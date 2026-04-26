@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--color-primary: 37 99 235;
+		--color-primary-hover: 29 78 216;
+		--color-accent: 250 204 21;
+		--color-accent-hover: 245 158 11;
+		--color-background: 245 247 251;
+		--color-surface: 255 255 255;
+		--color-surface-soft: 243 246 252;
+		--color-text: 15 23 42;
+		--color-muted: 100 116 139;
+		--color-border: 226 232 240;
+	}
+
+	body {
+		@apply bg-[rgb(var(--color-background))] text-slate-900;
+	}
+}
+
+@layer components {
+	.app-surface {
+		@apply bg-[rgb(var(--color-surface))] shadow-sm ring-1 ring-[rgb(var(--color-border))];
+	}
+
+	.app-card {
+		@apply rounded-2xl bg-[rgb(var(--color-surface))] p-5 shadow-sm ring-1 ring-[rgb(var(--color-border))];
+	}
+
+	.app-section-title {
+		@apply text-lg font-semibold text-[rgb(var(--color-text))];
+	}
+
+	.app-muted {
+		@apply text-sm text-[rgb(var(--color-muted))];
+	}
+
+	.btn-primary {
+		@apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-primary))] px-4 py-2 font-semibold text-white transition hover:bg-[rgb(var(--color-primary-hover))];
+	}
+
+	.btn-accent {
+		@apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-accent))] px-4 py-2 font-semibold text-slate-950 transition hover:bg-[rgb(var(--color-accent-hover))];
+	}
+
+	.btn-outline {
+		@apply inline-flex items-center justify-center rounded-lg border border-white/20 px-4 py-2 font-semibold text-white transition hover:bg-white hover:text-[rgb(var(--color-primary))];
+	}
+
+	.sidebar-shell {
+		@apply flex h-screen w-64 flex-col bg-gradient-to-b from-[rgb(var(--color-primary))] to-[rgb(var(--color-primary-hover))] p-5 text-white;
+	}
+
+	.sidebar-link {
+		@apply block rounded-lg px-4 py-2 transition;
+	}
+
+	.sidebar-link:hover:not(.sidebar-link-active) {
+		background-color: rgb(255 255 255 / 0.1);
+	}
+
+	.sidebar-link-active {
+		@apply bg-white font-semibold text-[rgb(var(--color-primary))];
+	}
+
+	.sidebar-link-active:hover {
+		@apply bg-white text-[rgb(var(--color-primary))];
+	}
+}
