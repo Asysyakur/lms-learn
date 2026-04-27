@@ -37,6 +37,14 @@ Route::middleware(['auth'])->group(function () {
         ->whereNumber('step')
         ->name('pertemuan.step');
 
+    Route::post('/pertemuan/{id}/step/{step}/complete', [LearningController::class, 'completeMeetingStep'])
+        ->whereNumber('step')
+        ->name('pertemuan.step.complete');
+
+    Route::post('/pertemuan/{id}/step/{step}/response', [LearningController::class, 'saveMeetingStepResponse'])
+        ->whereNumber('step')
+        ->name('pertemuan.step.response');
+
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 });
 require __DIR__.'/auth.php';

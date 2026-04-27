@@ -36,4 +36,9 @@ class Meeting extends Model
     {
         return $this->hasMany(MeetingStep::class);
     }
+
+    public function stepCompletions(): HasMany
+    {
+        return $this->hasMany(MeetingStepCompletion::class);
+    }
 }

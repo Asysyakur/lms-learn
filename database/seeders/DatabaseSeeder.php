@@ -5,6 +5,12 @@ namespace Database\Seeders;
 use App\Models\Course;
 use App\Models\Meeting;
 use App\Models\MeetingStep;
+use App\Models\MeetingStepAsk;
+use App\Models\MeetingStepExploration;
+use App\Models\MeetingStepObservation;
+use App\Models\MeetingStepPractice;
+use App\Models\MeetingStepReflection;
+use App\Models\MeetingStepReview;
 use App\Models\QuizQuestion;
 use App\Models\QuizSet;
 use App\Models\User;
@@ -91,9 +97,6 @@ class DatabaseSeeder extends Seeder
                     'title' => 'Eksplorasi',
                     'description' => 'Isi sesuai instruksi khusus tiap pertemuan.',
                     'exploration_mode' => $blueprint['exploration_mode'],
-                    'instruction_text' => $blueprint['exploration_mode'] === 'analysis'
-                        ? 'Pertemuan ini berfokus pada analisis studi kasus.'
-                        : 'Pertemuan ini berfokus pada praktik compile code.',
                     'exploration_prompt' => $blueprint['exploration_mode'] === 'analysis'
                         ? 'Analisis studi kasus berikut dan tulis hasil pengamatanmu.'
                         : 'Compile codingan berikut dan jelaskan hasil yang muncul.',
@@ -133,12 +136,48 @@ class DatabaseSeeder extends Seeder
             ];
 
             foreach ($steps as $step) {
-                MeetingStep::create([
+                $meetingStep = MeetingStep::create([
                     'meeting_id' => $meeting->id,
+                    'step_number' => $step['step_number'],
+                    'step_type' => $step['step_type'],
+                    'title' => $step['title'],
+                    'description' => $step['description'],
                     'sort_order' => $step['step_number'],
                     'is_active' => true,
-                    ...$step,
                 ]);
+
+                match ($step['step_type']) {
+                    'observe' => MeetingStepObservation::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'instruction_text' => $step['instruction_text'],
+                        'resource_type' => $step['resource_type'],
+                        'resource_url' => $step['resource_url'],
+                    ]),
+                    'ask' => MeetingStepAsk::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'question_prompt' => $step['question_prompt'],
+                    ]),
+                    'exploration' => MeetingStepExploration::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'exploration_mode' => $step['exploration_mode'],
+                        'exploration_prompt' => $step['exploration_prompt'],
+                    ]),
+                    'practice' => MeetingStepPractice::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'assessment_mode' => $step['assessment_mode'],
+                        'assessment_question' => $step['assessment_question'],
+                        'assessment_options' => $step['assessment_options'],
+                    ]),
+                    'review' => MeetingStepReview::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'review_prompt' => $step['review_prompt'],
+                    ]),
+                    'reflection' => MeetingStepReflection::create([
+                        'meeting_step_id' => $meetingStep->id,
+                        'reflection_question' => $step['reflection_question'],
+                    ]),
+                    default => null,
+                };
             }
         }
 

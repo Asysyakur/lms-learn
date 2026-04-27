@@ -2,13 +2,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import { Link, router } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import {
-  ArrowPathIcon,
-  BeakerIcon,
   BookOpenIcon,
-  ChatBubbleLeftRightIcon,
-  ClipboardDocumentCheckIcon,
-  MagnifyingGlassIcon,
-  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/solid";
 import StepOneObserve from "@/Pages/Pertemuan/StepOneObserve";
 import StepTwoAsk from "@/Pages/Pertemuan/StepTwoAsk";
@@ -16,67 +10,138 @@ import StepThreeExploration from "@/Pages/Pertemuan/StepThreeExploration";
 import StepFourPractice from "@/Pages/Pertemuan/StepFourPractice";
 import StepFiveReview from "@/Pages/Pertemuan/StepFiveReview";
 import StepSixReflection from "@/Pages/Pertemuan/StepSixReflection";
+import { decorateMeetingSteps } from "@/data/meetingSteps";
 
-export default function StepPage({ id, meeting, step, steps = [], stepData }) {
-  const [questionDraft, setQuestionDraft] = useState("");
-  const [questionSaved, setQuestionSaved] = useState("");
-  const [explorationDraft, setExplorationDraft] = useState("");
-  const [explorationSaved, setExplorationSaved] = useState("");
-  const [assessmentMode, setAssessmentMode] = useState("quiz");
-  const [quizAnswer, setQuizAnswer] = useState("");
-  const [essayAnswer, setEssayAnswer] = useState("");
-  const [assessmentSaved, setAssessmentSaved] = useState("");
-  const [reviewDraft, setReviewDraft] = useState("");
-  const [reviewSaved, setReviewSaved] = useState("");
-  const [reflectionDraft, setReflectionDraft] = useState("");
-  const [reflectionSaved, setReflectionSaved] = useState("");
+export default function StepPage({ id, meeting, step, steps = [], stepData, completedSteps = 0, savedResponses = {} }) {
+  const savedQuestionResponse = savedResponses[2]?.response_text || "";
+  const savedExplorationResponse = savedResponses[3]?.response_text || "";
+  const savedPracticeResponse = savedResponses[4] || null;
+  const savedReviewResponse = savedResponses[5]?.response_text || "";
+  const savedReflectionResponse = savedResponses[6]?.response_text || "";
+  const savedPracticeMode = savedPracticeResponse?.response_payload?.mode || stepData?.assessment_mode || "quiz";
+  const savedPracticeAnswer = savedPracticeResponse?.response_payload?.answer || savedPracticeResponse?.response_text || "";
 
-  const defaultSteps = [
-    { title: "Mari Mengamati", desc: "Lihat PPT atau video yang sudah disiapkan.", icon: MagnifyingGlassIcon, accent: false, step: 1 },
-    { title: "Ayo Bertanya", desc: "Tulis pertanyaan dan simpan jawabanmu.", icon: ChatBubbleLeftRightIcon, accent: true, step: 2 },
-    { title: "Eksplorasi", desc: "Isi sesuai instruksi khusus tiap pertemuan.", icon: BeakerIcon, accent: false, step: 3 },
-    { title: "Latihan Soal", desc: "Kuis pilihan ganda atau essay.", icon: ClipboardDocumentCheckIcon, accent: true, step: 4 },
-    { title: "Bandingkan dan Perbaiki", desc: "Tinjau jawaban eksplorasi dan edit jika perlu.", icon: ArrowPathIcon, accent: false, step: 5 },
-    { title: "Refleksi", desc: "Jawab pertanyaan penutup di textbox.", icon: QuestionMarkCircleIcon, accent: true, step: 6 },
-  ];
+  const [questionDraft, setQuestionDraft] = useState(savedQuestionResponse);
+  const [questionSaved, setQuestionSaved] = useState(savedQuestionResponse);
+  const [explorationDraft, setExplorationDraft] = useState(savedExplorationResponse);
+  const [explorationSaved, setExplorationSaved] = useState(savedExplorationResponse);
+  const [assessmentMode, setAssessmentMode] = useState(savedPracticeMode);
+  const [quizAnswer, setQuizAnswer] = useState(savedPracticeMode === "quiz" ? savedPracticeAnswer : "");
+  const [essayAnswer, setEssayAnswer] = useState(savedPracticeMode === "essay" ? savedPracticeAnswer : "");
+  const [assessmentSaved, setAssessmentSaved] = useState(savedPracticeAnswer);
+  const [reviewDraft, setReviewDraft] = useState(savedReviewResponse || savedExplorationResponse);
+  const [reviewSaved, setReviewSaved] = useState(savedReviewResponse);
+  const [reflectionDraft, setReflectionDraft] = useState(savedReflectionResponse);
+  const [reflectionSaved, setReflectionSaved] = useState(savedReflectionResponse);
 
-  const stepItems = steps.length > 0 ? steps : defaultSteps;
+  const [localCompletedSteps, setLocalCompletedSteps] = useState(completedSteps);
+
+  const stepItems = decorateMeetingSteps(steps);
   const activeStep = stepItems.find((item) => item.step === step) || stepItems[0];
   const currentStep = stepData || activeStep;
-  const completedSteps = Math.max(0, step - 1);
-  const progressPercent = Math.round((step / stepItems.length) * 100);
+  const progressPercent = stepItems.length > 0 ? Math.round((localCompletedSteps / stepItems.length) * 100) : 0;
 
   const goToStep = (targetStep) => {
     router.visit(route("pertemuan.step", { id, step: targetStep }));
   };
 
-  const saveQuestion = () => {
-    setQuestionSaved(questionDraft.trim());
+  const saveResponse = (targetStep, payload, onSuccess) => {
+    router.post(route("pertemuan.step.response", { id, step: targetStep }), payload, {
+      preserveScroll: true,
+      preserveState: true,
+      onSuccess: () => {
+        setLocalCompletedSteps((current) => Math.max(current, targetStep));
+
+        if (onSuccess) {
+          onSuccess();
+        }
+      },
+    });
   };
 
-  const saveExploration = () => {
-    setExplorationSaved(explorationDraft.trim());
+  const completeStep = (currentStepNumber, callback) => {
+    router.post(
+      route("pertemuan.step.complete", { id, step: currentStepNumber }),
+      {},
+      {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => {
+          setLocalCompletedSteps((current) => Math.max(current, currentStepNumber));
+
+          if (callback) {
+            callback();
+          }
+        },
+      },
+    );
   };
 
-  const saveAssessment = () => {
+  const saveQuestion = (onSuccess) => {
+    const responseText = questionDraft.trim();
+
+    saveResponse(2, { response_text: responseText }, () => {
+      setQuestionSaved(responseText);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    });
+  };
+
+  const saveExploration = (onSuccess) => {
+    const responseText = explorationDraft.trim();
+
+    saveResponse(3, { response_text: responseText }, () => {
+      setExplorationSaved(responseText);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    });
+  };
+
+  const saveAssessment = (onSuccess) => {
     const savedText = assessmentMode === "quiz" ? quizAnswer : essayAnswer;
 
-    setAssessmentSaved(savedText.trim());
+    saveResponse(4, {
+      response_text: savedText.trim(),
+      response_payload: {
+        mode: assessmentMode,
+        answer: savedText.trim(),
+      },
+    }, () => {
+      setAssessmentSaved(savedText.trim());
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    });
   };
 
-  const saveReview = () => {
-    setReviewSaved(reviewDraft.trim());
+  const saveReview = (onSuccess) => {
+    const responseText = reviewDraft.trim();
+
+    saveResponse(5, { response_text: responseText }, () => {
+      setReviewSaved(responseText);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    });
   };
 
-  const saveReflection = () => {
-    setReflectionSaved(reflectionDraft.trim());
-  };
+  const saveReflection = (onSuccess) => {
+    const responseText = reflectionDraft.trim();
 
-  useEffect(() => {
-    if (step === 5) {
-      setReviewDraft(explorationSaved);
-    }
-  }, [step, explorationSaved]);
+    saveResponse(6, { response_text: responseText }, () => {
+      setReflectionSaved(responseText);
+
+      if (onSuccess) {
+        onSuccess();
+      }
+    });
+  };
 
   useEffect(() => {
     if (currentStep?.assessment_mode) {
@@ -84,10 +149,29 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
     }
   }, [currentStep?.assessment_mode]);
 
+  useEffect(() => {
+    setLocalCompletedSteps(completedSteps);
+  }, [completedSteps]);
+
+  useEffect(() => {
+    setQuestionDraft(savedQuestionResponse);
+    setQuestionSaved(savedQuestionResponse);
+    setExplorationDraft(savedExplorationResponse);
+    setExplorationSaved(savedExplorationResponse);
+    setAssessmentMode(savedPracticeMode);
+    setQuizAnswer(savedPracticeMode === "quiz" ? savedPracticeAnswer : "");
+    setEssayAnswer(savedPracticeMode === "essay" ? savedPracticeAnswer : "");
+    setAssessmentSaved(savedPracticeAnswer);
+    setReviewDraft(savedReviewResponse || savedExplorationResponse);
+    setReviewSaved(savedReviewResponse);
+    setReflectionDraft(savedReflectionResponse);
+    setReflectionSaved(savedReflectionResponse);
+  }, [savedQuestionResponse, savedExplorationResponse, savedPracticeMode, savedPracticeAnswer, savedReviewResponse, savedReflectionResponse, step]);
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <StepOneObserve stepData={currentStep} onNext={() => goToStep(2)} />;
+        return <StepOneObserve stepData={currentStep} onNext={() => completeStep(1, () => goToStep(2))} />;
       case 2:
         return (
           <StepTwoAsk
@@ -96,7 +180,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
             setQuestionDraft={setQuestionDraft}
             questionSaved={questionSaved}
             onSave={saveQuestion}
-            onNext={() => goToStep(3)}
+            onNext={() => saveQuestion(() => goToStep(3))}
           />
         );
       case 3:
@@ -107,7 +191,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
             setExplorationDraft={setExplorationDraft}
             explorationSaved={explorationSaved}
             onSave={saveExploration}
-            onNext={() => goToStep(4)}
+            onNext={() => saveExploration(() => goToStep(4))}
           />
         );
       case 4:
@@ -133,7 +217,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
             setReviewDraft={setReviewDraft}
             reviewSaved={reviewSaved}
             onSave={saveReview}
-            onNext={() => goToStep(6)}
+            onNext={() => saveReview(() => goToStep(6))}
           />
         );
       case 6:
@@ -162,7 +246,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
         steps: stepItems,
         activeStep: step,
         progressPercent,
-        completedSteps,
+        completedSteps: localCompletedSteps,
       }}
     >
       <div className="course-shell">
@@ -172,7 +256,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
             <h2 className="course-title">{currentStep.title}</h2>
             <p className="course-description">{currentStep.desc}</p>
 
-            <div className="course-progress-label">{completedSteps}/{stepItems.length} Selesai</div>
+            <div className="course-progress-label">{localCompletedSteps}/{stepItems.length} Selesai</div>
             <div className="course-progress-track">
               <div className="course-progress-fill" style={{ width: `${progressPercent}%` }} />
             </div>
@@ -185,7 +269,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData }) {
           </div>
         </div>
 
-          <div className="course-detail-shell my-6 mx-4 sm:my-8 sm:mx-6">
+        <div className="course-detail-shell my-6 mx-4 sm:my-8 sm:mx-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-[rgb(var(--color-primary))]">Bagian aktif</div>
