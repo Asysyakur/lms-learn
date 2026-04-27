@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import {
   BookOpenIcon,
 } from "@heroicons/react/24/solid";
-import StepOneObserve from "@/Pages/Pertemuan/StepOneObserve";
-import StepTwoAsk from "@/Pages/Pertemuan/StepTwoAsk";
-import StepThreeExploration from "@/Pages/Pertemuan/StepThreeExploration";
-import StepFourPractice from "@/Pages/Pertemuan/StepFourPractice";
-import StepFiveReview from "@/Pages/Pertemuan/StepFiveReview";
-import StepSixReflection from "@/Pages/Pertemuan/StepSixReflection";
+import StepOneObserve from "@/Pages/Pertemuan/components/Observe";
+import StepTwoAsk from "@/Pages/Pertemuan/components/Ask";
+import StepThreeExploration from "@/Pages/Pertemuan/components/Exploration";
+import StepFourPractice from "@/Pages/Pertemuan/components/Practice";
+import StepFiveReview from "@/Pages/Pertemuan/components/Review";
+import StepSixReflection from "@/Pages/Pertemuan/components/Reflection";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
 
 export default function StepPage({ id, meeting, step, steps = [], stepData, completedSteps = 0, savedResponses = {} }) {

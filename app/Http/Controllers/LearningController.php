@@ -67,7 +67,7 @@ class LearningController extends Controller
                 ];
             });
 
-        return Inertia::render('Kuis', [
+        return Inertia::render('Kuis/Index', [
             'quizSets' => $quizSets,
         ]);
     }
@@ -122,7 +122,7 @@ class LearningController extends Controller
         })->values();
         $completedSteps = $this->completedStepCount($meeting);
 
-        return Inertia::render('Pertemuan', [
+        return Inertia::render('Pertemuan/Index', [
             'id' => $meeting->id,
             'meeting' => [
                 'id' => $meeting->id,
@@ -159,7 +159,7 @@ class LearningController extends Controller
         $completedSteps = $this->completedStepCount($meeting);
         $savedResponses = $this->savedResponsesForMeeting($meeting);
 
-        return Inertia::render('Pertemuan/StepPage', [
+        return Inertia::render('Pertemuan/Show', [
             'id' => $meeting->id,
             'meeting' => [
                 'id' => $meeting->id,
