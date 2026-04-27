@@ -1,29 +1,32 @@
 <?php
 
+use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\MeetingController;
+use App\Http\Controllers\Admin\QuizQuestionController;
+use App\Http\Controllers\Admin\QuizSetController;
+use App\Http\Controllers\Admin\StepController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\LearningController;
-use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+/*
+|--------------------------------------------------------------------------
+| PUBLIC
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return auth()->check()
+        ? redirect()->route('beranda')
+        : redirect()->route('login');
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+/*
+|--------------------------------------------------------------------------
+| AUTH USER
+|--------------------------------------------------------------------------
+*/
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/beranda', [LearningController::class, 'index'])->name('beranda');
@@ -38,13 +41,46 @@ Route::middleware(['auth'])->group(function () {
         ->name('pertemuan.step');
 
     Route::post('/pertemuan/{id}/step/{step}/complete', [LearningController::class, 'completeMeetingStep'])
-        ->whereNumber('step')
         ->name('pertemuan.step.complete');
 
     Route::post('/pertemuan/{id}/step/{step}/response', [LearningController::class, 'saveMeetingStepResponse'])
-        ->whereNumber('step')
         ->name('pertemuan.step.response');
 
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 });
+
+/*
+|--------------------------------------------------------------------------
+| ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', fn () => Inertia::render('Admin/Dashboard'))->name('dashboard');
+
+        Route::resource('courses', CourseController::class)->except(['show']);
+        Route::resource('meetings', MeetingController::class)->except(['show']);
+        Route::resource('quiz-sets', QuizSetController::class)->except(['show']);
+        Route::resource('quiz-questions', QuizQuestionController::class)->except(['show']);
+        Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+
+        Route::get('meetings/{meeting}/steps', [StepController::class, 'index'])
+            ->name('meetings.steps');
+
+        Route::post('steps', [StepController::class, 'store'])
+            ->name('steps.store');
+
+        Route::get('steps/{step}/edit', [StepController::class, 'edit'])
+            ->name('steps.edit');
+
+        Route::put('steps/{step}', [StepController::class, 'update'])
+            ->name('steps.update');
+
+        Route::delete('steps/{step}', [StepController::class, 'destroy'])
+            ->name('steps.destroy');
+    });
+
 require __DIR__.'/auth.php';

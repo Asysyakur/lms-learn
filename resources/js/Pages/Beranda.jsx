@@ -16,7 +16,7 @@ export default function Beranda({ course, meetings = [] }) {
             key={item.id}
             className="overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))]"
           >
-            <div className="px-4 py-3 text-center text-lg font-bold text-white bg-[rgb(var(--color-primary-hover))]">
+            <div className="px-4 py-3 text-center text-lg font-bold text-white bg-[rgb(var(--color-primary))]">
               Day {item.meeting_number || item.id}
             </div>
 
