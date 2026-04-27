@@ -1,0 +1,28 @@
+<svg width="640" height="320" viewBox="0 0 640 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="640" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#E7EEF9"/>
+    </linearGradient>
+    <linearGradient id="book" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FACC15"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="320" rx="24" fill="url(#bg)"/>
+  <circle cx="496" cy="92" r="50" fill="#DBEAFE"/>
+  <circle cx="138" cy="238" r="62" fill="#DBEAFE"/>
+  <path d="M192 82C192 68.7452 202.745 58 216 58H424C437.255 58 448 68.7452 448 82V238C448 251.255 437.255 262 424 262H216C202.745 262 192 251.255 192 238V82Z" fill="white" opacity="0.95"/>
+  <path d="M232 96H408V216H232V96Z" fill="url(#book)" rx="12"/>
+  <path d="M232 96C248 104 264 108 280 108C296 108 312 104 328 96V216C312 208 296 204 280 204C264 204 248 208 232 216V96Z" fill="#3B82F6"/>
+  <path d="M360 96C376 104 392 108 408 108V216C392 208 376 204 360 204C344 204 328 208 312 216V96C328 104 344 108 360 108Z" fill="#1D4ED8"/>
+  <path d="M280 120H344" stroke="#E0F2FE" stroke-width="10" stroke-linecap="round"/>
+  <path d="M280 148H360" stroke="#E0F2FE" stroke-width="10" stroke-linecap="round"/>
+  <path d="M280 176H332" stroke="#E0F2FE" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="476" cy="124" r="20" fill="url(#accent)"/>
+  <path d="M476 116L480.5 125L490 126.5L483 133.5L484.5 143L476 138L467.5 143L469 133.5L462 126.5L471.5 125L476 116Z" fill="white"/>
+</svg>

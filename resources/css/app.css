@@ -9,6 +9,7 @@
 		--color-accent: 250 204 21;
 		--color-accent-hover: 245 158 11;
 		--color-background: 245 247 251;
+		--color-cream: 251 243 220;
 		--color-surface: 255 255 255;
 		--color-surface-soft: 243 246 252;
 		--color-text: 15 23 42;
@@ -26,8 +27,188 @@
 		@apply bg-[rgb(var(--color-surface))] shadow-sm ring-1 ring-[rgb(var(--color-border))];
 	}
 
+	.app-topbar {
+		@apply flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-4 py-3 sm:px-6 sm:py-4;
+	}
+
+	.app-content-shell {
+		@apply rounded-tr-2xl bg-[rgb(var(--color-cream))];
+	}
+
 	.app-card {
-		@apply rounded-2xl bg-[rgb(var(--color-surface))] p-5 shadow-sm ring-1 ring-[rgb(var(--color-border))];
+		@apply rounded-2xl bg-[rgb(var(--color-surface))] p-5 shadow-lg ring-1 ring-[rgb(var(--color-border))];
+	}
+
+	.course-shell {
+		@apply min-h-screen bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)];
+	}
+
+	.course-detail-shell {
+		@apply rounded-3xl bg-slate-50 p-6 shadow-sm ring-1 ring-slate-200 sm:p-8;
+	}
+
+	.course-detail-grid {
+		@apply grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)];
+	}
+
+	.course-detail-card {
+		@apply rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200;
+	}
+
+	.course-detail-text {
+		@apply text-sm leading-6 text-slate-600;
+	}
+
+	.course-secondary-button {
+		@apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50;
+	}
+
+	.course-media-placeholder {
+		@apply flex min-h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center;
+	}
+
+	.course-exploration-box {
+		@apply rounded-2xl border border-dashed border-[rgb(var(--color-primary))]/30 bg-[rgb(239_246_255)] p-4;
+	}
+
+	.course-field-label {
+		@apply text-sm font-semibold text-slate-700;
+	}
+
+	.course-textarea {
+		@apply min-h-32 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(37_99_235_/_0.15)];
+	}
+
+	.course-tab {
+		@apply rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50;
+	}
+
+	.course-tab-active {
+		@apply border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))] text-white;
+	}
+
+	.course-option {
+		@apply flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700;
+	}
+
+	.course-review-box {
+		@apply rounded-2xl border border-slate-200 bg-slate-50 p-4;
+	}
+
+	.course-review-box-accent {
+		@apply bg-white;
+	}
+
+	.course-step-card-active {
+		@apply ring-2 ring-[rgb(var(--color-primary))];
+	}
+
+	.course-header {
+		@apply flex items-center justify-between gap-3 bg-[rgb(var(--color-primary))] px-4 py-3 text-white sm:px-6;
+	}
+
+	.course-header-brand {
+		@apply flex items-center gap-2 text-base font-black tracking-wide sm:text-lg;
+	}
+
+	.course-header-links {
+		@apply flex items-center gap-2 overflow-x-auto px-2 text-sm font-semibold sm:gap-4 sm:text-base;
+	}
+
+	.course-header-link {
+		@apply rounded-full px-3 py-1.5 text-white/90 transition hover:bg-white/15 hover:text-white;
+	}
+
+	.course-header-link-active {
+		@apply bg-white text-[rgb(var(--color-primary))];
+	}
+
+	.course-hero {
+		@apply grid gap-6 border-b border-[rgb(var(--color-border))] px-4 py-6 sm:px-6 md:grid-cols-[1.2fr_0.8fr] md:items-center;
+	}
+
+	.course-breadcrumb {
+		@apply mb-4 text-sm font-semibold text-[rgb(var(--color-primary))];
+	}
+
+	.course-title {
+		@apply text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl;
+	}
+
+	.course-description {
+		@apply mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base;
+	}
+
+	.course-progress-label {
+		@apply mt-5 text-sm font-semibold text-slate-700;
+	}
+
+	.course-progress-track {
+		@apply mt-2 h-3 overflow-hidden rounded-full bg-slate-200;
+	}
+
+	.course-progress-fill {
+		@apply h-full rounded-full bg-[rgb(var(--color-primary))];
+	}
+
+	.course-hero-art {
+		@apply flex justify-center md:justify-end;
+	}
+
+	.course-hero-badge {
+		@apply flex h-40 w-40 items-center justify-center rounded-full bg-[rgb(240_243_255)] text-7xl shadow-inner sm:h-48 sm:w-48 sm:text-8xl;
+	}
+
+	.course-step-list {
+		@apply w-full space-y-4 px-2 py-6 sm:px-4;
+	}
+
+	.course-step-card {
+		@apply flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[rgb(var(--color-border))] sm:flex-row sm:items-center sm:justify-between;
+	}
+
+	.course-step-left {
+		@apply flex items-start gap-4;
+	}
+
+	.course-step-icon {
+		@apply flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-accent))] text-2xl text-white shadow-sm;
+	}
+
+	.course-step-icon-blue {
+		@apply bg-[rgb(var(--color-primary))];
+	}
+
+	.course-step-title {
+		@apply text-base font-bold text-slate-900 sm:text-lg;
+	}
+
+	.course-step-desc {
+		@apply mt-1 text-sm text-slate-500;
+	}
+
+	.course-step-button {
+		@apply w-full sm:w-auto;
+	}
+
+	.day-card {
+		@apply overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))];
+	}
+
+	.day-card-header {
+		@apply px-4 py-3 text-center text-lg font-bold text-white;
+	}
+
+	.day-card-body {
+		@apply flex flex-col items-center gap-5 p-4 text-center;
+	}
+
+	.day-preview {
+		@apply flex h-44 w-full items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-slate-100 via-slate-200 to-slate-100 sm:h-52;
+	}
+
+	.day-card-title {
+		@apply text-center text-xl font-bold text-slate-800;
 	}
 
 	.app-section-title {
@@ -51,11 +232,31 @@
 	}
 
 	.sidebar-shell {
-		@apply flex h-screen w-64 flex-col bg-gradient-to-b from-[rgb(var(--color-primary))] to-[rgb(var(--color-primary-hover))] p-5 text-white;
+		@apply flex h-screen w-64 flex-col overflow-y-auto bg-[rgb(var(--color-primary))] p-5 text-white shadow-xl;
+	}
+
+	.mobile-navbar {
+		@apply flex items-center justify-between gap-3 border-b border-white/10 bg-[rgb(var(--color-primary))] px-4 py-3 text-white shadow-xl;
+	}
+
+	.mobile-nav-link {
+		@apply inline-flex shrink-0 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-semibold text-white transition hover:bg-white/20;
+	}
+
+	.mobile-nav-link-active {
+		@apply bg-white text-[rgb(var(--color-primary))];
+	}
+
+	.mobile-nav-logout {
+		@apply bg-white/15;
+	}
+
+	.mobile-nav-link-active-course {
+		@apply bg-white text-[rgb(var(--color-primary))];
 	}
 
 	.sidebar-link {
-		@apply block rounded-lg px-4 py-2 transition;
+		@apply flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-semibold transition;
 	}
 
 	.sidebar-link:hover:not(.sidebar-link-active) {
@@ -63,10 +264,32 @@
 	}
 
 	.sidebar-link-active {
-		@apply bg-white font-semibold text-[rgb(var(--color-primary))];
+		background-color: rgb(18 84 199);
+		color: #ffffff;
 	}
 
 	.sidebar-link-active:hover {
-		@apply bg-white text-[rgb(var(--color-primary))];
+		background-color: rgb(18 84 199);
+		color: #ffffff;
+	}
+
+	.sidebar-back-link {
+		@apply mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20;
+	}
+
+	.course-sidebar-step {
+		@apply flex items-center gap-4 rounded-xl bg-white/10 px-4 py-4 text-left text-white transition hover:bg-white/15;
+	}
+
+	.course-sidebar-step-active {
+		@apply bg-white text-[rgb(var(--color-primary))] hover:bg-white hover:text-[rgb(var(--color-primary))];
+	}
+
+	.course-sidebar-step-icon {
+		@apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white;
+	}
+
+	.course-sidebar-step-icon-active {
+		@apply bg-[rgb(var(--color-primary))] text-white;
 	}
 }

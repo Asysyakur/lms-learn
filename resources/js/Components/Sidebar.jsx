@@ -1,52 +1,157 @@
 import { Link, usePage } from "@inertiajs/react";
+import {
+  ArrowLeftIcon,
+  BookOpenIcon,
+  CheckCircleIcon,
+  HomeIcon,
+  PlayCircleIcon,
+  QuestionMarkCircleIcon,
+  Squares2X2Icon,
+  ArrowRightOnRectangleIcon,
+} from "@heroicons/react/24/solid";
 
-export default function Sidebar() {
+export default function Sidebar({
+  showMobileNav = true,
+  variant = "default",
+  courseTitle = "",
+  courseId = null,
+  steps = [],
+  activeStep = 1,
+  progressPercent = 0,
+  completedSteps = 0,
+}) {
   const { url, props } = usePage();
   const user = props.auth?.user;
 
   const menu = [
-    { name: "Beranda", href: "/beranda" },
-    { name: "Kuis", href: "/kuis" },
-    { name: "About", href: "/about" },
+    { name: "Home", href: "/beranda", icon: HomeIcon },
+    { name: "Kuis", href: "/kuis", icon: QuestionMarkCircleIcon },
+    { name: "About", href: "/about", icon: Squares2X2Icon },
   ];
 
+  const menuItemClass = (href) =>
+    `sidebar-link ${url.startsWith(href) ? "sidebar-link-active" : ""}`;
+
+  const isCourseSidebar = variant === "progress";
+
   return (
-    <div className="sidebar-shell">
-      <div>
-        <h1 className="mb-8 text-xl font-bold">LOGO</h1>
-
-        <div className="space-y-2">
-          {menu.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`sidebar-link ${
-                url.startsWith(item.href) ? "sidebar-link-active" : ""
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="mt-auto pt-6">
-        {user && (
-          <div className="mb-3 rounded-xl bg-white/10 px-4 py-3 text-sm">
-            <div className="font-semibold">{user.name}</div>
-            <div className="text-white/70">{user.email}</div>
+    <>
+      {showMobileNav && (
+        <nav className="mobile-navbar md:hidden">
+          <div className="flex items-center gap-2 text-lg font-black tracking-wide text-white">
+            <BookOpenIcon className="h-5 w-5" />
+            <span>LOGO</span>
           </div>
-        )}
 
-        <Link
-          href={route("logout")}
-          method="post"
-          as="button"
-          className="btn-outline w-full justify-start"
-        >
-          Logout
-        </Link>
-      </div>
-    </div>
+          <div className="flex items-center gap-2 overflow-x-auto px-2">
+            {menu.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`mobile-nav-link ${
+                  url.startsWith(item.href) ? "mobile-nav-link-active" : ""
+                }`}
+              >
+                  <item.icon className="h-4 w-4" />
+                {item.name}
+              </Link>
+            ))}
+
+              <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
+                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+              Logout
+            </Link>
+          </div>
+        </nav>
+      )}
+
+      <aside className="sidebar-shell hidden md:flex md:h-screen md:w-64">
+        {isCourseSidebar ? (
+          <>
+            <div>
+              <Link href={route("pertemuan", { id: courseId })} className="sidebar-back-link text-center">
+                <ArrowLeftIcon className="h-5 w-5" />
+                Kembali ke overview
+              </Link>
+
+              <div className="mt-6 space-y-3">
+                {steps.map((item) => {
+                  const isActive = item.step === activeStep;
+                  const isDone = item.step < activeStep;
+
+                  return (
+                    <Link
+                      key={item.step}
+                      href={route("pertemuan.step", { id: courseId, step: item.step })}
+                      className={`course-sidebar-step ${isActive ? "course-sidebar-step-active" : ""}`}
+                    >
+                      <span
+                        className={`course-sidebar-step-icon ${isActive ? "course-sidebar-step-icon-active" : ""}`}
+                      >
+                        {isDone ? (
+                          <CheckCircleIcon className="h-4 w-4" />
+                        ) : isActive ? (
+                          <PlayCircleIcon className="h-4 w-4" />
+                        ) : (
+                          <item.icon className="h-4 w-4" />
+                        )}
+                      </span>
+
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold">
+                          {item.step}. {item.title}
+                        </span>
+                        <span
+                          className={`block text-xs ${isActive ? "text-[rgb(var(--color-primary))]/80" : "text-white/70"}`}
+                        >
+                          {isDone ? "Selesai" : isActive ? "Sedang dibuka" : "Belum dibuka"}
+                        </span>
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <div>
+              <div className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide">
+                <BookOpenIcon className="h-6 w-6" />
+                <span>LOGO</span>
+              </div>
+
+              <div className="space-y-2">
+                {menu.map((item) => (
+                  <Link key={item.name} href={item.href} className={menuItemClass(item.href)}>
+                    <item.icon className="h-5 w-5 shrink-0" />
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-auto pt-6">
+              {user && (
+                <div className="mb-3 rounded-xl bg-white/10 px-4 py-3 text-sm">
+                  <div className="font-semibold">{user.name}</div>
+                  <div className="text-white/70">{user.email}</div>
+                </div>
+              )}
+
+              <Link
+                href={route("logout")}
+                method="post"
+                as="button"
+                className="sidebar-link w-full justify-start border border-white/10 bg-white/10 text-base font-semibold"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                Logout
+              </Link>
+            </div>
+          </>
+        )}
+      </aside>
+    </>
   );
 }

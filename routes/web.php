@@ -35,6 +35,13 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('pertemuan');
 
+    Route::get('/pertemuan/{id}/step/{step}', function ($id, $step) {
+        return Inertia::render('Pertemuan/StepPage', [
+            'id' => $id,
+            'step' => (int) $step,
+        ]);
+    })->whereNumber('step')->name('pertemuan.step');
+
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 });
 require __DIR__.'/auth.php';

@@ -1,0 +1,193 @@
+import AppLayout from "@/Layouts/AppLayout";
+import { Link, router } from "@inertiajs/react";
+import { useEffect, useState } from "react";
+import {
+  ArrowPathIcon,
+  BeakerIcon,
+  BookOpenIcon,
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentCheckIcon,
+  MagnifyingGlassIcon,
+  QuestionMarkCircleIcon,
+} from "@heroicons/react/24/solid";
+import StepOneObserve from "@/Pages/Pertemuan/StepOneObserve";
+import StepTwoAsk from "@/Pages/Pertemuan/StepTwoAsk";
+import StepThreeExploration from "@/Pages/Pertemuan/StepThreeExploration";
+import StepFourPractice from "@/Pages/Pertemuan/StepFourPractice";
+import StepFiveReview from "@/Pages/Pertemuan/StepFiveReview";
+import StepSixReflection from "@/Pages/Pertemuan/StepSixReflection";
+
+export default function StepPage({ id, step }) {
+  const [questionDraft, setQuestionDraft] = useState("");
+  const [questionSaved, setQuestionSaved] = useState("");
+  const [explorationDraft, setExplorationDraft] = useState("");
+  const [explorationSaved, setExplorationSaved] = useState("");
+  const [assessmentMode, setAssessmentMode] = useState("quiz");
+  const [quizAnswer, setQuizAnswer] = useState("");
+  const [essayAnswer, setEssayAnswer] = useState("");
+  const [assessmentSaved, setAssessmentSaved] = useState("");
+  const [reviewDraft, setReviewDraft] = useState("");
+  const [reviewSaved, setReviewSaved] = useState("");
+  const [reflectionDraft, setReflectionDraft] = useState("");
+  const [reflectionSaved, setReflectionSaved] = useState("");
+
+  const steps = [
+    { title: "Mari Mengamati", desc: "Lihat PPT atau video yang sudah disiapkan.", icon: MagnifyingGlassIcon, accent: false, step: 1 },
+    { title: "Ayo Bertanya", desc: "Tulis pertanyaan dan simpan jawabanmu.", icon: ChatBubbleLeftRightIcon, accent: true, step: 2 },
+    { title: "Eksplorasi", desc: "Isi sesuai instruksi khusus tiap pertemuan.", icon: BeakerIcon, accent: false, step: 3 },
+    { title: "Latihan Soal", desc: "Kuis pilihan ganda atau essay.", icon: ClipboardDocumentCheckIcon, accent: true, step: 4 },
+    { title: "Bandingkan dan Perbaiki", desc: "Tinjau jawaban eksplorasi dan edit jika perlu.", icon: ArrowPathIcon, accent: false, step: 5 },
+    { title: "Refleksi", desc: "Jawab pertanyaan penutup di textbox.", icon: QuestionMarkCircleIcon, accent: true, step: 6 },
+  ];
+
+  const activeStep = steps.find((item) => item.step === step) || steps[0];
+  const completedSteps = Math.max(0, step - 1);
+  const progressPercent = Math.round((step / steps.length) * 100);
+
+  const goToStep = (targetStep) => {
+    router.visit(route("pertemuan.step", { id, step: targetStep }));
+  };
+
+  const saveQuestion = () => {
+    setQuestionSaved(questionDraft.trim());
+  };
+
+  const saveExploration = () => {
+    setExplorationSaved(explorationDraft.trim());
+  };
+
+  const saveAssessment = () => {
+    const savedText = assessmentMode === "quiz" ? quizAnswer : essayAnswer;
+
+    setAssessmentSaved(savedText.trim());
+  };
+
+  const saveReview = () => {
+    setReviewSaved(reviewDraft.trim());
+  };
+
+  const saveReflection = () => {
+    setReflectionSaved(reflectionDraft.trim());
+  };
+
+  useEffect(() => {
+    if (step === 5) {
+      setReviewDraft(explorationSaved);
+    }
+  }, [step, explorationSaved]);
+
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return <StepOneObserve onNext={() => goToStep(2)} />;
+      case 2:
+        return (
+          <StepTwoAsk
+            questionDraft={questionDraft}
+            setQuestionDraft={setQuestionDraft}
+            questionSaved={questionSaved}
+            onSave={saveQuestion}
+            onNext={() => goToStep(3)}
+          />
+        );
+      case 3:
+        return (
+          <StepThreeExploration
+            explorationDraft={explorationDraft}
+            setExplorationDraft={setExplorationDraft}
+            explorationSaved={explorationSaved}
+            onSave={saveExploration}
+            onNext={() => goToStep(4)}
+          />
+        );
+      case 4:
+        return (
+          <StepFourPractice
+            assessmentMode={assessmentMode}
+            setAssessmentMode={setAssessmentMode}
+            quizAnswer={quizAnswer}
+            setQuizAnswer={setQuizAnswer}
+            essayAnswer={essayAnswer}
+            setEssayAnswer={setEssayAnswer}
+            assessmentSaved={assessmentSaved}
+            onSave={saveAssessment}
+          />
+        );
+      case 5:
+        return (
+          <StepFiveReview
+            explorationSaved={explorationSaved}
+            reviewDraft={reviewDraft}
+            setReviewDraft={setReviewDraft}
+            reviewSaved={reviewSaved}
+            onSave={saveReview}
+            onNext={() => goToStep(6)}
+          />
+        );
+      case 6:
+      default:
+        return (
+          <StepSixReflection
+            reflectionDraft={reflectionDraft}
+            setReflectionDraft={setReflectionDraft}
+            reflectionSaved={reflectionSaved}
+            onSave={saveReflection}
+          />
+        );
+    }
+  };
+
+  return (
+    <AppLayout
+      title={`Pertemuan ${id}`}
+      showTitleBar={false}
+      showMobileNav={false}
+      sidebarVariant="progress"
+      sidebarProps={{
+        courseTitle: `Pertemuan ${id}`,
+        courseId: id,
+        steps,
+        activeStep: step,
+        progressPercent,
+        completedSteps,
+      }}
+    >
+      <div className="course-shell">
+        <div className="course-hero">
+          <div>
+            <div className="course-breadcrumb">Pertemuan {id} / Step {step}</div>
+            <h2 className="course-title">{activeStep.title}</h2>
+            <p className="course-description">{activeStep.desc}</p>
+
+            <div className="course-progress-label">{completedSteps}/{steps.length} Selesai</div>
+            <div className="course-progress-track">
+              <div className="course-progress-fill" style={{ width: `${progressPercent}%` }} />
+            </div>
+          </div>
+
+          <div className="course-hero-art">
+            <div className="course-hero-badge">
+              <BookOpenIcon className="h-20 w-20 text-[rgb(var(--color-primary))] sm:h-24 sm:w-24" />
+            </div>
+          </div>
+        </div>
+
+        <div className="course-detail-shell my-6 sm:my-8 mx-4 sm:mx-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-[rgb(var(--color-primary))]">Bagian aktif</div>
+              <h3 className="text-lg font-bold text-slate-900">{activeStep.title}</h3>
+              <p className="text-sm text-slate-600">{activeStep.desc}</p>
+            </div>
+
+            <Link className="course-secondary-button" href={route("pertemuan", { id })}>
+              Kembali
+            </Link>
+          </div>
+
+          {renderStepContent()}
+        </div>
+      </div>
+    </AppLayout>
+  );
+}
