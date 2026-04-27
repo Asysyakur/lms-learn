@@ -1,8 +1,11 @@
 import { Link, usePage } from "@inertiajs/react";
 import {
   ArrowLeftIcon,
+  ArrowPathIcon,
   BookOpenIcon,
   CheckCircleIcon,
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentCheckIcon,
   HomeIcon,
   PlayCircleIcon,
   QuestionMarkCircleIcon,
@@ -29,10 +32,15 @@ export default function Sidebar({
     { name: "About", href: "/about", icon: Squares2X2Icon },
   ];
 
-  const menuItemClass = (href) =>
-    `sidebar-link ${url.startsWith(href) ? "sidebar-link-active" : ""}`;
-
   const isCourseSidebar = variant === "progress";
+  const stepIcons = [
+    BookOpenIcon,
+    ChatBubbleLeftRightIcon,
+    PlayCircleIcon,
+    ClipboardDocumentCheckIcon,
+    ArrowPathIcon,
+    QuestionMarkCircleIcon,
+  ];
 
   return (
     <>
@@ -78,6 +86,7 @@ export default function Sidebar({
                 {steps.map((item) => {
                   const isActive = item.step === activeStep;
                   const isDone = item.step < activeStep;
+                  const StepIcon = item.icon || stepIcons[item.step - 1] || BookOpenIcon;
 
                   return (
                     <Link
@@ -93,7 +102,7 @@ export default function Sidebar({
                         ) : isActive ? (
                           <PlayCircleIcon className="h-4 w-4" />
                         ) : (
-                          <item.icon className="h-4 w-4" />
+                          <StepIcon className="h-4 w-4" />
                         )}
                       </span>
 
@@ -123,7 +132,11 @@ export default function Sidebar({
 
               <div className="space-y-2">
                 {menu.map((item) => (
-                  <Link key={item.name} href={item.href} className={menuItemClass(item.href)}>
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`sidebar-link ${url.startsWith(item.href) ? "sidebar-link-active" : ""}`}
+                  >
                     <item.icon className="h-5 w-5 shrink-0" />
                     {item.name}
                   </Link>

@@ -1,6 +1,7 @@
 import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/solid";
 
 export default function StepFourPractice({
+  stepData,
   assessmentMode,
   setAssessmentMode,
   quizAnswer,
@@ -36,16 +37,16 @@ export default function StepFourPractice({
         {assessmentMode === "quiz" ? (
           <div className="space-y-4">
             <p className="course-detail-text font-semibold text-slate-900">
-              Pilih jawaban yang paling tepat:
+              {stepData?.assessment_question || "Pilih jawaban yang paling tepat:"}
             </p>
 
             <div className="space-y-2">
-              {[
+              {(stepData?.assessment_options || [
                 "A. OOP adalah pendekatan yang berfokus pada objek.",
                 "B. OOP hanya menggunakan fungsi.",
                 "C. OOP tidak memiliki class.",
                 "D. OOP hanya untuk desain grafis.",
-              ].map((option) => (
+              ]).map((option) => (
                 <label key={option} className="course-option">
                   <input
                     type="radio"
@@ -62,7 +63,7 @@ export default function StepFourPractice({
         ) : (
           <div className="space-y-3">
             <p className="course-detail-text font-semibold text-slate-900">
-              Tulis jawaban essay singkat:
+              {stepData?.assessment_question || "Tulis jawaban essay singkat:"}
             </p>
             <textarea
               className="course-textarea"

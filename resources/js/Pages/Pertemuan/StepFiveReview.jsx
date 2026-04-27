@@ -1,6 +1,7 @@
 import { ArrowPathIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 
 export default function StepFiveReview({
+  stepData,
   explorationSaved,
   reviewDraft,
   setReviewDraft,
@@ -26,6 +27,9 @@ export default function StepFiveReview({
 
           <div className="course-review-box course-review-box-accent">
             <div className="text-sm font-semibold text-slate-700">Edit jawaban</div>
+            <p className="mt-2 text-sm text-slate-600">
+              {stepData?.review_prompt || "Tinjau jawaban eksplorasimu lalu perbaiki jika ada bagian yang kurang tepat."}
+            </p>
             <textarea
               className="course-textarea mt-2"
               placeholder="Edit jawaban eksplorasi di sini..."

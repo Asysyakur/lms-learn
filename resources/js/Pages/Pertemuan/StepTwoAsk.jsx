@@ -1,6 +1,7 @@
 import { ChatBubbleLeftRightIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 
 export default function StepTwoAsk({
+  stepData,
   questionDraft,
   setQuestionDraft,
   questionSaved,
@@ -14,6 +15,10 @@ export default function StepTwoAsk({
           <ChatBubbleLeftRightIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
           Tulis pertanyaanmu
         </div>
+
+        <p className="course-detail-text">
+          {stepData?.question_prompt || "Tulis pertanyaan atau tanggapanmu setelah melihat PPT/video."}
+        </p>
 
         <label className="course-field-label">Pertanyaan siswa</label>
         <textarea

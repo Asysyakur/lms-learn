@@ -17,7 +17,7 @@ import StepFourPractice from "@/Pages/Pertemuan/StepFourPractice";
 import StepFiveReview from "@/Pages/Pertemuan/StepFiveReview";
 import StepSixReflection from "@/Pages/Pertemuan/StepSixReflection";
 
-export default function StepPage({ id, step }) {
+export default function StepPage({ id, meeting, step, steps = [], stepData }) {
   const [questionDraft, setQuestionDraft] = useState("");
   const [questionSaved, setQuestionSaved] = useState("");
   const [explorationDraft, setExplorationDraft] = useState("");
@@ -31,7 +31,7 @@ export default function StepPage({ id, step }) {
   const [reflectionDraft, setReflectionDraft] = useState("");
   const [reflectionSaved, setReflectionSaved] = useState("");
 
-  const steps = [
+  const defaultSteps = [
     { title: "Mari Mengamati", desc: "Lihat PPT atau video yang sudah disiapkan.", icon: MagnifyingGlassIcon, accent: false, step: 1 },
     { title: "Ayo Bertanya", desc: "Tulis pertanyaan dan simpan jawabanmu.", icon: ChatBubbleLeftRightIcon, accent: true, step: 2 },
     { title: "Eksplorasi", desc: "Isi sesuai instruksi khusus tiap pertemuan.", icon: BeakerIcon, accent: false, step: 3 },
@@ -40,9 +40,11 @@ export default function StepPage({ id, step }) {
     { title: "Refleksi", desc: "Jawab pertanyaan penutup di textbox.", icon: QuestionMarkCircleIcon, accent: true, step: 6 },
   ];
 
-  const activeStep = steps.find((item) => item.step === step) || steps[0];
+  const stepItems = steps.length > 0 ? steps : defaultSteps;
+  const activeStep = stepItems.find((item) => item.step === step) || stepItems[0];
+  const currentStep = stepData || activeStep;
   const completedSteps = Math.max(0, step - 1);
-  const progressPercent = Math.round((step / steps.length) * 100);
+  const progressPercent = Math.round((step / stepItems.length) * 100);
 
   const goToStep = (targetStep) => {
     router.visit(route("pertemuan.step", { id, step: targetStep }));
@@ -76,13 +78,20 @@ export default function StepPage({ id, step }) {
     }
   }, [step, explorationSaved]);
 
+  useEffect(() => {
+    if (currentStep?.assessment_mode) {
+      setAssessmentMode(currentStep.assessment_mode);
+    }
+  }, [currentStep?.assessment_mode]);
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <StepOneObserve onNext={() => goToStep(2)} />;
+        return <StepOneObserve stepData={currentStep} onNext={() => goToStep(2)} />;
       case 2:
         return (
           <StepTwoAsk
+            stepData={currentStep}
             questionDraft={questionDraft}
             setQuestionDraft={setQuestionDraft}
             questionSaved={questionSaved}
@@ -93,6 +102,7 @@ export default function StepPage({ id, step }) {
       case 3:
         return (
           <StepThreeExploration
+            stepData={currentStep}
             explorationDraft={explorationDraft}
             setExplorationDraft={setExplorationDraft}
             explorationSaved={explorationSaved}
@@ -103,6 +113,7 @@ export default function StepPage({ id, step }) {
       case 4:
         return (
           <StepFourPractice
+            stepData={currentStep}
             assessmentMode={assessmentMode}
             setAssessmentMode={setAssessmentMode}
             quizAnswer={quizAnswer}
@@ -116,6 +127,7 @@ export default function StepPage({ id, step }) {
       case 5:
         return (
           <StepFiveReview
+            stepData={currentStep}
             explorationSaved={explorationSaved}
             reviewDraft={reviewDraft}
             setReviewDraft={setReviewDraft}
@@ -128,6 +140,7 @@ export default function StepPage({ id, step }) {
       default:
         return (
           <StepSixReflection
+            stepData={currentStep}
             reflectionDraft={reflectionDraft}
             setReflectionDraft={setReflectionDraft}
             reflectionSaved={reflectionSaved}
@@ -144,9 +157,9 @@ export default function StepPage({ id, step }) {
       showMobileNav={false}
       sidebarVariant="progress"
       sidebarProps={{
-        courseTitle: `Pertemuan ${id}`,
+        courseTitle: meeting?.title || `Pertemuan ${id}`,
         courseId: id,
-        steps,
+        steps: stepItems,
         activeStep: step,
         progressPercent,
         completedSteps,
@@ -155,11 +168,11 @@ export default function StepPage({ id, step }) {
       <div className="course-shell">
         <div className="course-hero">
           <div>
-            <div className="course-breadcrumb">Pertemuan {id} / Step {step}</div>
-            <h2 className="course-title">{activeStep.title}</h2>
-            <p className="course-description">{activeStep.desc}</p>
+            <div className="course-breadcrumb">{meeting?.title || `Pertemuan ${id}`} / Step {step}</div>
+            <h2 className="course-title">{currentStep.title}</h2>
+            <p className="course-description">{currentStep.desc}</p>
 
-            <div className="course-progress-label">{completedSteps}/{steps.length} Selesai</div>
+            <div className="course-progress-label">{completedSteps}/{stepItems.length} Selesai</div>
             <div className="course-progress-track">
               <div className="course-progress-fill" style={{ width: `${progressPercent}%` }} />
             </div>
@@ -172,12 +185,12 @@ export default function StepPage({ id, step }) {
           </div>
         </div>
 
-        <div className="course-detail-shell my-6 sm:my-8 mx-4 sm:mx-6">
+          <div className="course-detail-shell my-6 mx-4 sm:my-8 sm:mx-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-[rgb(var(--color-primary))]">Bagian aktif</div>
-              <h3 className="text-lg font-bold text-slate-900">{activeStep.title}</h3>
-              <p className="text-sm text-slate-600">{activeStep.desc}</p>
+              <h3 className="text-lg font-bold text-slate-900">{currentStep.title}</h3>
+              <p className="text-sm text-slate-600">{currentStep.desc}</p>
             </div>
 
             <Link className="course-secondary-button" href={route("pertemuan", { id })}>

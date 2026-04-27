@@ -1,6 +1,7 @@
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/solid";
 
 export default function StepSixReflection({
+  stepData,
   reflectionDraft,
   setReflectionDraft,
   reflectionSaved,
@@ -15,7 +16,7 @@ export default function StepSixReflection({
         </div>
 
         <p className="course-detail-text font-semibold text-slate-900">
-          Apa hal paling penting yang kamu pelajari pada pertemuan ini?
+          {stepData?.reflection_question || "Apa hal paling penting yang kamu pelajari pada pertemuan ini?"}
         </p>
 
         <textarea

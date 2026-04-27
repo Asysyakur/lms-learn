@@ -18,14 +18,6 @@ export default function Modal({
         }
     };
 
-    const maxWidthClass = {
-        sm: 'sm:max-w-sm',
-        md: 'sm:max-w-md',
-        lg: 'sm:max-w-lg',
-        xl: 'sm:max-w-xl',
-        '2xl': 'sm:max-w-2xl',
-    }[maxWidth];
-
     return (
         <Transition show={show} leave="duration-200">
             <Dialog
@@ -54,7 +46,17 @@ export default function Modal({
                     leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                 >
                     <DialogPanel
-                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${maxWidthClass}`}
+                        className={`mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full ${
+                            maxWidth === 'sm'
+                                ? 'sm:max-w-sm'
+                                : maxWidth === 'md'
+                                  ? 'sm:max-w-md'
+                                  : maxWidth === 'lg'
+                                    ? 'sm:max-w-lg'
+                                    : maxWidth === 'xl'
+                                      ? 'sm:max-w-xl'
+                                      : 'sm:max-w-2xl'
+                        }`}
                     >
                         {children}
                     </DialogPanel>

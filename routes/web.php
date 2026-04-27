@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,22 +26,16 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/beranda', fn () => Inertia::render('Beranda'))->name('beranda');
+    Route::get('/beranda', [LearningController::class, 'index'])->name('beranda');
 
-    Route::get('/kuis', fn () => Inertia::render('Kuis'))->name('kuis');
+    Route::get('/kuis', [LearningController::class, 'quizIndex'])->name('kuis');
+    Route::get('/kuis/{slug}', [LearningController::class, 'quizShow'])->name('kuis.show');
 
-    Route::get('/pertemuan/{id}', function ($id) {
-        return Inertia::render('Pertemuan', [
-            'id' => $id
-        ]);
-    })->name('pertemuan');
+    Route::get('/pertemuan/{id}', [LearningController::class, 'meetingShow'])->name('pertemuan');
 
-    Route::get('/pertemuan/{id}/step/{step}', function ($id, $step) {
-        return Inertia::render('Pertemuan/StepPage', [
-            'id' => $id,
-            'step' => (int) $step,
-        ]);
-    })->whereNumber('step')->name('pertemuan.step');
+    Route::get('/pertemuan/{id}/step/{step}', [LearningController::class, 'meetingStep'])
+        ->whereNumber('step')
+        ->name('pertemuan.step');
 
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 });

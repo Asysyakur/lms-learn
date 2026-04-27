@@ -1,6 +1,7 @@
 import { BeakerIcon, PencilSquareIcon } from "@heroicons/react/24/solid";
 
 export default function StepThreeExploration({
+  stepData,
   explorationDraft,
   setExplorationDraft,
   explorationSaved,
@@ -17,11 +18,14 @@ export default function StepThreeExploration({
 
         <div className="course-exploration-box">
           <p className="font-semibold text-slate-900">
-            Konten eksplorasi akan kamu isi per pertemuan.
+            {stepData?.exploration_mode === "code_compile"
+              ? "Compile codingan pertemuan ini lalu tulis hasil yang muncul."
+              : stepData?.exploration_mode === "analysis"
+                ? "Analisis studi kasus pertemuan ini lalu tulis hasil pengamatanmu."
+                : "Konten eksplorasi akan kamu isi per pertemuan."}
           </p>
           <p className="mt-2 text-sm text-slate-600">
-            Bagian ini nanti bisa berisi tugas berbeda sesuai materi dan
-            kebutuhan pertemuan yang sedang dibuka.
+            {stepData?.exploration_prompt || "Bagian ini nanti bisa berisi tugas berbeda sesuai materi dan kebutuhan pertemuan yang sedang dibuka."}
           </p>
         </div>
 
