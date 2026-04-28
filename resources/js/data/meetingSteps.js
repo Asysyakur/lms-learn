@@ -52,11 +52,20 @@ export const meetingStepBlueprints = [
   },
 ];
 
+const stepBlueprintByType = {
+  observe: meetingStepBlueprints[0],
+  ask: meetingStepBlueprints[1],
+  exploration: meetingStepBlueprints[2],
+  practice: meetingStepBlueprints[3],
+  review: meetingStepBlueprints[4],
+  reflection: meetingStepBlueprints[5],
+};
+
 export function decorateMeetingSteps(steps = []) {
   const sourceSteps = steps.length > 0 ? steps : meetingStepBlueprints;
 
   return sourceSteps.map((stepItem, index) => {
-    const blueprint = meetingStepBlueprints[index] || {};
+    const blueprint = stepBlueprintByType[stepItem.step_type] || meetingStepBlueprints[index] || {};
 
     return {
       ...blueprint,

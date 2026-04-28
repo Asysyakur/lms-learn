@@ -7,6 +7,7 @@ export default function StepTwoAsk({
   questionSaved,
   onSave,
   onNext,
+  nextLabel = "Lanjut",
 }) {
   return (
     <div className="course-detail-grid">
@@ -34,7 +35,7 @@ export default function StepTwoAsk({
             Simpan Jawaban
           </button>
           <button className="course-secondary-button" onClick={onNext}>
-            Lanjut ke Eksplorasi
+            {nextLabel}
           </button>
         </div>
       </div>

@@ -7,7 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,7 +19,7 @@ class AuthenticatedSessionController extends Controller
     public function create(): Response
     {
         return Inertia::render('Auth/Login', [
-            'canResetPassword' => Route::has('password.request'),
+            'canResetPassword' => false, // Password reset feature disabled
             'status' => session('status'),
         ]);
     }
@@ -33,7 +33,28 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = $request->user();
+
+        // Redirect admins to the admin dashboard, regular users to the learning homepage.
+        $default = $user && isset($user->role) && $user->role === 'admin'
+            ? route('admin.dashboard')
+            : route('beranda');
+
+        // Respect an "intended" URL only when it's appropriate for the user.
+        // If the intended URL points under /admin but the user is not an admin,
+        // ignore it to avoid a 403 and fall back to the default.
+        $intended = $request->session()->pull('url.intended');
+
+        if ($intended) {
+            $path = parse_url($intended, PHP_URL_PATH) ?: $intended;
+            $isAdminPath = Str::startsWith($path, '/admin');
+
+            if (! $isAdminPath || ($user && isset($user->role) && $user->role === 'admin')) {
+                return redirect($intended);
+            }
+        }
+
+        return redirect($default);
     }
 
     /**

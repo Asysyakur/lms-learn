@@ -11,6 +11,7 @@ import {
   QuestionMarkCircleIcon,
   Squares2X2Icon,
   ArrowRightOnRectangleIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/solid";
 
 export default function Sidebar({
@@ -30,6 +31,7 @@ export default function Sidebar({
     { name: "Home", href: "/beranda", icon: HomeIcon },
     { name: "Kuis", href: "/kuis", icon: QuestionMarkCircleIcon },
     { name: "About", href: "/about", icon: Squares2X2Icon },
+    { name: "Profile", href: "/profile", icon: UserCircleIcon },
   ];
 
   const isCourseSidebar = variant === "progress";
@@ -60,22 +62,22 @@ export default function Sidebar({
                   url.startsWith(item.href) ? "mobile-nav-link-active" : ""
                 }`}
               >
-                  <item.icon className="h-4 w-4" />
+                <item.icon className="h-4 w-4" />
                 {item.name}
               </Link>
             ))}
 
-              <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
-                <ArrowRightOnRectangleIcon className="h-4 w-4" />
+            <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
+              <ArrowRightOnRectangleIcon className="h-4 w-4" />
               Logout
             </Link>
           </div>
         </nav>
       )}
 
-      <aside className="sidebar-shell hidden md:flex md:h-screen md:w-64">
-        {isCourseSidebar ? (
-          <>
+      <div className="sidebar-column">
+        <aside className="sidebar-shell md:flex">
+          {isCourseSidebar ? (
             <div>
               <Link href={route("pertemuan", { id: courseId })} className="sidebar-back-link text-center">
                 <ArrowLeftIcon className="h-5 w-5" />
@@ -121,50 +123,56 @@ export default function Sidebar({
                 })}
               </div>
             </div>
-          </>
-        ) : (
-          <>
-            <div>
-              <div className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide">
-                <BookOpenIcon className="h-6 w-6" />
-                <span>LOGO</span>
-              </div>
-
-              <div className="space-y-2">
-                {menu.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className={`sidebar-link ${url.startsWith(item.href) ? "sidebar-link-active" : ""}`}
-                  >
-                    <item.icon className="h-5 w-5 shrink-0" />
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-auto pt-6">
-              {user && (
-                <div className="mb-3 rounded-xl bg-white/10 px-4 py-3 text-sm">
-                  <div className="font-semibold">{user.name}</div>
-                  <div className="text-white/70">{user.email}</div>
+          ) : (
+            <>
+              <div>
+                <div className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide">
+                  <BookOpenIcon className="h-6 w-6" />
+                  <span>LOGO</span>
                 </div>
-              )}
 
-              <Link
-                href={route("logout")}
-                method="post"
-                as="button"
-                className="sidebar-link w-full justify-start border border-white/10 bg-white/10 text-base font-semibold"
-              >
-                <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                Logout
-              </Link>
-            </div>
-          </>
-        )}
-      </aside>
+                <div className="space-y-2">
+                  {menu.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`sidebar-link ${url.startsWith(item.href) ? "sidebar-link-active" : ""}`}
+                    >
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-auto pt-6">
+                {user && (
+                  <Link
+                    href={route("profile.edit")}
+                    className={`sidebar-profile-link mb-3 ${url === "/profile" ? "sidebar-link-active" : ""}`}
+                  >
+                    <UserCircleIcon className="h-9 w-9 shrink-0 text-white/85" />
+                    <div className="min-w-0 leading-tight">
+                      <div className="truncate text-sm font-bold">{user.name}</div>
+                      <div className="truncate text-xs font-medium text-white/70">{user.email}</div>
+                    </div>
+                  </Link>
+                )}
+
+                <Link
+                  href={route("logout")}
+                  method="post"
+                  as="button"
+                  className="sidebar-link w-full justify-start border border-white/10 bg-white/10 text-base font-semibold"
+                >
+                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                  Logout
+                </Link>
+              </div>
+            </>
+          )}
+        </aside>
+      </div>
     </>
   );
 }

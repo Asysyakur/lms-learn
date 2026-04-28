@@ -13,18 +13,45 @@ import StepSixReflection from "@/Pages/Pertemuan/components/Reflection";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
 
 export default function StepPage({ id, meeting, step, steps = [], stepData, completedSteps = 0, savedResponses = {} }) {
-  const savedQuestionResponse = savedResponses[2]?.response_text || "";
-  const savedExplorationResponse = savedResponses[3]?.response_text || "";
-  const savedPracticeResponse = savedResponses[4] || null;
-  const savedReviewResponse = savedResponses[5]?.response_text || "";
-  const savedReflectionResponse = savedResponses[6]?.response_text || "";
-  const savedPracticeMode = savedPracticeResponse?.response_payload?.mode || stepData?.assessment_mode || "quiz";
+  const stepItems = decorateMeetingSteps(steps);
+  const activeStep = stepItems.find((item) => item.step === step) || stepItems[0];
+  const currentStep = stepData || activeStep;
+  const [localCompletedSteps, setLocalCompletedSteps] = useState(completedSteps);
+  const progressPercent = stepItems.length > 0 ? Math.round((localCompletedSteps / stepItems.length) * 100) : 0;
+  const currentStepIndex = stepItems.findIndex((item) => item.step === currentStep?.step);
+  const stepByType = (type) => stepItems.find((item) => item.step_type === type);
+  const responseByType = (type) => {
+    const typedStep = stepByType(type);
+
+    return typedStep ? savedResponses[typedStep.step] : null;
+  };
+  const nextStepNumber = () => {
+    return currentStepIndex >= 0 ? stepItems[currentStepIndex + 1]?.step : null;
+  };
+  const nextStepTitle = () => {
+    const next = stepItems.find((item) => item.step === nextStepNumber());
+    return next ? `Lanjut ke ${next.title}` : "Selesai";
+  };
+
+  const savedCurrentResponse = currentStep ? savedResponses[currentStep.step] : null;
+  const savedQuestionResponse = currentStep?.step_type === "ask" ? savedCurrentResponse?.response_text || "" : responseByType("ask")?.response_text || "";
+  const savedExplorationResponse = currentStep?.step_type === "exploration" ? savedCurrentResponse?.response_text || "" : responseByType("exploration")?.response_text || "";
+  const savedExplorationPayload = currentStep?.step_type === "exploration" ? savedCurrentResponse?.response_payload || null : responseByType("exploration")?.response_payload || null;
+  const savedExplorationMode = savedExplorationPayload?.mode || stepByType("exploration")?.exploration_mode || "analysis";
+  const savedPracticeResponse = currentStep?.step_type === "practice" ? savedCurrentResponse : responseByType("practice") || null;
+  const savedReviewResponse = currentStep?.step_type === "review" ? savedCurrentResponse?.response_text || "" : responseByType("review")?.response_text || "";
+  const savedReflectionResponse = currentStep?.step_type === "reflection" ? savedCurrentResponse?.response_text || "" : responseByType("reflection")?.response_text || "";
+  const savedPracticeMode = savedPracticeResponse?.response_payload?.mode || currentStep?.assessment_mode || "quiz";
   const savedPracticeAnswer = savedPracticeResponse?.response_payload?.answer || savedPracticeResponse?.response_text || "";
+  const savedCodeLanguage = savedExplorationPayload?.language || currentStep?.code_language || "javascript";
 
   const [questionDraft, setQuestionDraft] = useState(savedQuestionResponse);
   const [questionSaved, setQuestionSaved] = useState(savedQuestionResponse);
   const [explorationDraft, setExplorationDraft] = useState(savedExplorationResponse);
   const [explorationSaved, setExplorationSaved] = useState(savedExplorationResponse);
+  const [explorationCode, setExplorationCode] = useState(savedExplorationPayload?.code || "");
+  const [codeLanguage, setCodeLanguage] = useState(savedCodeLanguage);
+  const [compileOutput, setCompileOutput] = useState(savedExplorationPayload?.output || "");
   const [assessmentMode, setAssessmentMode] = useState(savedPracticeMode);
   const [quizAnswer, setQuizAnswer] = useState(savedPracticeMode === "quiz" ? savedPracticeAnswer : "");
   const [essayAnswer, setEssayAnswer] = useState(savedPracticeMode === "essay" ? savedPracticeAnswer : "");
@@ -33,13 +60,6 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   const [reviewSaved, setReviewSaved] = useState(savedReviewResponse);
   const [reflectionDraft, setReflectionDraft] = useState(savedReflectionResponse);
   const [reflectionSaved, setReflectionSaved] = useState(savedReflectionResponse);
-
-  const [localCompletedSteps, setLocalCompletedSteps] = useState(completedSteps);
-
-  const stepItems = decorateMeetingSteps(steps);
-  const activeStep = stepItems.find((item) => item.step === step) || stepItems[0];
-  const currentStep = stepData || activeStep;
-  const progressPercent = stepItems.length > 0 ? Math.round((localCompletedSteps / stepItems.length) * 100) : 0;
 
   const goToStep = (targetStep) => {
     router.visit(route("pertemuan.step", { id, step: targetStep }));
@@ -50,7 +70,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
       preserveScroll: true,
       preserveState: true,
       onSuccess: () => {
-        setLocalCompletedSteps((current) => Math.max(current, targetStep));
+        setLocalCompletedSteps((current) => Math.max(current, currentStepIndex + 1));
 
         if (onSuccess) {
           onSuccess();
@@ -67,7 +87,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
-          setLocalCompletedSteps((current) => Math.max(current, currentStepNumber));
+          setLocalCompletedSteps((current) => Math.max(current, currentStepIndex + 1));
 
           if (callback) {
             callback();
@@ -80,7 +100,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   const saveQuestion = (onSuccess) => {
     const responseText = questionDraft.trim();
 
-    saveResponse(2, { response_text: responseText }, () => {
+    saveResponse(currentStep.step, { response_text: responseText }, () => {
       setQuestionSaved(responseText);
 
       if (onSuccess) {
@@ -90,9 +110,21 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   };
 
   const saveExploration = (onSuccess) => {
-    const responseText = explorationDraft.trim();
+    const isCompileMode = currentStep?.exploration_mode === "code_compile";
+    const responseText = isCompileMode ? explorationCode.trim() : explorationDraft.trim();
+    const payload = isCompileMode
+      ? {
+          response_text: responseText,
+          response_payload: {
+            mode: "code_compile",
+            language: codeLanguage,
+            code: explorationCode,
+            output: compileOutput,
+          },
+        }
+      : { response_text: responseText };
 
-    saveResponse(3, { response_text: responseText }, () => {
+    saveResponse(currentStep.step, payload, () => {
       setExplorationSaved(responseText);
 
       if (onSuccess) {
@@ -102,12 +134,13 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   };
 
   const saveAssessment = (onSuccess) => {
-    const savedText = assessmentMode === "quiz" ? quizAnswer : essayAnswer;
+    const activeMode = currentStep?.assessment_mode || assessmentMode;
+    const savedText = activeMode === "quiz" ? quizAnswer : essayAnswer;
 
-    saveResponse(4, {
+    saveResponse(currentStep.step, {
       response_text: savedText.trim(),
       response_payload: {
-        mode: assessmentMode,
+        mode: activeMode,
         answer: savedText.trim(),
       },
     }, () => {
@@ -122,7 +155,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   const saveReview = (onSuccess) => {
     const responseText = reviewDraft.trim();
 
-    saveResponse(5, { response_text: responseText }, () => {
+    saveResponse(currentStep.step, { response_text: responseText }, () => {
       setReviewSaved(responseText);
 
       if (onSuccess) {
@@ -134,7 +167,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
   const saveReflection = (onSuccess) => {
     const responseText = reflectionDraft.trim();
 
-    saveResponse(6, { response_text: responseText }, () => {
+    saveResponse(currentStep.step, { response_text: responseText }, () => {
       setReflectionSaved(responseText);
 
       if (onSuccess) {
@@ -158,6 +191,9 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
     setQuestionSaved(savedQuestionResponse);
     setExplorationDraft(savedExplorationResponse);
     setExplorationSaved(savedExplorationResponse);
+    setExplorationCode(savedExplorationPayload?.code || "");
+    setCodeLanguage(savedCodeLanguage);
+    setCompileOutput(savedExplorationPayload?.output || "");
     setAssessmentMode(savedPracticeMode);
     setQuizAnswer(savedPracticeMode === "quiz" ? savedPracticeAnswer : "");
     setEssayAnswer(savedPracticeMode === "essay" ? savedPracticeAnswer : "");
@@ -166,13 +202,26 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
     setReviewSaved(savedReviewResponse);
     setReflectionDraft(savedReflectionResponse);
     setReflectionSaved(savedReflectionResponse);
-  }, [savedQuestionResponse, savedExplorationResponse, savedPracticeMode, savedPracticeAnswer, savedReviewResponse, savedReflectionResponse, step]);
+  }, [savedQuestionResponse, savedExplorationResponse, savedExplorationPayload?.code, savedExplorationPayload?.output, savedCodeLanguage, savedPracticeMode, savedPracticeAnswer, savedReviewResponse, savedReflectionResponse, step]);
 
   const renderStepContent = () => {
-    switch (step) {
-      case 1:
-        return <StepOneObserve stepData={currentStep} onNext={() => completeStep(1, () => goToStep(2))} />;
-      case 2:
+    const next = nextStepNumber();
+    const goNext = () => {
+      if (next) {
+        goToStep(next);
+      }
+    };
+
+    switch (currentStep?.step_type) {
+      case "observe":
+        return (
+          <StepOneObserve
+            stepData={currentStep}
+            nextLabel={nextStepTitle()}
+            onNext={() => completeStep(currentStep.step, goNext)}
+          />
+        );
+      case "ask":
         return (
           <StepTwoAsk
             stepData={currentStep}
@@ -180,21 +229,29 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
             setQuestionDraft={setQuestionDraft}
             questionSaved={questionSaved}
             onSave={saveQuestion}
-            onNext={() => saveQuestion(() => goToStep(3))}
+            nextLabel={nextStepTitle()}
+            onNext={() => saveQuestion(goNext)}
           />
         );
-      case 3:
+      case "exploration":
         return (
           <StepThreeExploration
             stepData={currentStep}
             explorationDraft={explorationDraft}
             setExplorationDraft={setExplorationDraft}
+            explorationCode={explorationCode}
+            setExplorationCode={setExplorationCode}
+            codeLanguage={codeLanguage}
+            setCodeLanguage={setCodeLanguage}
+            compileOutput={compileOutput}
+            setCompileOutput={setCompileOutput}
             explorationSaved={explorationSaved}
             onSave={saveExploration}
-            onNext={() => saveExploration(() => goToStep(4))}
+            nextLabel={nextStepTitle()}
+            onNext={() => saveExploration(goNext)}
           />
         );
-      case 4:
+      case "practice":
         return (
           <StepFourPractice
             stepData={currentStep}
@@ -208,20 +265,22 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
             onSave={saveAssessment}
           />
         );
-      case 5:
+      case "review":
         return (
           <StepFiveReview
             stepData={currentStep}
             explorationSaved={explorationSaved}
+            explorationMode={savedExplorationMode}
+            explorationOutput={savedExplorationPayload?.output || ""}
             reviewDraft={reviewDraft}
             setReviewDraft={setReviewDraft}
             reviewSaved={reviewSaved}
             onSave={saveReview}
-            onNext={() => saveReview(() => goToStep(6))}
+            nextLabel={nextStepTitle()}
+            onNext={() => saveReview(goNext)}
           />
         );
-      case 6:
-      default:
+      case "reflection":
         return (
           <StepSixReflection
             stepData={currentStep}
@@ -230,6 +289,18 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
             reflectionSaved={reflectionSaved}
             onSave={saveReflection}
           />
+        );
+      default:
+        return (
+          <div className="course-detail-card space-y-3">
+            <h3 className="course-detail-title">{currentStep?.title || "Step"}</h3>
+            <p className="course-detail-text">
+              Tipe step ini belum punya tampilan khusus. Hubungi admin untuk menyesuaikan konfigurasi step.
+            </p>
+            <button className="btn-primary w-full sm:w-auto" onClick={() => completeStep(currentStep.step, goNext)}>
+              {nextStepTitle()}
+            </button>
+          </div>
         );
     }
   };
@@ -249,7 +320,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
         completedSteps: localCompletedSteps,
       }}
     >
-      <div className="course-shell">
+      <div className="course-shell pb-6 sm:pb-8">
         <div className="course-hero">
           <div>
             <div className="course-breadcrumb">{meeting?.title || `Pertemuan ${id}`} / Step {step}</div>
@@ -269,7 +340,7 @@ export default function StepPage({ id, meeting, step, steps = [], stepData, comp
           </div>
         </div>
 
-        <div className="course-detail-shell my-6 mx-4 sm:my-8 sm:mx-6">
+        <div className="course-detail-shell mx-4 mt-6 sm:mx-6 sm:mt-8">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <div className="text-sm font-semibold text-[rgb(var(--color-primary))]">Bagian aktif</div>

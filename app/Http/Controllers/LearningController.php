@@ -24,7 +24,7 @@ class LearningController extends Controller
     {
         $course = Course::query()
             ->with(['meetings.steps' => function ($query) {
-                $query->orderBy('sort_order');
+                $query->orderBy('sort_order')->orderBy('step_number');
             }])
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -106,7 +106,7 @@ class LearningController extends Controller
         $meeting = Meeting::query()
             ->with([
                 'steps' => function ($query) {
-                    $query->orderBy('sort_order');
+                    $query->orderBy('sort_order')->orderBy('step_number');
                 },
                 'steps.observation',
                 'steps.ask',
@@ -140,7 +140,7 @@ class LearningController extends Controller
         $meeting = Meeting::query()
             ->with([
                 'steps' => function ($query) {
-                    $query->orderBy('sort_order');
+                    $query->orderBy('sort_order')->orderBy('step_number');
                 },
                 'steps.observation',
                 'steps.ask',
@@ -179,7 +179,7 @@ class LearningController extends Controller
     {
         $meeting = Meeting::query()
             ->with(['steps' => function ($query) {
-                $query->orderBy('sort_order');
+                $query->orderBy('sort_order')->orderBy('step_number');
             }])
             ->findOrFail($id);
 
@@ -205,7 +205,7 @@ class LearningController extends Controller
     {
         $meeting = Meeting::query()
             ->with(['steps' => function ($query) {
-                $query->orderBy('sort_order');
+                $query->orderBy('sort_order')->orderBy('step_number');
             }])
             ->findOrFail($id);
 
@@ -316,6 +316,7 @@ class LearningController extends Controller
     {
         return [
             'exploration_mode' => $exploration?->exploration_mode,
+            'code_language' => $exploration?->code_language,
             'exploration_prompt' => $exploration?->exploration_prompt,
         ];
     }

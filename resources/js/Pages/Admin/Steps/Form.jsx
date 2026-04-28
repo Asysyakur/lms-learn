@@ -10,6 +10,14 @@ const STEP_TYPES = [
   { value: "reflection", label: "Reflection" },
 ];
 
+const CODE_LANGUAGES = [
+  { value: "javascript", label: "JavaScript" },
+  { value: "python", label: "Python" },
+  { value: "php", label: "PHP" },
+  { value: "java", label: "Java" },
+  { value: "cpp", label: "C++" },
+];
+
 export default function StepForm({ meetingId, step = null }) {
   const isEdit = Boolean(step);
   const { data, setData, post, put, processing, errors, reset } = useForm({
@@ -23,6 +31,7 @@ export default function StepForm({ meetingId, step = null }) {
     resource_url: step?.observation?.resource_url ?? "",
     question_prompt: step?.ask?.question_prompt ?? "",
     exploration_mode: step?.exploration?.exploration_mode ?? "analysis",
+    code_language: step?.exploration?.code_language ?? "javascript",
     exploration_prompt: step?.exploration?.exploration_prompt ?? "",
     assessment_mode: step?.practice?.assessment_mode ?? "quiz",
     assessment_question: step?.practice?.assessment_question ?? "",
@@ -147,7 +156,7 @@ export default function StepForm({ meetingId, step = null }) {
         )}
 
         {data.step_type === "exploration" && (
-          <div className="grid gap-4 md:grid-cols-[220px_1fr]">
+          <div className="grid gap-4 md:grid-cols-[220px_220px_1fr]">
             <div>
               <label className="block text-sm font-semibold text-slate-700">Mode</label>
               <select
@@ -157,6 +166,21 @@ export default function StepForm({ meetingId, step = null }) {
               >
                 <option value="analysis">Analysis</option>
                 <option value="code_compile">Code Compile</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700">Bahasa</label>
+              <select
+                className="mt-1 w-full rounded-lg border-slate-300 disabled:bg-slate-100"
+                value={data.code_language}
+                disabled={data.exploration_mode !== "code_compile"}
+                onChange={(e) => setData("code_language", e.target.value)}
+              >
+                {CODE_LANGUAGES.map((language) => (
+                  <option key={language.value} value={language.value}>
+                    {language.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

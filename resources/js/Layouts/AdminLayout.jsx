@@ -12,7 +12,7 @@ export default function AdminLayout({ children, title }) {
         <AdminSidebar />
 
         <div className="min-h-screen flex-1 bg-white p-0 sm:p-0">
-          <div className="flex h-full min-h-[calc(100vh-1rem)] flex-col overflow-hidden rounded-none bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:rounded-3xl">
+          <div className="flex h-full min-h-screen flex-col overflow-hidden rounded-none bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)] sm:rounded-3xl">
             <div className="app-topbar pt-[env(safe-area-inset-top)] md:pt-4">
               <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                 {title}

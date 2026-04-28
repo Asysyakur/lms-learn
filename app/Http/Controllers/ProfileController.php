@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -14,34 +13,47 @@ use Inertia\Response;
 class ProfileController extends Controller
 {
     /**
-     * Display the user's profile form.
+     * Show the form for editing the authenticated user's profile.
      */
-    public function edit(Request $request): Response
+    public function edit(): Response
     {
         return Inertia::render('Profile/Edit', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
+            'user' => Auth::user()->only(['id', 'name', 'email', 'role']),
             'status' => session('status'),
         ]);
     }
 
     /**
-     * Update the user's profile information.
+     * Update the authenticated user's profile.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
+            'password' => ['nullable', 'confirmed', 'min:8'],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        if (! empty($data['password'])) {
+            $user->password = Hash::make($data['password']);
+        }
 
-        return Redirect::route('profile.edit');
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('status', 'Profile updated.');
     }
 
     /**
-     * Delete the user's account.
+     * Delete the authenticated user's account.
      */
     public function destroy(Request $request): RedirectResponse
     {

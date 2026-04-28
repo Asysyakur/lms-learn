@@ -98,6 +98,7 @@ class DatabaseSeeder extends Seeder
                     'title' => 'Eksplorasi',
                     'description' => 'Isi sesuai instruksi khusus tiap pertemuan.',
                     'exploration_mode' => $blueprint['exploration_mode'],
+                    'code_language' => $blueprint['exploration_mode'] === 'code_compile' ? 'javascript' : null,
                     'exploration_prompt' => $blueprint['exploration_mode'] === 'analysis'
                         ? 'Analisis studi kasus berikut dan tulis hasil pengamatanmu.'
                         : 'Compile codingan berikut dan jelaskan hasil yang muncul.',
@@ -161,6 +162,7 @@ class DatabaseSeeder extends Seeder
                     'exploration' => MeetingStepExploration::create([
                         'meeting_step_id' => $meetingStep->id,
                         'exploration_mode' => $step['exploration_mode'],
+                        'code_language' => $step['code_language'],
                         'exploration_prompt' => $step['exploration_prompt'],
                     ]),
                     'practice' => MeetingStepPractice::create([

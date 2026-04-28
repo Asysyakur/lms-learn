@@ -36,7 +36,7 @@ export default function Pertemuan({ id, meeting, steps = [], completedSteps = 0 
         </div>
 
         <div className="course-step-list">
-          {meetingSteps.map((step, i) => (
+          {meetingSteps.map((step) => (
             <div
               key={step.step || step.title}
               className="course-step-card"
@@ -48,7 +48,7 @@ export default function Pertemuan({ id, meeting, steps = [], completedSteps = 0 
 
                 <div>
                   <h3 className="course-step-title">
-                    {i + 1}. {step.title}
+                    {step.step}. {step.title}
                   </h3>
                   <p className="course-step-desc">{step.desc}</p>
                 </div>

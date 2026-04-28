@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MeetingStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 class StepController extends Controller
@@ -121,12 +122,20 @@ class StepController extends Controller
                 break;
 
             case 'exploration':
+                $explorationData = [
+                    'exploration_mode' => $request->exploration_mode,
+                    'exploration_prompt' => $request->exploration_prompt,
+                ];
+
+                if (Schema::hasColumn('meeting_step_explorations', 'code_language')) {
+                    $explorationData['code_language'] = $request->exploration_mode === 'code_compile'
+                        ? ($request->code_language ?: 'javascript')
+                        : null;
+                }
+
                 $step->exploration()->updateOrCreate(
                     ['meeting_step_id' => $step->id],
-                    [
-                        'exploration_mode' => $request->exploration_mode,
-                        'exploration_prompt' => $request->exploration_prompt,
-                    ]
+                    $explorationData
                 );
                 break;
 

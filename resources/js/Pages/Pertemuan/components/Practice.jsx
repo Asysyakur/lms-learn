@@ -11,6 +11,9 @@ export default function StepFourPractice({
   assessmentSaved,
   onSave,
 }) {
+  const lockedAssessmentMode = stepData?.assessment_mode;
+  const activeMode = lockedAssessmentMode || assessmentMode;
+
   return (
     <div className="course-detail-grid">
       <div className="course-detail-card space-y-4">
@@ -19,22 +22,28 @@ export default function StepFourPractice({
           Latihan soal
         </div>
 
-        <div className="flex gap-2">
-          <button
-            className={`course-tab ${assessmentMode === "quiz" ? "course-tab-active" : ""}`}
-            onClick={() => setAssessmentMode("quiz")}
-          >
-            Kuis
-          </button>
-          <button
-            className={`course-tab ${assessmentMode === "essay" ? "course-tab-active" : ""}`}
-            onClick={() => setAssessmentMode("essay")}
-          >
-            Essay
-          </button>
-        </div>
+        {lockedAssessmentMode ? (
+          <div className="inline-flex w-fit rounded-full bg-[rgb(var(--color-primary))] px-4 py-2 text-sm font-semibold text-white">
+            {lockedAssessmentMode === "quiz" ? "Kuis" : "Essay"}
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              className={`course-tab ${assessmentMode === "quiz" ? "course-tab-active" : ""}`}
+              onClick={() => setAssessmentMode("quiz")}
+            >
+              Kuis
+            </button>
+            <button
+              className={`course-tab ${assessmentMode === "essay" ? "course-tab-active" : ""}`}
+              onClick={() => setAssessmentMode("essay")}
+            >
+              Essay
+            </button>
+          </div>
+        )}
 
-        {assessmentMode === "quiz" ? (
+        {activeMode === "quiz" ? (
           <div className="space-y-4">
             <p className="course-detail-text font-semibold text-slate-900">
               {stepData?.assessment_question || "Pilih jawaban yang paling tepat:"}
