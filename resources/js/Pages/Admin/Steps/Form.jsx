@@ -18,7 +18,7 @@ const CODE_LANGUAGES = [
   { value: "cpp", label: "C++" },
 ];
 
-export default function StepForm({ meetingId, step = null }) {
+export default function StepForm({ meetingId, step = null, onSuccess = null }) {
   const isEdit = Boolean(step);
   const { data, setData, post, put, processing, errors, reset } = useForm({
     meeting_id: meetingId ?? step?.meeting_id ?? "",
@@ -55,7 +55,10 @@ export default function StepForm({ meetingId, step = null }) {
     }
 
     post("/admin/steps", {
-      onSuccess: () => reset(),
+      onSuccess: () => {
+        reset();
+        onSuccess?.();
+      },
     });
   }
 

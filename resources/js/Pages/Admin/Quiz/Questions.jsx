@@ -1,7 +1,7 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
 
-export default function Questions({ questions }) {
+export default function Questions({ questions, selected_set }) {
   function destroy(question) {
     if (confirm("Hapus pertanyaan ini?")) {
       router.delete(`/admin/quiz-questions/${question.id}`);
@@ -10,16 +10,16 @@ export default function Questions({ questions }) {
 
   return (
     <AdminLayout title="Quiz Questions">
-      <div className="mb-4 flex items-center justify-between gap-3">
+        <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Questions</h2>
+          <h2 className="text-lg font-bold text-slate-900">Questions {selected_set ? `- ${selected_set.title}` : ''}</h2>
           <p className="text-sm text-slate-500">Pertanyaan untuk quiz set.</p>
         </div>
         <div className="flex gap-2">
           <Link className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/quiz-sets">
             Quiz Sets
           </Link>
-          <Link className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500" href="/admin/quiz-questions/create">
+          <Link className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500" href={`/admin/quiz-questions/create${selected_set ? `?set_id=${selected_set.id}` : ''}`}>
             Tambah
           </Link>
         </div>

@@ -49,7 +49,7 @@ class StepController extends Controller
 
         $this->handleStepType($step, $request);
 
-        return back();
+        return redirect()->route('admin.meetings.steps', ['meeting' => $request->meeting_id])->with('success', 'Step berhasil ditambahkan');
     }
 
     public function edit(MeetingStep $step)
@@ -85,13 +85,14 @@ class StepController extends Controller
 
         $this->handleStepType($step, $request);
 
-        return back();
+        return redirect()->route('admin.meetings.steps', ['meeting' => $step->meeting_id])->with('success', 'Step berhasil diperbarui');
     }
 
     public function destroy(MeetingStep $step)
     {
+        $meetingId = $step->meeting_id;
         $step->delete();
-        return back();
+        return redirect()->route('admin.meetings.steps', ['meeting' => $meetingId])->with('success', 'Step berhasil dihapus');
     }
 
     /**

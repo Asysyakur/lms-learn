@@ -1,9 +1,9 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, useForm } from "@inertiajs/react";
 
-export default function CreateQuestion({ sets }) {
+export default function CreateQuestion({ sets, selected_set_id }) {
   const { data, setData, post, processing, errors } = useForm({
-    quiz_set_id: sets[0]?.id ?? "",
+    quiz_set_id: selected_set_id ?? sets[0]?.id ?? "",
     question_text: "",
     options: "",
     correct_option: "A",

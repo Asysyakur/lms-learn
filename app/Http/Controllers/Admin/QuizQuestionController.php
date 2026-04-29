@@ -10,17 +10,29 @@ use Inertia\Inertia;
 
 class QuizQuestionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $setId = $request->query('set_id');
+
+        if ($setId) {
+            $questions = QuizQuestion::with('quizSet')->where('quiz_set_id', $setId)->get();
+            $selectedSet = QuizSet::find($setId);
+        } else {
+            $questions = QuizQuestion::with('quizSet')->get();
+            $selectedSet = null;
+        }
+
         return Inertia::render('Admin/Quiz/Questions', [
-            'questions' => QuizQuestion::with('quizSet')->get()
+            'questions' => $questions,
+            'selected_set' => $selectedSet,
         ]);
     }
 
-    public function create()
+    public function create(Request $request)
     {
         return Inertia::render('Admin/Quiz/CreateQuestion', [
-            'sets' => QuizSet::all()
+            'sets' => QuizSet::all(),
+            'selected_set_id' => $request->query('set_id') ?? null,
         ]);
     }
 
@@ -40,7 +52,7 @@ class QuizQuestionController extends Controller
             'correct_option' => $request->correct_option,
         ]);
 
-        return back();
+        return redirect()->route('admin.quiz-questions.index', ['set_id' => $request->quiz_set_id])->with('success', 'Soal berhasil ditambahkan');
     }
 
     public function edit(QuizQuestion $quizQuestion)
@@ -60,13 +72,14 @@ class QuizQuestionController extends Controller
             'correct_option' => $request->correct_option,
         ]);
 
-        return back();
+        return redirect()->route('admin.quiz-questions.index', ['set_id' => $quizQuestion->quiz_set_id])->with('success', 'Soal berhasil diperbarui');
     }
 
     public function destroy(QuizQuestion $quizQuestion)
     {
+        $setId = $quizQuestion->quiz_set_id;
         $quizQuestion->delete();
-        return back();
+        return redirect()->route('admin.quiz-questions.index', ['set_id' => $setId])->with('success', 'Soal berhasil dihapus');
     }
 
     private function normalizeOptions($options): array

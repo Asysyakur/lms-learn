@@ -22,12 +22,6 @@ export default function Sets({ sets }) {
           >
             Tambah
           </Link>
-          <Link
-            href="/admin/quiz-questions"
-            className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            Questions
-          </Link>
         </div>
       </div>
 
@@ -54,6 +48,11 @@ export default function Sets({ sets }) {
                 <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/quiz-sets/${set.id}/edit`}>
                   Edit
                 </Link>
+
+                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/quiz-questions?set_id=${set.id}`}>
+                  Edit Soal
+                </Link>
+
                 <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50" type="button" onClick={() => destroy(set)}>
                   Hapus
                 </button>
