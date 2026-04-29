@@ -35,7 +35,7 @@ export default function StepTwoAsk({
             Simpan Jawaban
           </button>
           <button className="course-secondary-button" onClick={onNext}>
-            {nextLabel}
+            Lanjut
           </button>
         </div>
       </div>

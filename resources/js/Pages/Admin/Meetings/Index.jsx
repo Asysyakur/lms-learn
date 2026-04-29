@@ -9,10 +9,9 @@ export default function Index({ meetings }) {
   }
 
   return (
-    <AdminLayout title="Meetings">
+    <AdminLayout title="Pertemuan">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Meetings</h2>
           <p className="text-sm text-slate-500">Pertemuan yang berisi step pembelajaran.</p>
         </div>
 

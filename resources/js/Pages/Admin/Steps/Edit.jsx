@@ -3,7 +3,7 @@ import StepForm from "./Form";
 
 export default function Edit({ step }) {
   return (
-    <AdminLayout title="Edit Step">
+    <AdminLayout title="Ubah Langkah">
       <StepForm step={step} />
     </AdminLayout>
   );

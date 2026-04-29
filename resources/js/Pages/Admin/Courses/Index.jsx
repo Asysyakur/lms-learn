@@ -9,10 +9,9 @@ export default function Index({ courses }) {
   }
 
   return (
-    <AdminLayout title="Courses">
+    <AdminLayout title="Kursus">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Courses</h2>
           <p className="text-sm text-slate-500">Materi utama yang muncul di halaman belajar.</p>
         </div>
         <Link

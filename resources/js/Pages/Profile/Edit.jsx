@@ -25,7 +25,7 @@ export default function Edit({ user, status }) {
 
     const content = (
         <>
-            <Head title="Profile" />
+            <Head title="Profil" />
 
             <div className="grid gap-6 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
                 <section className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -54,15 +54,15 @@ export default function Edit({ user, status }) {
                 <section className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
                     <div className="mb-5 flex items-start justify-between gap-3">
                         <div>
-                            <h2 className="text-lg font-extrabold text-slate-900">Edit Profile</h2>
-                            <p className="mt-1 text-sm text-slate-500">Update nama, email, dan password akun.</p>
+                            <h2 className="text-lg font-extrabold text-slate-900">Ubah Profil</h2>
+                            <p className="mt-1 text-sm text-slate-500">Perbarui nama, email, dan password akun.</p>
                         </div>
                         <KeyIcon className="h-6 w-6 shrink-0 text-slate-300" />
                     </div>
 
                     {(status || recentlySuccessful) && (
                         <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-100">
-                            {status || 'Profile updated.'}
+                            {status || 'Profil berhasil diperbarui.'}
                         </div>
                     )}
 
@@ -115,7 +115,7 @@ export default function Edit({ user, status }) {
                         </div>
 
                         <div className="flex items-center justify-end">
-                            <PrimaryButton disabled={processing}>Save Changes</PrimaryButton>
+                            <PrimaryButton disabled={processing}>Simpan Perubahan</PrimaryButton>
                         </div>
                     </form>
                 </section>
@@ -124,8 +124,8 @@ export default function Edit({ user, status }) {
     );
 
     return user.role === 'admin' ? (
-        <AdminLayout title="Profile">{content}</AdminLayout>
+        <AdminLayout title="Profil">{content}</AdminLayout>
     ) : (
-        <AppLayout title="Profile">{content}</AppLayout>
+        <AppLayout title="Profil">{content}</AppLayout>
     );
 }

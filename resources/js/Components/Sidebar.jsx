@@ -28,9 +28,9 @@ export default function Sidebar({
   const user = props.auth?.user;
 
   const menu = [
-    { name: "Home", href: "/beranda", icon: HomeIcon },
+    { name: "Beranda", href: "/beranda", icon: HomeIcon },
     { name: "Kuis", href: "/kuis", icon: QuestionMarkCircleIcon },
-    { name: "About", href: "/about", icon: Squares2X2Icon },
+    { name: "Tentang", href: "/about", icon: Squares2X2Icon },
   ];
 
   const isCourseSidebar = variant === "progress";
@@ -68,7 +68,7 @@ export default function Sidebar({
 
             <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
               <ArrowRightOnRectangleIcon className="h-4 w-4" />
-              Logout
+              Keluar
             </Link>
           </div>
         </nav>
@@ -127,7 +127,7 @@ export default function Sidebar({
               <div>
                 <div className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide">
                   <BookOpenIcon className="h-6 w-6" />
-                  <span>LOGO</span>
+                  <span>LEARN</span>
                 </div>
 
                 <div className="space-y-2">
@@ -165,7 +165,7 @@ export default function Sidebar({
                   className="sidebar-link w-full justify-start border border-white/10 bg-white/10 text-base font-semibold"
                 >
                   <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                  Logout
+                  Keluar
                 </Link>
               </div>
             </>

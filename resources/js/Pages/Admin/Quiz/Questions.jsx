@@ -9,15 +9,15 @@ export default function Questions({ questions, selected_set }) {
   }
 
   return (
-    <AdminLayout title="Quiz Questions">
+    <AdminLayout title="Soal Kuis">
         <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Questions {selected_set ? `- ${selected_set.title}` : ''}</h2>
+          <h2 className="text-lg font-bold text-slate-900">Soal {selected_set ? `- ${selected_set.title}` : ''}</h2>
           <p className="text-sm text-slate-500">Pertanyaan untuk quiz set.</p>
         </div>
         <div className="flex gap-2">
           <Link className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/quiz-sets">
-            Quiz Sets
+            Kumpulan Kuis
           </Link>
           <Link className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500" href={`/admin/quiz-questions/create${selected_set ? `?set_id=${selected_set.id}` : ''}`}>
             Tambah
@@ -44,7 +44,7 @@ export default function Questions({ questions, selected_set }) {
 
                 <div className="flex gap-2">
                   <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/quiz-questions/${question.id}/edit`}>
-                    Edit
+                    Ubah
                   </Link>
                   <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50" type="button" onClick={() => destroy(question)}>
                     Hapus

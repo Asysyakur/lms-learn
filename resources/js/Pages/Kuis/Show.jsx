@@ -221,7 +221,7 @@ export default function QuizShow({ quizSet, questions = [] }) {
                                         disabled={currentQuestionIndex === 0}
                                     >
                                         <ChevronLeftIcon className="h-4 w-4" />
-                                        <span>Previous</span>
+                                        <span>Sebelumnya</span>
                                     </button>
 
                                     <button
@@ -233,7 +233,7 @@ export default function QuizShow({ quizSet, questions = [] }) {
                                             totalQuestions - 1
                                         }
                                     >
-                                        <span>Next</span>
+                                        <span>Berikutnya</span>
                                         <ChevronRightIcon className="h-4 w-4" />
                                     </button>
                                 </div>

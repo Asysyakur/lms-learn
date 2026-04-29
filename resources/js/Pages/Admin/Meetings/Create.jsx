@@ -18,7 +18,7 @@ export default function Create({ defaultCourseId }) {
   }
 
   return (
-    <AdminLayout title="Tambah Meeting">
+    <AdminLayout title="Tambah Pertemuan">
       <MeetingForm
         data={data}
         setData={setData}

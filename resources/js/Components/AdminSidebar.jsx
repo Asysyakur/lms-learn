@@ -13,10 +13,10 @@ export default function AdminSidebar() {
   const user = props.auth?.user;
 
   const menu = [
-    { name: "Dashboard", href: "/admin", icon: HomeIcon },
-    { name: "Meetings", href: "/admin/meetings", icon: BookOpenIcon },
-    { name: "Quiz", href: "/admin/quiz-sets", icon: ClipboardDocumentListIcon },
-    { name: "Users", href: "/admin/users", icon: UsersIcon },
+    { name: "Dasbor", href: "/admin", icon: HomeIcon },
+    { name: "Pertemuan", href: "/admin/meetings", icon: BookOpenIcon },
+    { name: "Kuis", href: "/admin/quiz-sets", icon: ClipboardDocumentListIcon },
+    { name: "Pengguna", href: "/admin/users", icon: UsersIcon },
   ];
 
   return (
@@ -47,12 +47,12 @@ export default function AdminSidebar() {
 
           <Link href={route('profile.edit')} className={`mobile-nav-link ${url === '/profile' ? 'mobile-nav-link-active' : ''}`}>
             <UserCircleIcon className="h-4 w-4" />
-            Profile
+            Profil
           </Link>
 
           <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
             <ArrowRightOnRectangleIcon className="h-4 w-4" />
-            Logout
+            Keluar
           </Link>
         </div>
       </nav>
@@ -106,7 +106,7 @@ export default function AdminSidebar() {
               className="sidebar-link w-full justify-start border border-white/10 bg-white/10 text-base font-semibold"
             >
               <ArrowRightOnRectangleIcon className="h-5 w-5" />
-              Logout
+              Keluar
             </Link>
           </div>
         </aside>

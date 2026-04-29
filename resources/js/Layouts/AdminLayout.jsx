@@ -19,9 +19,6 @@ export default function AdminLayout({ children, title }) {
               <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl">
                 {title}
               </h1>
-              <div className="text-sm font-semibold text-slate-600">
-                {auth?.user?.name ?? "Admin"}
-              </div>
             </div>
 
             <div className="flex-1 p-4 sm:p-6">{children}</div>

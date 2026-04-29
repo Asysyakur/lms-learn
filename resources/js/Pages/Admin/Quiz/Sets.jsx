@@ -9,10 +9,9 @@ export default function Sets({ sets }) {
   }
 
   return (
-    <AdminLayout title="Quiz">
+    <AdminLayout title="Kumpulan Kuis">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Quiz Sets</h2>
           <p className="text-sm text-slate-500">Pre-test dan post-test untuk siswa.</p>
         </div>
         <div className="flex gap-2">
@@ -46,7 +45,7 @@ export default function Sets({ sets }) {
 
               <div className="flex gap-2">
                 <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/quiz-sets/${set.id}/edit`}>
-                  Edit
+                  Ubah
                 </Link>
 
                 <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/quiz-questions?set_id=${set.id}`}>

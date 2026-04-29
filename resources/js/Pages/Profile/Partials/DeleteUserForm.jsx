@@ -67,13 +67,13 @@ export default function DeleteUserForm({ className = '' }) {
             <Modal show={confirmingUserDeletion} onClose={closeModal}>
                 <form onSubmit={deleteUser} className="p-6">
                     <h2 className="text-lg font-medium text-gray-900">
-                        Are you sure you want to delete your account?
+                        Apakah Anda yakin ingin menghapus akun Anda?
                     </h2>
 
                     <p className="mt-1 text-sm text-gray-600">
-                        Once your account is deleted, all of its resources and
-                        data will be permanently deleted. Please enter your
-                        password to confirm you would like to permanently delete
+                        Setelah akun Anda dihapus, semua sumber daya dan
+                        data akan dihapus secara permanen. Masukkan
+                        password Anda untuk mengkonfirmasi bahwa Anda ingin menghapus
                         your account.
                     </p>
 
@@ -106,11 +106,11 @@ export default function DeleteUserForm({ className = '' }) {
 
                     <div className="mt-6 flex justify-end">
                         <SecondaryButton onClick={closeModal}>
-                            Cancel
+                            Batal
                         </SecondaryButton>
 
                         <DangerButton className="ms-3" disabled={processing}>
-                            Delete Account
+                            Hapus Akun
                         </DangerButton>
                     </div>
                 </form>

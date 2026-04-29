@@ -19,7 +19,7 @@ export default function Edit({ meeting, defaultCourseId }) {
   }
 
   return (
-    <AdminLayout title="Edit Meeting">
+    <AdminLayout title="Ubah Pertemuan">
       <form onSubmit={submit} className="max-w-2xl rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <input type="hidden" value={data.course_id} onChange={(e) => setData("course_id", e.target.value)} />
 
@@ -79,7 +79,7 @@ export default function Edit({ meeting, defaultCourseId }) {
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">
-            Update
+            Perbarui
           </button>
           <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/meetings">
             Batal

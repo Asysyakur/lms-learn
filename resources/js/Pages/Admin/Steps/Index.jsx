@@ -57,7 +57,7 @@ export default function Index({ steps, meetingId }) {
 
                 <div className="flex gap-2">
                   <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/steps/${step.id}/edit`}>
-                    Edit
+                    Ubah
                   </Link>
                   <button className="rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50" type="button" onClick={() => destroy(step)}>
                     Hapus

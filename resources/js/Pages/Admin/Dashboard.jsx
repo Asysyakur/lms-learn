@@ -8,14 +8,14 @@ import {
 export default function Dashboard() {
   const items = [
     {
-      title: "Meetings",
+      title: "Pertemuan",
       href: "/admin/meetings",
       description: "Atur pertemuan dan step belajar.",
       icon: BookOpenIcon,
       color: "bg-emerald-600",
     },
     {
-      title: "Quiz",
+      title: "Kuis",
       href: "/admin/quiz-sets",
       description: "Kelola pre-test dan post-test.",
       icon: ClipboardDocumentListIcon,
@@ -24,7 +24,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <AdminLayout title="Dashboard">
+    <AdminLayout title="Dasbor">
       <div className="grid gap-4 md:grid-cols-3">
         {items.map((item) => {
           const Icon = item.icon;

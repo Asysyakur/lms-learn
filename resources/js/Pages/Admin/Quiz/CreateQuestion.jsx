@@ -15,7 +15,7 @@ export default function CreateQuestion({ sets, selected_set_id }) {
   }
 
   return (
-    <AdminLayout title="Tambah Question">
+    <AdminLayout title="Tambah Soal">
       <QuestionForm
         data={data}
         setData={setData}

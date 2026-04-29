@@ -17,7 +17,7 @@ export default function EditSet({ set }) {
   }
 
   return (
-    <AdminLayout title="Edit Quiz">
+    <AdminLayout title="Ubah Kuis">
       <form onSubmit={submit} className="max-w-2xl rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <label className="block text-sm font-semibold text-slate-700">Judul</label>
         <input
@@ -59,7 +59,7 @@ export default function EditSet({ set }) {
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">
-            Update
+            Perbarui
           </button>
           <Link className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/quiz-sets">
             Batal
