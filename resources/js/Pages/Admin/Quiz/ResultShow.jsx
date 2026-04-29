@@ -33,7 +33,56 @@ export default function ResultShow({ quizSet, attempts = [] }) {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="divide-y divide-slate-100 md:hidden">
+          {attempts.length === 0 ? (
+            <div className="p-5 text-center text-sm text-slate-500">
+              Belum ada siswa yang mengerjakan tes ini.
+            </div>
+          ) : (
+            attempts.map((attempt, index) => (
+              <div key={attempt.id} className="space-y-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      No {index + 1}
+                    </p>
+                    <p className="mt-1 break-words font-semibold text-slate-900">
+                      {attempt.student_name}
+                    </p>
+                    <p className="mt-1 break-all text-sm text-slate-600">
+                      {attempt.student_email || "-"}
+                    </p>
+                  </div>
+
+                  <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                    {attempt.percentage}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      Skor
+                    </p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {attempt.score}/{attempt.total_questions}
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-slate-50 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      Submit
+                    </p>
+                    <p className="mt-1 font-semibold text-slate-800">
+                      {attempt.submitted_at || "-"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="min-w-full divide-y divide-slate-200 text-sm">
             <thead className="bg-white">
               <tr>

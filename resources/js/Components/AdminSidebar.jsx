@@ -1,17 +1,21 @@
 import { Link, usePage } from "@inertiajs/react";
+import { useState } from "react";
 import {
   ArrowRightOnRectangleIcon,
+  Bars3Icon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
   ChartBarIcon,
   HomeIcon,
   UsersIcon,
   UserCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
 
 export default function AdminSidebar() {
   const { url, props } = usePage();
   const user = props.auth?.user;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menu = [
     { name: "Dasbor", href: "/admin", icon: HomeIcon },
@@ -24,39 +28,68 @@ export default function AdminSidebar() {
   return (
     <>
       <nav className="mobile-navbar md:hidden">
-        <div className="flex items-center gap-2 text-lg font-black tracking-wide text-white">
-          <BookOpenIcon className="h-5 w-5" />
-          <span>ADMIN</span>
+        <div className="mobile-navbar-row">
+          <div className="mobile-navbar-brand">
+            <BookOpenIcon className="h-5 w-5" />
+            <span>ADMIN</span>
+          </div>
+
+          <button
+            type="button"
+            className="mobile-menu-button"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? (
+              <XMarkIcon className="h-5 w-5" />
+            ) : (
+              <Bars3Icon className="h-5 w-5" />
+            )}
+          </button>
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto px-2">
-          {menu.map((item) => {
-            const Icon = item.icon;
-            const active =
-              item.href === "/admin" ? url === "/admin" : url.startsWith(item.href);
+        {mobileMenuOpen && (
+          <div className="mobile-nav-panel">
+            {menu.map((item) => {
+              const Icon = item.icon;
+              const active =
+                item.href === "/admin" ? url === "/admin" : url.startsWith(item.href);
 
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`mobile-nav-link ${active ? "mobile-nav-link-active" : ""}`}
-              >
-                <Icon className="h-4 w-4" />
-                {item.name}
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`mobile-nav-link ${active ? "mobile-nav-link-active" : ""}`}
+                >
+                  <Icon className="mobile-nav-icon" />
+                  <span>{item.name}</span>
+                </Link>
+              );
+            })}
 
-          <Link href={route('profile.edit')} className={`mobile-nav-link ${url === '/profile' ? 'mobile-nav-link-active' : ''}`}>
-            <UserCircleIcon className="h-4 w-4" />
-            Profil
-          </Link>
+            <Link
+              href={route('profile.edit')}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`mobile-nav-link ${url === '/profile' ? 'mobile-nav-link-active' : ''}`}
+            >
+              <UserCircleIcon className="mobile-nav-icon" />
+              <span>Profil</span>
+            </Link>
 
-          <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
-            <ArrowRightOnRectangleIcon className="h-4 w-4" />
-            Keluar
-          </Link>
-        </div>
+            <Link
+              href={route("logout")}
+              method="post"
+              as="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mobile-nav-link mobile-nav-logout"
+            >
+              <ArrowRightOnRectangleIcon className="mobile-nav-icon" />
+              <span>Keluar</span>
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div className="sidebar-column">

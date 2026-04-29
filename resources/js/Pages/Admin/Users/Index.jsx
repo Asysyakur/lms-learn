@@ -33,15 +33,26 @@ export default function Index({ users }) {
           users.map((user) => (
             <div key={user.id} className="grid gap-3 border-b border-slate-100 p-4 last:border-b-0 md:grid-cols-[1.1fr_1.2fr_100px_1.4fr_150px] md:items-center">
               <div>
+                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
+                  Nama
+                </p>
                 <p className="font-semibold text-slate-900">{user.name}</p>
                 {currentUser?.id === user.id && (
                   <p className="text-xs font-semibold text-blue-700">Akun kamu</p>
                 )}
               </div>
 
-              <div className="text-sm text-slate-600">{user.email}</div>
+              <div>
+                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
+                  Email
+                </p>
+                <p className="break-all text-sm text-slate-600">{user.email}</p>
+              </div>
 
               <div>
+                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
+                  Role
+                </p>
                 <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
                   user.role === "admin"
                     ? "bg-blue-100 text-blue-700"
@@ -52,6 +63,9 @@ export default function Index({ users }) {
               </div>
 
               <div className="space-y-1.5">
+                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
+                  Nilai Kuis
+                </p>
                 {user.quiz_attempts?.length > 0 ? (
                   user.quiz_attempts.map((attempt) => (
                     <div key={attempt.id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -68,8 +82,8 @@ export default function Index({ users }) {
                 )}
               </div>
 
-              <div className="flex gap-2 md:justify-end">
-                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/users/${user.id}/edit`}>
+              <div className="grid grid-cols-2 gap-2 md:flex md:justify-end">
+                <Link className="rounded-lg border border-slate-200 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/users/${user.id}/edit`}>
                   Ubah
                 </Link>
                 <button

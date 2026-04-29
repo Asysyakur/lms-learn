@@ -1,4 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
+import { useState } from "react";
 import {
   ArrowLeftIcon,
   ArrowPathIcon,
@@ -11,7 +12,9 @@ import {
   QuestionMarkCircleIcon,
   Squares2X2Icon,
   ArrowRightOnRectangleIcon,
+  Bars3Icon,
   UserCircleIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/solid";
 
 export default function Sidebar({
@@ -26,6 +29,7 @@ export default function Sidebar({
 }) {
   const { url, props } = usePage();
   const user = props.auth?.user;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const menu = [
     { name: "Beranda", href: "/beranda", icon: HomeIcon },
@@ -47,30 +51,55 @@ export default function Sidebar({
     <>
       {showMobileNav && (
         <nav className="mobile-navbar md:hidden">
-          <div className="flex items-center gap-2 text-lg font-black tracking-wide text-white">
-            <BookOpenIcon className="h-5 w-5" />
-            <span>LOGO</span>
+          <div className="mobile-navbar-row">
+            <div className="mobile-navbar-brand">
+              <BookOpenIcon className="h-5 w-5" />
+              <span>LOGO</span>
+            </div>
+
+            <button
+              type="button"
+              className="mobile-menu-button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={mobileMenuOpen ? "Tutup menu" : "Buka menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? (
+                <XMarkIcon className="h-5 w-5" />
+              ) : (
+                <Bars3Icon className="h-5 w-5" />
+              )}
+            </button>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto px-2">
-            {menu.map((item) => (
+          {mobileMenuOpen && (
+            <div className="mobile-nav-panel">
+              {menu.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`mobile-nav-link ${
+                    url.startsWith(item.href) ? "mobile-nav-link-active" : ""
+                  }`}
+                >
+                  <item.icon className="mobile-nav-icon" />
+                  <span>{item.name}</span>
+                </Link>
+              ))}
+
               <Link
-                key={item.name}
-                href={item.href}
-                className={`mobile-nav-link ${
-                  url.startsWith(item.href) ? "mobile-nav-link-active" : ""
-                }`}
+                href={route("logout")}
+                method="post"
+                as="button"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mobile-nav-link mobile-nav-logout"
               >
-                <item.icon className="h-4 w-4" />
-                {item.name}
+                <ArrowRightOnRectangleIcon className="mobile-nav-icon" />
+                <span>Keluar</span>
               </Link>
-            ))}
-
-            <Link href={route("logout")} method="post" as="button" className="mobile-nav-link mobile-nav-logout">
-              <ArrowRightOnRectangleIcon className="h-4 w-4" />
-              Keluar
-            </Link>
-          </div>
+            </div>
+          )}
         </nav>
       )}
 

@@ -15,17 +15,17 @@ export default function Results({ quizSets = [] }) {
           Belum ada kuis.
         </div>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {quizSets.map((quizSet) => (
             <Link
               key={quizSet.id}
               href={`/admin/quiz-results/${quizSet.id}`}
-              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
+              className="min-w-0 rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:shadow-md"
             >
               <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
                 {quizSet.quiz_type}
               </p>
-              <h2 className="mt-1 text-base font-bold text-slate-900">
+              <h2 className="mt-1 break-words text-base font-bold text-slate-900">
                 {quizSet.title}
               </h2>
               <p className="mt-2 text-sm font-semibold text-slate-500">
