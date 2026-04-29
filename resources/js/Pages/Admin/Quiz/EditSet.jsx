@@ -2,15 +2,18 @@ import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, useForm } from "@inertiajs/react";
 
 export default function EditSet({ set }) {
-  const { data, setData, put, processing } = useForm({
+  const { data, setData, post, processing } = useForm({
+    _method: "put",
     title: set.title ?? "",
     quiz_type: set.quiz_type ?? "pre-test",
     description: set.description ?? "",
+    cover_image: set.cover_image ?? "",
+    cover_image_file: null,
   });
 
   function submit(e) {
     e.preventDefault();
-    put(`/admin/quiz-sets/${set.id}`);
+    post(`/admin/quiz-sets/${set.id}`, { forceFormData: true });
   }
 
   return (
@@ -39,6 +42,20 @@ export default function EditSet({ set }) {
           value={data.description}
           onChange={(e) => setData("description", e.target.value)}
         />
+
+        <label className="mt-4 block text-sm font-semibold text-slate-700">Thumbnail</label>
+        {data.cover_image ? (
+          <img src={data.cover_image} alt={set.title} className="mt-2 h-28 w-full rounded-lg object-cover ring-1 ring-slate-200" />
+        ) : null}
+
+        <label className="mt-4 block text-sm font-semibold text-slate-700">Upload Thumbnail Baru</label>
+        <input
+          className="mt-1 w-full rounded-lg border-slate-300"
+          type="file"
+          accept="image/*"
+          onChange={(e) => setData("cover_image_file", e.target.files?.[0] ?? null)}
+        />
+        <p className="mt-1 text-xs text-slate-500">Upload baru akan mengganti thumbnail lama. Maksimal 2 MB.</p>
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">

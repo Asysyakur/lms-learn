@@ -1,4 +1,5 @@
 import AdminSidebar from "@/Components/AdminSidebar";
+import FlashToast from "@/Components/FlashToast";
 import { Head, usePage } from "@inertiajs/react";
 
 export default function AdminLayout({ children, title }) {
@@ -7,6 +8,7 @@ export default function AdminLayout({ children, title }) {
   return (
     <>
       <Head title={title} />
+      <FlashToast />
 
       <div className="flex min-h-screen flex-col md:flex-row">
         <AdminSidebar />

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -39,11 +40,18 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'role' => ['required', Rule::in(['admin', 'student'])],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user->update($validated);
+        $payload = Arr::except($validated, ['password']);
 
-        return redirect()->route('admin.users.index');
+        if ($request->filled('password')) {
+            $payload['password'] = $validated['password'];
+        }
+
+        $user->update($payload);
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil diperbarui.');
     }
 
     public function destroy(Request $request, User $user)
@@ -52,6 +60,6 @@ class UserController extends Controller
 
         $user->delete();
 
-        return back();
+        return back()->with('success', 'User berhasil dihapus.');
     }
 }

@@ -31,7 +31,6 @@ export default function Sidebar({
     { name: "Home", href: "/beranda", icon: HomeIcon },
     { name: "Kuis", href: "/kuis", icon: QuestionMarkCircleIcon },
     { name: "About", href: "/about", icon: Squares2X2Icon },
-    { name: "Profile", href: "/profile", icon: UserCircleIcon },
   ];
 
   const isCourseSidebar = variant === "progress";

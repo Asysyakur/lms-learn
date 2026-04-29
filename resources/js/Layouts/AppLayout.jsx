@@ -1,4 +1,5 @@
 import Sidebar from "@/Components/Sidebar";
+import FlashToast from "@/Components/FlashToast";
 import { Head } from "@inertiajs/react";
 
 export default function AppLayout({
@@ -12,6 +13,7 @@ export default function AppLayout({
     return (
         <>
             <Head title={title} />
+            <FlashToast />
             <div className="flex min-h-screen flex-col md:flex-row">
                 <Sidebar
                     showMobileNav={showMobileNav}

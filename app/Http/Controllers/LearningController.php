@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
 use App\Models\Meeting;
 use App\Models\MeetingStep;
 use App\Models\MeetingStepAsk;
@@ -22,29 +21,26 @@ class LearningController extends Controller
 {
     public function index()
     {
-        $course = Course::query()
-            ->with(['meetings.steps' => function ($query) {
+        $meetings = Meeting::query()
+            ->with(['steps' => function ($query) {
                 $query->orderBy('sort_order')->orderBy('step_number');
             }])
             ->where('is_active', true)
             ->orderBy('sort_order')
-            ->first();
-
-        $meetings = $course
-            ? $course->meetings->sortBy('sort_order')->values()->map(function (Meeting $meeting) {
+            ->get()
+            ->map(function (Meeting $meeting) {
                 return [
                     'id' => $meeting->id,
                     'title' => $meeting->title,
                     'description' => $meeting->description,
                     'meeting_number' => $meeting->meeting_number,
                     'step_count' => $meeting->steps->count(),
-                    'cover_image' => '/images/learning-card.svg',
+                    'cover_image' => $meeting->cover_image ?: '/images/learning-card.svg',
                 ];
-            })
-            : collect();
+            });
 
         return Inertia::render('Beranda', [
-            'course' => $course?->only(['id', 'title', 'slug', 'description']),
+            'title' => 'Pembelajaran OOP',
             'meetings' => $meetings,
         ]);
     }
@@ -63,7 +59,7 @@ class LearningController extends Controller
                     'slug' => $quizSet->slug,
                     'quiz_type' => $quizSet->quiz_type,
                     'description' => $quizSet->description,
-                    'image' => $quizSet->cover_image,
+                    'image' => $quizSet->cover_image ?: ($quizSet->quiz_type === 'pre-test' ? '/images/pretest-card.svg' : '/images/posttest-card.svg'),
                 ];
             });
 
@@ -88,7 +84,7 @@ class LearningController extends Controller
                 'slug' => $quizSet->slug,
                 'quiz_type' => $quizSet->quiz_type,
                 'description' => $quizSet->description,
-                'image' => $quizSet->cover_image,
+                'image' => $quizSet->cover_image ?: ($quizSet->quiz_type === 'pre-test' ? '/images/pretest-card.svg' : '/images/posttest-card.svg'),
             ],
             'questions' => $quizSet->questions->map(function ($question) {
                 return [
@@ -224,7 +220,7 @@ class LearningController extends Controller
 
         if ($responseType === 'practice' && ! $responsePayload) {
             $responsePayload = [
-                'mode' => $meetingStep->practice?->assessment_mode ?? 'quiz',
+                'mode' => $meetingStep->practice ? $meetingStep->practice->assessment_mode : 'quiz',
                 'answer' => $responseText,
             ];
         }
@@ -258,15 +254,22 @@ class LearningController extends Controller
             'desc' => $step->description,
         ];
 
-        return match ($step->step_type) {
-            'observe' => array_merge($base, $this->formatObservationStep($step->observation)),
-            'ask' => array_merge($base, $this->formatAskStep($step->ask)),
-            'exploration' => array_merge($base, $this->formatExplorationStep($step->exploration)),
-            'practice' => array_merge($base, $this->formatPracticeStep($step->practice)),
-            'review' => array_merge($base, $this->formatReviewStep($step->review)),
-            'reflection' => array_merge($base, $this->formatReflectionStep($step->reflection)),
-            default => $base,
-        };
+        switch ($step->step_type) {
+            case 'observe':
+                return array_merge($base, $this->formatObservationStep($step->observation));
+            case 'ask':
+                return array_merge($base, $this->formatAskStep($step->ask));
+            case 'exploration':
+                return array_merge($base, $this->formatExplorationStep($step->exploration));
+            case 'practice':
+                return array_merge($base, $this->formatPracticeStep($step->practice));
+            case 'review':
+                return array_merge($base, $this->formatReviewStep($step->review));
+            case 'reflection':
+                return array_merge($base, $this->formatReflectionStep($step->reflection));
+            default:
+                return $base;
+        }
     }
 
     private function completedStepCount(Meeting $meeting): int
@@ -299,48 +302,48 @@ class LearningController extends Controller
     private function formatObservationStep(?MeetingStepObservation $observation): array
     {
         return [
-            'instruction_text' => $observation?->instruction_text,
-            'resource_type' => $observation?->resource_type,
-            'resource_url' => $observation?->resource_url,
+            'instruction_text' => $observation ? $observation->instruction_text : null,
+            'resource_type' => $observation ? $observation->resource_type : null,
+            'resource_url' => $observation ? $observation->resource_url : null,
         ];
     }
 
     private function formatAskStep(?MeetingStepAsk $ask): array
     {
         return [
-            'question_prompt' => $ask?->question_prompt,
+            'question_prompt' => $ask ? $ask->question_prompt : null,
         ];
     }
 
     private function formatExplorationStep(?MeetingStepExploration $exploration): array
     {
         return [
-            'exploration_mode' => $exploration?->exploration_mode,
-            'code_language' => $exploration?->code_language,
-            'exploration_prompt' => $exploration?->exploration_prompt,
+            'exploration_mode' => $exploration ? $exploration->exploration_mode : null,
+            'code_language' => $exploration ? $exploration->code_language : null,
+            'exploration_prompt' => $exploration ? $exploration->exploration_prompt : null,
         ];
     }
 
     private function formatPracticeStep(?MeetingStepPractice $practice): array
     {
         return [
-            'assessment_mode' => $practice?->assessment_mode,
-            'assessment_question' => $practice?->assessment_question,
-            'assessment_options' => $practice?->assessment_options,
+            'assessment_mode' => $practice ? $practice->assessment_mode : null,
+            'assessment_question' => $practice ? $practice->assessment_question : null,
+            'assessment_options' => $practice ? $practice->assessment_options : null,
         ];
     }
 
     private function formatReviewStep(?MeetingStepReview $review): array
     {
         return [
-            'review_prompt' => $review?->review_prompt,
+            'review_prompt' => $review ? $review->review_prompt : null,
         ];
     }
 
     private function formatReflectionStep(?MeetingStepReflection $reflection): array
     {
         return [
-            'reflection_question' => $reflection?->reflection_question,
+            'reflection_question' => $reflection ? $reflection->reflection_question : null,
         ];
     }
 

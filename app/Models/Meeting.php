@@ -16,6 +16,7 @@ class Meeting extends Model
         'meeting_number',
         'title',
         'description',
+        'cover_image',
         'sort_order',
         'is_active',
     ];

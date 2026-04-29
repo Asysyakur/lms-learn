@@ -6,6 +6,8 @@ export default function Edit({ user }) {
     name: user.name ?? "",
     email: user.email ?? "",
     role: user.role ?? "student",
+    password: "",
+    password_confirmation: "",
   });
 
   function submit(e) {
@@ -43,6 +45,28 @@ export default function Edit({ user }) {
           <option value="admin">Admin</option>
         </select>
         {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
+
+        <div className="mt-4 rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
+          <h3 className="text-sm font-bold text-slate-800">Ubah Password</h3>
+          <p className="mt-1 text-xs leading-5 text-slate-500">Kosongkan jika password tidak ingin diubah.</p>
+
+          <label className="mt-3 block text-sm font-semibold text-slate-700">Password Baru</label>
+          <input
+            className="mt-1 w-full rounded-lg border-slate-300"
+            type="password"
+            value={data.password}
+            onChange={(e) => setData("password", e.target.value)}
+          />
+          {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+
+          <label className="mt-4 block text-sm font-semibold text-slate-700">Konfirmasi Password</label>
+          <input
+            className="mt-1 w-full rounded-lg border-slate-300"
+            type="password"
+            value={data.password_confirmation}
+            onChange={(e) => setData("password_confirmation", e.target.value)}
+          />
+        </div>
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">

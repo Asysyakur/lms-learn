@@ -23,9 +23,10 @@ export default function Kuis({ quizSets = [] }) {
     <AppLayout title="Kuis">
       <div className="grid gap-6 md:grid-cols-2">
         {quizzes.map((quiz) => (
-          <div
+          <Link
             key={quiz.label || quiz.slug}
-            className="overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))]"
+            href={route("kuis.show", { slug: quiz.slug })}
+            className="group overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))] transition hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="px-4 py-3 text-center text-lg font-bold text-white bg-[rgb(var(--color-primary-hover))]">
               {quiz.label || quiz.title}
@@ -44,14 +45,11 @@ export default function Kuis({ quizSets = [] }) {
                 {quiz.description}
               </p>
 
-              <Link
-                href={route("kuis.show", { slug: quiz.slug })}
-                className="btn-accent w-full rounded-full sm:max-w-sm"
-              >
-                Mulai
-              </Link>
+              <span className="btn-accent w-full rounded-full text-center sm:max-w-sm">
+                Buka {quiz.label || "Quiz"}
+              </span>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </AppLayout>

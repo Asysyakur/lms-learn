@@ -1,20 +1,12 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link } from "@inertiajs/react";
 import {
-  AcademicCapIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Dashboard() {
   const items = [
-    {
-      title: "Courses",
-      href: "/admin/courses",
-      description: "Kelola materi utama pembelajaran.",
-      icon: AcademicCapIcon,
-      color: "bg-blue-600",
-    },
     {
       title: "Meetings",
       href: "/admin/meetings",

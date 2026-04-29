@@ -37,10 +37,17 @@ export default function Sets({ sets }) {
         ) : (
           sets.map((set) => (
             <div key={set.id} className="flex flex-col gap-3 border-b border-slate-100 p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{set.quiz_type}</p>
-                <h3 className="mt-1 font-semibold text-slate-900">{set.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">{set.description || set.slug}</p>
+              <div className="flex items-center gap-3">
+                <img
+                  src={set.cover_image || (set.quiz_type === "pre-test" ? "/images/pretest-card.svg" : "/images/posttest-card.svg")}
+                  alt={set.title}
+                  className="h-16 w-24 rounded-lg object-cover ring-1 ring-slate-200"
+                />
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{set.quiz_type}</p>
+                  <h3 className="mt-1 font-semibold text-slate-900">{set.title}</h3>
+                  <p className="mt-1 text-sm text-slate-500">{set.description || set.slug}</p>
+                </div>
               </div>
 
               <div className="flex gap-2">

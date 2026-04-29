@@ -33,13 +33,20 @@ export default function Index({ meetings }) {
           meetings.map((meeting) => (
             <div key={meeting.id} className="rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
-                    Pertemuan {meeting.meeting_number} / {meeting.course?.title ?? "Course"}
-                  </p>
-                  <h3 className="mt-1 font-semibold text-slate-900">{meeting.title}</h3>
-                  <p className="mt-1 text-sm text-slate-500">{meeting.description}</p>
-                </div>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={meeting.cover_image || "/images/learning-card.svg"}
+                      alt={meeting.title}
+                      className="h-16 w-24 rounded-lg object-cover ring-1 ring-slate-200"
+                    />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
+                        Pertemuan {meeting.meeting_number}
+                      </p>
+                      <h3 className="mt-1 font-semibold text-slate-900">{meeting.title}</h3>
+                      <p className="mt-1 text-sm text-slate-500">{meeting.description}</p>
+                    </div>
+                  </div>
 
                 <div className="flex flex-wrap gap-2">
                   <Link className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" href={`/admin/meetings/${meeting.id}/steps`}>

@@ -1,6 +1,5 @@
 import { Link, usePage } from "@inertiajs/react";
 import {
-  AcademicCapIcon,
   ArrowRightOnRectangleIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
@@ -15,7 +14,6 @@ export default function AdminSidebar() {
 
   const menu = [
     { name: "Dashboard", href: "/admin", icon: HomeIcon },
-    { name: "Courses", href: "/admin/courses", icon: AcademicCapIcon },
     { name: "Meetings", href: "/admin/meetings", icon: BookOpenIcon },
     { name: "Quiz", href: "/admin/quiz-sets", icon: ClipboardDocumentListIcon },
     { name: "Users", href: "/admin/users", icon: UsersIcon },

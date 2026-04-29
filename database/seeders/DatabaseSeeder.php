@@ -71,6 +71,7 @@ class DatabaseSeeder extends Seeder
                 'meeting_number' => $blueprint['meeting_number'],
                 'title' => $blueprint['title'],
                 'description' => $blueprint['description'],
+                'cover_image' => '/images/learning-card.svg',
                 'sort_order' => $blueprint['meeting_number'],
                 'is_active' => true,
             ]);

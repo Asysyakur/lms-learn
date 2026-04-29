@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\MeetingController;
 use App\Http\Controllers\Admin\QuizQuestionController;
 use App\Http\Controllers\Admin\QuizSetController;
@@ -68,7 +67,6 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::get('/', fn () => Inertia::render('Admin/Dashboard'))->name('dashboard');
 
-        Route::resource('courses', CourseController::class)->except(['show']);
         Route::resource('meetings', MeetingController::class)->except(['show']);
         Route::resource('quiz-sets', QuizSetController::class)->except(['show']);
         Route::resource('quiz-questions', QuizQuestionController::class)->except(['show']);
