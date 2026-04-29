@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\MeetingController;
+use App\Http\Controllers\Admin\QuizAttemptController;
 use App\Http\Controllers\Admin\QuizQuestionController;
 use App\Http\Controllers\Admin\QuizSetController;
 use App\Http\Controllers\Admin\StepController;
@@ -33,6 +34,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/kuis', [LearningController::class, 'quizIndex'])->name('kuis');
     Route::get('/kuis/{slug}', [LearningController::class, 'quizShow'])->name('kuis.show');
+    Route::post('/kuis/{slug}', [LearningController::class, 'submitQuiz'])->name('kuis.submit');
 
     Route::get('/pertemuan/{id}', [LearningController::class, 'meetingShow'])->name('pertemuan');
 
@@ -70,6 +72,8 @@ Route::middleware(['auth', 'admin'])
         Route::resource('meetings', MeetingController::class)->except(['show']);
         Route::resource('quiz-sets', QuizSetController::class)->except(['show']);
         Route::resource('quiz-questions', QuizQuestionController::class)->except(['show']);
+        Route::get('quiz-results', [QuizAttemptController::class, 'index'])->name('quiz-results.index');
+        Route::get('quiz-results/{quizSet}', [QuizAttemptController::class, 'show'])->name('quiz-results.show');
         Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
 
         Route::get('meetings/{meeting}/steps', [StepController::class, 'index'])

@@ -45,9 +45,20 @@ export default function Kuis({ quizSets = [] }) {
                 {quiz.description}
               </p>
 
-              <span className="btn-accent w-full rounded-full text-center sm:max-w-sm">
-                Buka {quiz.label || "Quiz"}
-              </span>
+              {quiz.attempt ? (
+                <div className="w-full rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-center sm:max-w-sm">
+                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-700">
+                    Sudah dikerjakan
+                  </p>
+                  <p className="mt-1 text-lg font-black text-emerald-800">
+                    Nilai: {quiz.attempt.percentage} ({quiz.attempt.score}/{quiz.attempt.total_questions})
+                  </p>
+                </div>
+              ) : (
+                <span className="btn-accent w-full rounded-full text-center sm:max-w-sm">
+                  Buka {quiz.label || "Quiz"}
+                </span>
+              )}
             </div>
           </Link>
         ))}

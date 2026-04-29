@@ -10,17 +10,20 @@ export default function Index({ users }) {
     }
   }
 
+  const formatScore = (attempt) => `${attempt.percentage} (${attempt.score}/${attempt.total_questions})`;
+
   return (
     <AdminLayout title="Pengguna">
       <div className="mb-4">
-        <p className="text-sm text-slate-500">Daftar akun dan role akses admin.</p>
+        <p className="text-sm text-slate-500">Daftar akun, role akses, dan nilai kuis siswa.</p>
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
-        <div className="hidden grid-cols-[1.2fr_1.4fr_120px_160px] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
+        <div className="hidden grid-cols-[1.1fr_1.2fr_100px_1.4fr_150px] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
           <div>Nama</div>
           <div>Email</div>
           <div>Role</div>
+          <div>Nilai Kuis</div>
           <div className="text-right">Aksi</div>
         </div>
 
@@ -28,7 +31,7 @@ export default function Index({ users }) {
           <div className="p-6 text-sm text-slate-500">Belum ada user.</div>
         ) : (
           users.map((user) => (
-            <div key={user.id} className="grid gap-3 border-b border-slate-100 p-4 last:border-b-0 md:grid-cols-[1.2fr_1.4fr_120px_160px] md:items-center">
+            <div key={user.id} className="grid gap-3 border-b border-slate-100 p-4 last:border-b-0 md:grid-cols-[1.1fr_1.2fr_100px_1.4fr_150px] md:items-center">
               <div>
                 <p className="font-semibold text-slate-900">{user.name}</p>
                 {currentUser?.id === user.id && (
@@ -46,6 +49,23 @@ export default function Index({ users }) {
                 }`}>
                   {user.role}
                 </span>
+              </div>
+
+              <div className="space-y-1.5">
+                {user.quiz_attempts?.length > 0 ? (
+                  user.quiz_attempts.map((attempt) => (
+                    <div key={attempt.id} className="flex flex-wrap items-center gap-2 text-sm">
+                      <span className="font-semibold text-slate-700">
+                        {attempt.quiz_title}
+                      </span>
+                      <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                        {formatScore(attempt)}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <span className="text-sm text-slate-400">Belum mengerjakan kuis</span>
+                )}
               </div>
 
               <div className="flex gap-2 md:justify-end">

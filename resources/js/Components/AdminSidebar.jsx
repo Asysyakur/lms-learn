@@ -3,6 +3,7 @@ import {
   ArrowRightOnRectangleIcon,
   BookOpenIcon,
   ClipboardDocumentListIcon,
+  ChartBarIcon,
   HomeIcon,
   UsersIcon,
   UserCircleIcon,
@@ -16,6 +17,7 @@ export default function AdminSidebar() {
     { name: "Dasbor", href: "/admin", icon: HomeIcon },
     { name: "Pertemuan", href: "/admin/meetings", icon: BookOpenIcon },
     { name: "Kuis", href: "/admin/quiz-sets", icon: ClipboardDocumentListIcon },
+    { name: "Hasil Kuis", href: "/admin/quiz-results", icon: ChartBarIcon },
     { name: "Pengguna", href: "/admin/users", icon: UsersIcon },
   ];
 

@@ -12,6 +12,7 @@ use App\Models\MeetingStepPractice;
 use App\Models\MeetingStepReflection;
 use App\Models\MeetingStepResponse;
 use App\Models\MeetingStepReview;
+use App\Models\QuizAttempt;
 use App\Models\QuizSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,11 +48,18 @@ class LearningController extends Controller
 
     public function quizIndex()
     {
+        $attempts = QuizAttempt::query()
+            ->where('user_id', Auth::id())
+            ->get()
+            ->keyBy('quiz_set_id');
+
         $quizSets = QuizSet::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get()
-            ->map(function (QuizSet $quizSet) {
+            ->map(function (QuizSet $quizSet) use ($attempts) {
+                $attempt = $attempts->get($quizSet->id);
+
                 return [
                     'id' => $quizSet->id,
                     'title' => $quizSet->title,
@@ -60,6 +68,7 @@ class LearningController extends Controller
                     'quiz_type' => $quizSet->quiz_type,
                     'description' => $quizSet->description,
                     'image' => $quizSet->cover_image ?: ($quizSet->quiz_type === 'pre-test' ? '/images/pretest-card.svg' : '/images/posttest-card.svg'),
+                    'attempt' => $attempt ? $this->formatQuizAttempt($attempt) : null,
                 ];
             });
 
@@ -77,6 +86,11 @@ class LearningController extends Controller
             }])
             ->firstOrFail();
 
+        $attempt = QuizAttempt::query()
+            ->where('quiz_set_id', $quizSet->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
         return Inertia::render('Kuis/Show', [
             'quizSet' => [
                 'id' => $quizSet->id,
@@ -91,10 +105,57 @@ class LearningController extends Controller
                     'id' => $question->id,
                     'question_text' => $question->question_text,
                     'options' => $question->options,
-                    'correct_option' => $question->correct_option,
                 ];
             })->values(),
+            'attempt' => $attempt ? $this->formatQuizAttempt($attempt) : null,
         ]);
+    }
+
+    public function submitQuiz(Request $request, string $slug)
+    {
+        $quizSet = QuizSet::query()
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->with(['questions' => function ($query) {
+                $query->orderBy('sort_order');
+            }])
+            ->firstOrFail();
+
+        $existingAttempt = QuizAttempt::query()
+            ->where('quiz_set_id', $quizSet->id)
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($existingAttempt) {
+            return back()->with('error', 'Kuis ini sudah pernah dikerjakan. Setiap user hanya bisa mengerjakan satu kali.');
+        }
+
+        $validated = $request->validate([
+            'answers' => ['required', 'array'],
+            'answers.*' => ['nullable', 'string', 'max:5'],
+        ]);
+
+        $answers = $validated['answers'];
+        $score = $quizSet->questions->reduce(function (int $result, $question) use ($answers) {
+            $selectedAnswer = $answers[$question->id] ?? null;
+
+            return $selectedAnswer === $question->correct_option ? $result + 1 : $result;
+        }, 0);
+        $totalQuestions = $quizSet->questions->count();
+        $percentage = $totalQuestions > 0 ? round(($score / $totalQuestions) * 100, 2) : 0;
+
+        QuizAttempt::create([
+            'quiz_set_id' => $quizSet->id,
+            'user_id' => Auth::id(),
+            'answers' => $answers,
+            'score' => $score,
+            'total_questions' => $totalQuestions,
+            'percentage' => $percentage,
+            'submitted_at' => now(),
+        ]);
+
+        return redirect()->route('kuis')
+            ->with('success', 'Jawaban kuis berhasil disimpan.');
     }
 
     public function meetingShow(string $id)
@@ -359,5 +420,17 @@ class LearningController extends Controller
                 'completed_at' => now(),
             ]
         );
+    }
+
+    private function formatQuizAttempt(QuizAttempt $attempt): array
+    {
+        return [
+            'id' => $attempt->id,
+            'answers' => $attempt->answers,
+            'score' => $attempt->score,
+            'total_questions' => $attempt->total_questions,
+            'percentage' => (float) $attempt->percentage,
+            'submitted_at' => optional($attempt->submitted_at)->toISOString(),
+        ];
     }
 }

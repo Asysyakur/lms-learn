@@ -13,10 +13,36 @@ class UserController extends Controller
 {
     public function index()
     {
+        $users = User::query()
+            ->with(['quizAttempts.quizSet'])
+            ->latest()
+            ->get(['id', 'name', 'email', 'role', 'created_at'])
+            ->map(function (User $user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                    'created_at' => $user->created_at,
+                    'quiz_attempts' => $user->quizAttempts
+                        ->sortBy(fn ($attempt) => $attempt->quizSet?->sort_order ?? 0)
+                        ->map(function ($attempt) {
+                            return [
+                                'id' => $attempt->id,
+                                'quiz_title' => $attempt->quizSet?->title ?? 'Quiz',
+                                'quiz_type' => $attempt->quizSet?->quiz_type,
+                                'score' => $attempt->score,
+                                'total_questions' => $attempt->total_questions,
+                                'percentage' => (float) $attempt->percentage,
+                                'submitted_at' => optional($attempt->submitted_at)->toISOString(),
+                            ];
+                        })
+                        ->values(),
+                ];
+            });
+
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::query()
-                ->latest()
-                ->get(['id', 'name', 'email', 'role', 'created_at']),
+            'users' => $users,
         ]);
     }
 

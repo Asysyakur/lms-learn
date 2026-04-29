@@ -1,5 +1,5 @@
 import AppLayout from "@/Layouts/AppLayout";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import { useEffect, useMemo, useState } from "react";
 import {
     ChevronLeftIcon,
@@ -12,11 +12,11 @@ import {
 const optionLabels = ["A", "B", "C", "D"];
 const DEFAULT_TIME_SECONDS = 45 * 60;
 
-export default function QuizShow({ quizSet, questions = [] }) {
+export default function QuizShow({ quizSet, questions = [], attempt = null }) {
     const [answers, setAnswers] = useState({});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [submitted, setSubmitted] = useState(false);
-    const [score, setScore] = useState(0);
+    const [submitted, setSubmitted] = useState(Boolean(attempt));
+    const [processing, setProcessing] = useState(false);
     const [remainingSeconds, setRemainingSeconds] =
         useState(DEFAULT_TIME_SECONDS);
 
@@ -58,18 +58,20 @@ export default function QuizShow({ quizSet, questions = [] }) {
     };
 
     const submitQuiz = () => {
-        const totalScore = questions.reduce((result, question) => {
-            const selectedAnswer = answers[question.id];
+        if (submitted || processing) {
+            return;
+        }
 
-            if (selectedAnswer === question.correct_option) {
-                return result + 1;
-            }
-
-            return result;
-        }, 0);
-
-        setScore(totalScore);
-        setSubmitted(true);
+        router.post(
+            route("kuis.submit", { slug: quizSet.slug }),
+            { answers },
+            {
+                preserveScroll: true,
+                onStart: () => setProcessing(true),
+                onSuccess: () => setSubmitted(true),
+                onFinish: () => setProcessing(false),
+            },
+        );
     };
 
     const goToPrevious = () => {
@@ -101,10 +103,16 @@ export default function QuizShow({ quizSet, questions = [] }) {
                         </p>
                     </div>
 
-                    <div className="inline-flex items-center gap-2 self-start rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-semibold text-red-600 shadow-sm">
-                        <ClockIcon className="h-5 w-5" />
+                    <div className={`inline-flex items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm ${submitted ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-600"}`}>
+                        {submitted ? (
+                            <CheckCircleIcon className="h-5 w-5" />
+                        ) : (
+                            <ClockIcon className="h-5 w-5" />
+                        )}
                         <span>
-                            Waktu tersisa: {formatTime(remainingSeconds)}
+                            {submitted
+                                ? "Kuis sudah dikerjakan"
+                                : `Waktu tersisa: ${formatTime(remainingSeconds)}`}
                         </span>
                     </div>
                 </div>
@@ -187,6 +195,7 @@ export default function QuizShow({ quizSet, questions = [] }) {
                                                             type="radio"
                                                             name={`question-${currentQuestion.id}`}
                                                             checked={isSelected}
+                                                            disabled={submitted}
                                                             onChange={() =>
                                                                 setAnswers(
                                                                     (
@@ -283,18 +292,21 @@ export default function QuizShow({ quizSet, questions = [] }) {
                             })}
                         </div>
 
-                        {submitted ? (
+                        {attempt ? (
                             <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 shadow-sm">
                                 <div>
                                     <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--color-primary))]">
-                                        Hasil sementara
+                                        Hasil kuis
                                     </div>
                                     <p className="mt-1 text-base font-black text-slate-900">
-                                        Skor kamu: {score}/{totalQuestions}
+                                        Nilai kamu: {attempt.percentage}
+                                    </p>
+                                    <p className="mt-1 text-sm font-semibold text-slate-600">
+                                        Benar {attempt.score}/{attempt.total_questions} soal
                                     </p>
                                 </div>
                                 <p className="mt-2 text-xs leading-5 text-slate-600">
-                                    Kamu bisa cek lagi nomor soal sebelum kirim ulang.
+                                    Kuis ini hanya bisa dikerjakan satu kali.
                                 </p>
                             </div>
                         ) : null}
@@ -311,8 +323,9 @@ export default function QuizShow({ quizSet, questions = [] }) {
                                 type="button"
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[rgb(var(--color-primary))] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40 hover:bg-[rgb(var(--color-primary-hover))]"
                                 onClick={submitQuiz}
+                                disabled={submitted || processing || totalQuestions === 0}
                             >
-                                Submit Jawaban
+                                {processing ? "Menyimpan..." : submitted ? "Sudah Submit" : "Submit Jawaban"}
                             </button>
                         </div>
                     </aside>

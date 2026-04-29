@@ -1,0 +1,100 @@
+import AdminLayout from "@/Layouts/AdminLayout";
+import { Link } from "@inertiajs/react";
+
+export default function ResultShow({ quizSet, attempts = [] }) {
+  return (
+    <AdminLayout title={`Hasil ${quizSet.title}`}>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
+            {quizSet.quiz_type}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            Tabel hasil siswa untuk tes ini.
+          </p>
+        </div>
+
+        <Link
+          href="/admin/quiz-results"
+          className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+          Kembali
+        </Link>
+      </div>
+
+      <section className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
+        <div className="flex flex-col gap-1 border-b border-slate-200 bg-slate-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="text-base font-bold text-slate-900">
+            {quizSet.title}
+          </h2>
+
+          <span className="text-sm font-semibold text-slate-500">
+            {attempts.length} siswa
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-slate-200 text-sm">
+            <thead className="bg-white">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  No
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Nama Siswa
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Email
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Skor
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Nilai
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Waktu Submit
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {attempts.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-4 py-5 text-center text-slate-500">
+                    Belum ada siswa yang mengerjakan tes ini.
+                  </td>
+                </tr>
+              ) : (
+                attempts.map((attempt, index) => (
+                  <tr key={attempt.id} className="hover:bg-slate-50">
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                      {index + 1}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 font-semibold text-slate-900">
+                      {attempt.student_name}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+                      {attempt.student_email || "-"}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-700">
+                      {attempt.score}/{attempt.total_questions}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                        {attempt.percentage}
+                      </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-500">
+                      {attempt.submitted_at || "-"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </AdminLayout>
+  );
+}
