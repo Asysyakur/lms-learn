@@ -382,6 +382,9 @@ class LearningController extends Controller
             'exploration_mode' => $exploration ? $exploration->exploration_mode : null,
             'code_language' => $exploration ? $exploration->code_language : null,
             'exploration_prompt' => $exploration ? $exploration->exploration_prompt : null,
+            'exploration_pdf_url' => $exploration ? $exploration->exploration_pdf_url : null,
+            'materials' => $exploration ? $exploration->materials : [],
+            'case_studies' => $exploration ? $exploration->case_studies : [],
         ];
     }
 

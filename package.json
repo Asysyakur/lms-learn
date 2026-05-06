@@ -23,6 +23,9 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
-        "@heroicons/react": "^2.2.0"
+        "@heroicons/react": "^2.2.0",
+        "prism-themes": "^1.9.0",
+        "prismjs": "^1.30.0",
+        "shiki": "^4.0.2"
     }
 }

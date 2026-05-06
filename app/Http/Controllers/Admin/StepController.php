@@ -37,6 +37,8 @@ class StepController extends Controller
             'step_number' => 'required|numeric',
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
+            'materials' => 'nullable',
+            'case_studies' => 'nullable',
         ]);
 
         $step = MeetingStep::create($request->only([
@@ -74,6 +76,8 @@ class StepController extends Controller
             'step_number' => 'required|numeric',
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
+            'materials' => 'nullable',
+            'case_studies' => 'nullable',
         ]);
 
         $step->update([
@@ -132,6 +136,25 @@ class StepController extends Controller
                     $explorationData['code_language'] = $request->exploration_mode === 'code_compile'
                         ? ($request->code_language ?: 'javascript')
                         : null;
+                }
+
+                // Accept materials / case studies as array or JSON string
+                if (Schema::hasColumn('meeting_step_explorations', 'materials') && $request->filled('materials')) {
+                    $materials = $request->materials;
+                    if (is_string($materials)) {
+                        $decoded = json_decode($materials, true);
+                        $materials = $decoded === null ? null : $decoded;
+                    }
+                    $explorationData['materials'] = $materials;
+                }
+
+                if (Schema::hasColumn('meeting_step_explorations', 'case_studies') && $request->filled('case_studies')) {
+                    $cases = $request->case_studies;
+                    if (is_string($cases)) {
+                        $decoded = json_decode($cases, true);
+                        $cases = $decoded === null ? null : $decoded;
+                    }
+                    $explorationData['case_studies'] = $cases;
                 }
 
                 $step->exploration()->updateOrCreate(

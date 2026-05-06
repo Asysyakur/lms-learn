@@ -15,6 +15,13 @@ class MeetingStepExploration extends Model
         'exploration_mode',
         'code_language',
         'exploration_prompt',
+        'materials',
+        'case_studies',
+    ];
+
+    protected $casts = [
+        'materials' => 'array',
+        'case_studies' => 'array',
     ];
 
     public function meetingStep(): BelongsTo
