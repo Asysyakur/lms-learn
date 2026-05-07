@@ -12,9 +12,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('meeting_step_id')->constrained()->cascadeOnDelete();
             $table->text('question_prompt')->nullable();
+            $table->integer('order')->default(1);
             $table->timestamps();
 
-            $table->unique('meeting_step_id');
+            $table->index('meeting_step_id');
         });
     }
 

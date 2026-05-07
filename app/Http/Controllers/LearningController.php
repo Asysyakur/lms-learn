@@ -5,13 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Meeting;
 use App\Models\MeetingStep;
 use App\Models\MeetingStepAsk;
+use App\Models\MeetingStepAskResponse;
 use App\Models\MeetingStepCompletion;
 use App\Models\MeetingStepExploration;
+use App\Models\MeetingStepExplorationResponse;
 use App\Models\MeetingStepObservation;
+use App\Models\MeetingStepObservationResponse;
 use App\Models\MeetingStepPractice;
+use App\Models\MeetingStepPracticeResponse;
 use App\Models\MeetingStepReflection;
-use App\Models\MeetingStepResponse;
+use App\Models\MeetingStepReflectionResponse;
 use App\Models\MeetingStepReview;
+use App\Models\MeetingStepReviewResponse;
 use App\Models\QuizAttempt;
 use App\Models\QuizSet;
 use Illuminate\Http\Request;
@@ -166,7 +171,7 @@ class LearningController extends Controller
                     $query->orderBy('step_number');
                 },
                 'steps.observation',
-                'steps.ask',
+                'steps.asks',
                 'steps.exploration',
                 'steps.practice',
                 'steps.review',
@@ -200,7 +205,7 @@ class LearningController extends Controller
                     $query->orderBy('step_number');
                 },
                 'steps.observation',
-                'steps.ask',
+                'steps.asks',
                 'steps.exploration',
                 'steps.practice',
                 'steps.review',
@@ -273,32 +278,81 @@ class LearningController extends Controller
         $validated = $request->validate([
             'response_text' => ['nullable', 'string'],
             'response_payload' => ['nullable', 'array'],
+            'ask_id' => ['nullable', 'integer'],
         ]);
 
-        $responseType = $meetingStep->step_type;
         $responseText = $validated['response_text'] ?? null;
         $responsePayload = $validated['response_payload'] ?? null;
+        $askId = $validated['ask_id'] ?? null;
+        $stepType = $meetingStep->step_type;
+        $userId = Auth::id();
 
-        if ($responseType === 'practice' && ! $responsePayload) {
-            $responsePayload = [
-                'mode' => $meetingStep->practice ? $meetingStep->practice->assessment_mode : 'quiz',
-                'answer' => $responseText,
-            ];
+        // Route to appropriate response model based on step type
+        if ($stepType === 'observe') {
+            MeetingStepObservationResponse::query()->updateOrCreate(
+                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'observation_text' => $responseText,
+                    'observation_payload' => $responsePayload,
+                    'observed_at' => now(),
+                ]
+            );
+        } elseif ($stepType === 'ask' && $askId) {
+            MeetingStepAskResponse::query()->updateOrCreate(
+                ['meeting_step_ask_id' => $askId, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'meeting_step_id' => $meetingStep->id,
+                    'answer_text' => $responseText,
+                    'answer_payload' => $responsePayload,
+                    'answered_at' => now(),
+                ]
+            );
+        } elseif ($stepType === 'exploration') {
+            MeetingStepExplorationResponse::query()->updateOrCreate(
+                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'exploration_text' => $responseText,
+                    'exploration_payload' => $responsePayload,
+                    'explored_at' => now(),
+                ]
+            );
+        } elseif ($stepType === 'practice') {
+            MeetingStepPracticeResponse::query()->updateOrCreate(
+                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'practice_text' => $responseText,
+                    'practice_payload' => $responsePayload ?? [
+                        'mode' => $meetingStep->practice?->assessment_mode ?? 'quiz',
+                        'answer' => $responseText,
+                    ],
+                    'practiced_at' => now(),
+                ]
+            );
+        } elseif ($stepType === 'review') {
+            MeetingStepReviewResponse::query()->updateOrCreate(
+                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'review_text' => $responseText,
+                    'review_payload' => $responsePayload,
+                    'reviewed_at' => now(),
+                ]
+            );
+        } elseif ($stepType === 'reflection') {
+            MeetingStepReflectionResponse::query()->updateOrCreate(
+                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_id' => $meeting->id,
+                    'reflection_text' => $responseText,
+                    'reflection_payload' => $responsePayload,
+                    'reflected_at' => now(),
+                ]
+            );
         }
-
-        MeetingStepResponse::query()->updateOrCreate(
-            [
-                'meeting_id' => $meeting->id,
-                'meeting_step_id' => $meetingStep->id,
-                'user_id' => Auth::id(),
-                'response_type' => $responseType,
-            ],
-            [
-                'response_text' => $responseText,
-                'response_payload' => $responsePayload,
-                'completed_at' => now(),
-            ]
-        );
 
         $this->markStepCompleted($meeting->id, $step);
 
@@ -319,7 +373,7 @@ class LearningController extends Controller
             case 'observe':
                 return array_merge($base, $this->formatObservationStep($step->observation));
             case 'ask':
-                return array_merge($base, $this->formatAskStep($step->ask));
+                return array_merge($base, $this->formatAskStep($step));
             case 'exploration':
                 return array_merge($base, $this->formatExplorationStep($step->exploration));
             case 'practice':
@@ -343,21 +397,108 @@ class LearningController extends Controller
 
     private function savedResponsesForMeeting(Meeting $meeting): array
     {
-        return MeetingStepResponse::query()
+        $userId = Auth::id();
+        $responses = [];
+
+        // Fetch all response types
+        $observationResponses = MeetingStepObservationResponse::query()
             ->where('meeting_id', $meeting->id)
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
             ->with('meetingStep')
-            ->get()
-            ->mapWithKeys(function (MeetingStepResponse $response) {
-                return [
-                    $response->meetingStep->step_number => [
-                        'response_type' => $response->response_type,
-                        'response_text' => $response->response_text,
-                        'response_payload' => $response->response_payload,
-                    ],
-                ];
-            })
-            ->all();
+            ->get();
+
+        $askResponses = MeetingStepAskResponse::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', $userId)
+            ->with(['meetingStep', 'ask'])
+            ->get();
+
+        $explorationResponses = MeetingStepExplorationResponse::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', $userId)
+            ->with('meetingStep')
+            ->get();
+
+        $practiceResponses = MeetingStepPracticeResponse::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', $userId)
+            ->with('meetingStep')
+            ->get();
+
+        $reviewResponses = MeetingStepReviewResponse::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', $userId)
+            ->with('meetingStep')
+            ->get();
+
+        $reflectionResponses = MeetingStepReflectionResponse::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', $userId)
+            ->with('meetingStep')
+            ->get();
+
+        // Map observation responses
+        foreach ($observationResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            $responses[$stepNumber] = [
+                'response_text' => $response->observation_text,
+                'response_payload' => $response->observation_payload,
+            ];
+        }
+
+        // Map ask responses (can be multiple per step)
+        foreach ($askResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            if (!isset($responses[$stepNumber])) {
+                $responses[$stepNumber] = [];
+            }
+            if (!isset($responses[$stepNumber]['ask_responses'])) {
+                $responses[$stepNumber]['ask_responses'] = [];
+            }
+            $responses[$stepNumber]['ask_responses'][] = [
+                'ask_id' => $response->meeting_step_ask_id,
+                'answer_text' => $response->answer_text,
+                'answer_payload' => $response->answer_payload,
+            ];
+        }
+
+        // Map exploration responses
+        foreach ($explorationResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            $responses[$stepNumber] = [
+                'response_text' => $response->exploration_text,
+                'response_payload' => $response->exploration_payload,
+            ];
+        }
+
+        // Map practice responses
+        foreach ($practiceResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            $responses[$stepNumber] = [
+                'response_text' => $response->practice_text,
+                'response_payload' => $response->practice_payload,
+            ];
+        }
+
+        // Map review responses
+        foreach ($reviewResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            $responses[$stepNumber] = [
+                'response_text' => $response->review_text,
+                'response_payload' => $response->review_payload,
+            ];
+        }
+
+        // Map reflection responses
+        foreach ($reflectionResponses as $response) {
+            $stepNumber = $response->meetingStep->step_number;
+            $responses[$stepNumber] = [
+                'response_text' => $response->reflection_text,
+                'response_payload' => $response->reflection_payload,
+            ];
+        }
+
+        return $responses;
     }
 
     private function formatObservationStep(?MeetingStepObservation $observation): array
@@ -369,10 +510,22 @@ class LearningController extends Controller
         ];
     }
 
-    private function formatAskStep(?MeetingStepAsk $ask): array
+    private function formatAskStep(?MeetingStep $step): array
     {
+        if (!$step) {
+            return ['questions' => []];
+        }
+        
+        $asks = $step->asks()->orderBy('order')->get();
+        
         return [
-            'question_prompt' => $ask ? $ask->question_prompt : null,
+            'questions' => $asks->map(function ($question) {
+                return [
+                    'id' => $question->id,
+                    'question_prompt' => $question->question_prompt,
+                    'order' => $question->order,
+                ];
+            })->values()->toArray(),
         ];
     }
 

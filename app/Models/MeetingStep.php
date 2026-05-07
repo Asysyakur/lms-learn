@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MeetingStep extends Model
 {
@@ -38,9 +39,9 @@ class MeetingStep extends Model
         return $this->hasOne(MeetingStepObservation::class);
     }
 
-    public function ask(): HasOne
+    public function asks(): HasMany
     {
-        return $this->hasOne(MeetingStepAsk::class);
+        return $this->hasMany(MeetingStepAsk::class)->orderBy('order');
     }
 
     public function exploration(): HasOne
@@ -61,5 +62,35 @@ class MeetingStep extends Model
     public function reflection(): HasOne
     {
         return $this->hasOne(MeetingStepReflection::class);
+    }
+
+    public function observationResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepObservationResponse::class);
+    }
+
+    public function askResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepAskResponse::class);
+    }
+
+    public function explorationResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepExplorationResponse::class);
+    }
+
+    public function practiceResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepPracticeResponse::class);
+    }
+
+    public function reviewResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepReviewResponse::class);
+    }
+
+    public function reflectionResponses(): HasMany
+    {
+        return $this->hasMany(MeetingStepReflectionResponse::class);
     }
 }

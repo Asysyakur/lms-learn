@@ -74,6 +74,23 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
     const [draggedBlock, setDraggedBlock] = useState(null);
     const [dragOverBlock, setDragOverBlock] = useState(null);
     const [expandedMaterials, setExpandedMaterials] = useState({});
+    const [questions, setQuestions] = useState(
+        Array.isArray(step?.asks) && step.asks.length > 0
+            ? step.asks.map((ask) => ({
+                  id: ask.id || null,
+                  question_prompt: ask.question_prompt || "",
+                  order: ask.order || 0,
+              }))
+            : step?.ask?.question_prompt
+              ? [
+                    {
+                      id: step.ask.id || null,
+                      question_prompt: step.ask.question_prompt,
+                      order: 1,
+                    },
+                ]
+              : [],
+    );
     const materialTextRefs = useRef({});
     const materialSelectionRefs = useRef({});
     const materialUndoRefs = useRef({});
@@ -88,6 +105,7 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
             resource_type: step?.observation?.resource_type ?? "video",
             resource_url: step?.observation?.resource_url ?? "",
             question_prompt: step?.ask?.question_prompt ?? "",
+            questions: [],
             code_language: step?.exploration?.code_language ?? "javascript",
             exploration_prompt: step?.exploration?.exploration_prompt ?? "",
             materials: Array.isArray(step?.exploration?.materials)
@@ -343,9 +361,18 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
     function submit(e) {
         e.preventDefault();
 
+        // For ask type, convert questions array to form data
+        let submitData = { ...data };
+        if (data.step_type === "ask" && questions.length > 0) {
+            submitData = {
+                ...data,
+                questions: questions,
+            };
+        }
+
         if (isEdit) {
             transform((formData) => {
-                const out = { ...formData, _method: "put" };
+                const out = { ...formData, ...submitData, _method: "put" };
                 return out;
             });
             post(`/admin/steps/${step.id}`, { forceFormData: true });
@@ -353,7 +380,7 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
         }
 
         transform((formData) => {
-            const out = { ...formData };
+            const out = { ...formData, ...submitData };
             return out;
         });
 
@@ -487,17 +514,81 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                 )}
 
                 {data.step_type === "ask" && (
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700">
-                            Prompt Pertanyaan
-                        </label>
-                        <textarea
-                            className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                            value={data.question_prompt}
-                            onChange={(e) =>
-                                setData("question_prompt", e.target.value)
-                            }
-                        />
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <label className="block text-sm font-semibold text-slate-700">
+                                Daftar Pertanyaan
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const newOrder = Math.max(
+                                        ...questions.map((q) => q.order || 0),
+                                        0,
+                                    ) + 1;
+                                    setQuestions([
+                                        ...questions,
+                                        {
+                                            id: null,
+                                            question_prompt: "",
+                                            order: newOrder,
+                                        },
+                                    ]);
+                                }}
+                                className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                            >
+                                + Tambah Pertanyaan
+                            </button>
+                        </div>
+
+                        {questions.length === 0 ? (
+                            <p className="text-sm text-slate-500 italic">
+                                Belum ada pertanyaan. Klik "Tambah Pertanyaan" untuk menambah.
+                            </p>
+                        ) : (
+                            <div className="space-y-3">
+                                {questions.map((q, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="p-3 rounded-lg border border-slate-200 bg-slate-50"
+                                    >
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex-1">
+                                                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                                                    Pertanyaan #{q.order || idx + 1}
+                                                </label>
+                                                <textarea
+                                                    className="w-full min-h-16 rounded-lg border-slate-300 text-sm"
+                                                    placeholder="Tulis pertanyaan di sini..."
+                                                    value={q.question_prompt}
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...questions,
+                                                        ];
+                                                        updated[idx].question_prompt =
+                                                            e.target.value;
+                                                        setQuestions(updated);
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setQuestions(
+                                                        questions.filter(
+                                                            (_, i) => i !== idx,
+                                                        ),
+                                                    );
+                                                }}
+                                                className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded whitespace-nowrap"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 

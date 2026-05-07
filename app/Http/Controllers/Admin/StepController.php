@@ -15,7 +15,7 @@ class StepController extends Controller
     {
         $steps = MeetingStep::with([
             'observation',
-            'ask',
+            'asks',
             'exploration',
             'practice',
             'review',
@@ -59,7 +59,7 @@ class StepController extends Controller
     {
         $step->load([
             'observation',
-            'ask',
+            'asks',
             'exploration',
             'practice',
             'review',
@@ -119,12 +119,34 @@ class StepController extends Controller
                 break;
 
             case 'ask':
-                $step->ask()->updateOrCreate(
-                    ['meeting_step_id' => $step->id],
-                    [
+                // Support single question (backward compat) or array of questions
+                $questions = [];
+                
+                if ($request->filled('question_prompt')) {
+                    // Single question mode (backward compatible)
+                    $questions[] = [
                         'question_prompt' => $request->question_prompt,
-                    ]
-                );
+                        'order' => 1,
+                    ];
+                } elseif ($request->filled('questions') && is_array($request->input('questions'))) {
+                    // Multiple questions mode
+                    $questions = collect($request->input('questions'))
+                        ->filter(fn ($q) => isset($q['question_prompt']) && !empty($q['question_prompt']))
+                        ->values()
+                        ->map(fn ($q, $index) => [
+                            'question_prompt' => $q['question_prompt'],
+                            'order' => $q['order'] ?? ($index + 1),
+                        ])
+                        ->all();
+                }
+                
+                // Delete existing asks for this step
+                $step->asks()->delete();
+                
+                // Create new asks
+                foreach ($questions as $question) {
+                    $step->asks()->create($question);
+                }
                 break;
 
             case 'exploration':

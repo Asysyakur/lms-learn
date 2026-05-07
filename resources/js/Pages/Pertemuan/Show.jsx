@@ -51,6 +51,16 @@ export default function StepPage({
     const savedCurrentResponse = currentStep
         ? savedResponses[currentStep.step]
         : null;
+    
+    // Handle multiple ask responses
+    const savedAskResponses = 
+        currentStep?.step_type === "ask" && savedCurrentResponse?.ask_responses
+            ? savedCurrentResponse.ask_responses.reduce((acc, resp) => {
+                  acc[resp.ask_id] = resp.answer_text;
+                  return acc;
+              }, {})
+            : {};
+    
     const savedQuestionResponse =
         currentStep?.step_type === "ask"
             ? savedCurrentResponse?.response_text || ""
@@ -114,7 +124,10 @@ export default function StepPage({
     const savedReviewData = parseReviewResponse(savedReviewResponse);
 
     const [questionDraft, setQuestionDraft] = useState(savedQuestionResponse);
-    const [questionSaved, setQuestionSaved] = useState(savedQuestionResponse);
+    const [questionSaved, setQuestionSaved] = useState(
+        currentStep?.questions?.length > 0 ? savedAskResponses : savedQuestionResponse
+    );
+    const [askAnswerDrafts, setAskAnswerDrafts] = useState(savedAskResponses);
     const [explorationDraft, setExplorationDraft] = useState(
         savedExplorationResponse,
     );
@@ -203,9 +216,28 @@ export default function StepPage({
         );
     };
 
-    const saveQuestion = (onSuccess) => {
-        const responseText = questionDraft.trim();
+    const saveQuestion = (askId, answer, onSuccess) => {
+        // If ask step has multiple questions
+        if (currentStep?.questions && currentStep.questions.length > 0 && askId) {
+            const responseText = (answer || "").trim();
+            saveResponse(currentStep.step, { 
+                response_text: responseText,
+                ask_id: askId,
+            }, () => {
+                setQuestionSaved((prev) => ({
+                    ...prev,
+                    [askId]: responseText,
+                }));
 
+                if (onSuccess) {
+                    onSuccess();
+                }
+            });
+            return;
+        }
+
+        // Old single question format for backward compatibility
+        const responseText = questionDraft.trim();
         saveResponse(currentStep.step, { response_text: responseText }, () => {
             setQuestionSaved(responseText);
 
@@ -316,8 +348,16 @@ export default function StepPage({
     }, [completedSteps]);
 
     useEffect(() => {
-        setQuestionDraft(savedQuestionResponse);
-        setQuestionSaved(savedQuestionResponse);
+        if (
+            currentStep?.step_type === "ask" &&
+            currentStep?.questions?.length > 0
+        ) {
+            setQuestionDraft("");
+            setQuestionSaved(savedAskResponses);
+        } else {
+            setQuestionDraft(savedQuestionResponse);
+            setQuestionSaved(savedQuestionResponse);
+        }
         setExplorationDraft(savedExplorationResponse);
         setExplorationSaved(savedExplorationResponse);
         setExplorationCode(savedExplorationPayload?.code || "");
@@ -347,6 +387,7 @@ export default function StepPage({
         savedPracticeAnswer,
         savedReviewResponse,
         savedReflectionResponse,
+        savedAskResponses,
         step,
     ]);
 
@@ -376,7 +417,7 @@ export default function StepPage({
                         questionSaved={questionSaved}
                         onSave={saveQuestion}
                         nextLabel={nextStepTitle()}
-                        onNext={() => saveQuestion(goNext)}
+                        onNext={goNext}
                     />
                 );
             case "exploration":

@@ -156,6 +156,7 @@ class DatabaseSeeder extends Seeder
                     'ask' => MeetingStepAsk::create([
                         'meeting_step_id' => $meetingStep->id,
                         'question_prompt' => $step['question_prompt'],
+                        'order' => 1,
                     ]),
                     'exploration' => MeetingStepExploration::create([
                         'meeting_step_id' => $meetingStep->id,

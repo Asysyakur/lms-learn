@@ -5,24 +5,31 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class MeetingStepPractice extends Model
+class MeetingStepExplorationResponse extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'meeting_id',
         'meeting_step_id',
-        'assessment_mode',
-        'assessment_question',
-        'assessment_options',
+        'user_id',
+        'exploration_text',
+        'exploration_payload',
+        'explored_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'assessment_options' => 'array',
+            'exploration_payload' => 'array',
+            'explored_at' => 'datetime',
         ];
+    }
+
+    public function meeting(): BelongsTo
+    {
+        return $this->belongsTo(Meeting::class);
     }
 
     public function meetingStep(): BelongsTo
@@ -30,8 +37,8 @@ class MeetingStepPractice extends Model
         return $this->belongsTo(MeetingStep::class);
     }
 
-    public function responses(): HasMany
+    public function user(): BelongsTo
     {
-        return $this->hasMany(MeetingStepPracticeResponse::class);
+        return $this->belongsTo(User::class);
     }
 }
