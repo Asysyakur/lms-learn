@@ -74,16 +74,12 @@
 		@apply min-h-screen bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)];
 	}
 
-	.course-detail-shell {
-		@apply rounded-3xl bg-slate-50 p-6 shadow-sm ring-1 ring-slate-200 sm:p-8;
-	}
-
 	.course-detail-grid {
 		@apply grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)];
 	}
 
 	.course-detail-card {
-		@apply rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200;
+		@apply rounded-2xl w-full bg-white p-4 shadow-sm ring-1 ring-slate-200;
 	}
 
 	.course-detail-title {
@@ -355,5 +351,129 @@
 
 	.course-sidebar-step-icon-active {
 		@apply bg-[rgb(var(--color-primary))] text-white;
+	}
+
+	.activity-content {
+		@apply space-y-5;
+	}
+
+	.activity-info {
+		@apply flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700;
+	}
+
+	.activity-info-icon {
+		@apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-blue-300 text-sm font-bold text-blue-600;
+	}
+
+	.activity-code-card {
+		@apply rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
+	}
+
+	.activity-card-heading {
+		@apply mb-4 flex items-center gap-3 text-base font-bold text-slate-900;
+	}
+
+	.activity-card-heading h3 {
+		@apply min-w-0 truncate;
+	}
+
+	.activity-number {
+		@apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-black text-[rgb(var(--color-primary))];
+	}
+
+	.activity-editor {
+		@apply overflow-hidden rounded-md bg-slate-950 shadow-inner ring-1 ring-slate-900;
+	}
+
+	.activity-editor-toolbar {
+		@apply flex min-h-10 items-center justify-between gap-3 border-b border-white/5 bg-slate-900 px-3 py-2;
+	}
+
+	.activity-language {
+		@apply relative;
+	}
+
+	.activity-language-trigger {
+		@apply inline-flex min-w-32 items-center justify-between gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-blue-400/60;
+	}
+
+	.activity-language-menu {
+		@apply absolute right-0 top-[calc(100%+0.5rem)] z-20 w-44 overflow-hidden rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-xl shadow-black/30;
+	}
+
+	.activity-language-option {
+		@apply flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm font-semibold text-slate-200 transition hover:bg-blue-600 hover:text-white;
+	}
+
+	.activity-language-option-active {
+		@apply bg-blue-600/20 text-blue-200;
+	}
+
+	.activity-language-check {
+		@apply h-2 w-2 rounded-full bg-blue-400;
+	}
+
+	.activity-editor-body {
+		@apply grid min-h-[19rem] grid-cols-[3rem_minmax(0,1fr)] bg-slate-950;
+	}
+
+	.activity-line-numbers {
+		@apply flex select-none flex-col border-r border-white/5 bg-black/15 px-3 py-3 text-right font-mono text-xs leading-6 text-slate-500;
+	}
+
+	.activity-code-input {
+		@apply h-full min-h-[19rem] resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 focus:ring-0;
+	}
+
+	.activity-card-actions {
+		@apply mt-3 flex items-center justify-between gap-3;
+	}
+
+	.activity-run-button {
+		@apply inline-flex min-w-24 items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
+	}
+
+	.activity-reset-button {
+		@apply inline-flex min-w-24 items-center justify-center rounded-md border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-[rgb(var(--color-primary))] shadow-sm transition hover:bg-slate-50;
+	}
+
+	.activity-output {
+		@apply mt-4 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
+	}
+
+	.activity-output-title {
+		@apply mb-3 flex items-center gap-2 text-sm font-bold text-slate-700;
+	}
+
+	.activity-output pre {
+		@apply min-h-24 whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs leading-5 text-slate-600;
+	}
+
+	.activity-preview {
+		@apply min-h-64 w-full rounded-md border border-slate-200 bg-white;
+	}
+
+	.activity-input-runner {
+		@apply grid gap-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3;
+	}
+
+	.activity-input-runner label {
+		@apply grid gap-2 text-xs font-semibold text-slate-700 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center;
+	}
+
+	.activity-input-runner input {
+		@apply rounded-md border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[rgb(var(--color-primary))] focus:ring-[rgb(37_99_235_/_0.18)];
+	}
+
+	.activity-note {
+		@apply flex max-w-5xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700;
+	}
+
+	.activity-note-icon {
+		@apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-300 text-sm font-black text-amber-500;
+	}
+
+	.activity-next-button {
+		@apply inline-flex items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
 	}
 }

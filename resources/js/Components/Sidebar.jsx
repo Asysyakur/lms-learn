@@ -26,6 +26,11 @@ export default function Sidebar({
   activeStep = 1,
   progressPercent = 0,
   completedSteps = 0,
+  showProgressCard = false,
+  progressLabel = "Progres Belajar",
+  progressDetail = "",
+  progressActionLabel = "Lihat Detail",
+  progressActionHref = null,
 }) {
   const { url, props } = usePage();
   const user = props.auth?.user;
@@ -46,6 +51,38 @@ export default function Sidebar({
     ArrowPathIcon,
     QuestionMarkCircleIcon,
   ];
+
+  const normalizedProgress = Math.max(0, Math.min(100, progressPercent || 0));
+
+  const renderProgressCard = () => {
+    if (!showProgressCard) {
+      return null;
+    }
+
+    const detailText = progressDetail || `${completedSteps} dari ${steps.length || 0} materi selesai`;
+
+    return (
+      <div className="rounded-2xl bg-white/10 p-4 text-white ring-1 ring-white/10">
+        <div className="flex items-center gap-4">
+          <div
+            className="relative h-16 w-16 shrink-0 rounded-full p-1"
+            style={{
+              background: `conic-gradient(rgb(250 204 21) 0 ${normalizedProgress}%, rgba(255,255,255,0.15) ${normalizedProgress}% 100%)`,
+            }}
+          >
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-[rgb(var(--color-primary))] text-sm font-black">
+              {normalizedProgress}%
+            </div>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-white/70">{progressLabel}</div>
+            <div className="mt-1 text-sm font-bold leading-5 text-white">{detailText}</div>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -106,50 +143,56 @@ export default function Sidebar({
       <div className="sidebar-column">
         <aside className="sidebar-shell md:flex">
           {isCourseSidebar ? (
-            <div>
-              <Link href={route("pertemuan", { id: courseId })} className="sidebar-back-link text-center">
-                <ArrowLeftIcon className="h-5 w-5" />
-                Kembali ke overview
-              </Link>
+            <div className="flex h-full flex-col">
+              <div>
+                <Link href={route("pertemuan", { id: courseId })} className="sidebar-back-link text-center">
+                  <ArrowLeftIcon className="h-5 w-5" />
+                  Kembali ke overview
+                </Link>
 
-              <div className="mt-6 space-y-3">
-                {steps.map((item) => {
-                  const isActive = item.step === activeStep;
-                  const isDone = item.step < activeStep;
-                  const StepIcon = item.icon || stepIcons[item.step - 1] || BookOpenIcon;
+                {steps.length > 0 && (
+                  <div className="mt-6 space-y-3">
+                    {steps.map((item) => {
+                      const isActive = item.step === activeStep;
+                      const isDone = item.step < activeStep;
+                      const StepIcon = item.icon || stepIcons[item.step - 1] || BookOpenIcon;
 
-                  return (
-                    <Link
-                      key={item.step}
-                      href={route("pertemuan.step", { id: courseId, step: item.step })}
-                      className={`course-sidebar-step ${isActive ? "course-sidebar-step-active" : ""}`}
-                    >
-                      <span
-                        className={`course-sidebar-step-icon ${isActive ? "course-sidebar-step-icon-active" : ""}`}
-                      >
-                        {isDone ? (
-                          <CheckCircleIcon className="h-4 w-4" />
-                        ) : isActive ? (
-                          <PlayCircleIcon className="h-4 w-4" />
-                        ) : (
-                          <StepIcon className="h-4 w-4" />
-                        )}
-                      </span>
-
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-sm font-semibold">
-                          {item.step}. {item.title}
-                        </span>
-                        <span
-                          className={`block text-xs ${isActive ? "text-[rgb(var(--color-primary))]/80" : "text-white/70"}`}
+                      return (
+                        <Link
+                          key={item.step}
+                          href={route("pertemuan.step", { id: courseId, step: item.step })}
+                          className={`course-sidebar-step ${isActive ? "course-sidebar-step-active" : ""}`}
                         >
-                          {isDone ? "Selesai" : isActive ? "Sedang dibuka" : "Belum dibuka"}
-                        </span>
-                      </span>
-                    </Link>
-                  );
-                })}
+                          <span
+                            className={`course-sidebar-step-icon ${isActive ? "course-sidebar-step-icon-active" : ""}`}
+                          >
+                            {isDone ? (
+                              <CheckCircleIcon className="h-4 w-4" />
+                            ) : isActive ? (
+                              <PlayCircleIcon className="h-4 w-4" />
+                            ) : (
+                              <StepIcon className="h-4 w-4" />
+                            )}
+                          </span>
+
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-semibold">
+                              {item.step}. {item.title}
+                            </span>
+                            <span
+                              className={`block text-xs ${isActive ? "text-[rgb(var(--color-primary))]/80" : "text-white/70"}`}
+                            >
+                              {isDone ? "Selesai" : isActive ? "Sedang dibuka" : "Belum dibuka"}
+                            </span>
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
+
+              <div className="mt-auto pt-6">{renderProgressCard()}</div>
             </div>
           ) : (
             <>
@@ -174,6 +217,8 @@ export default function Sidebar({
               </div>
 
               <div className="mt-auto pt-6">
+                <div className="mb-4">{renderProgressCard()}</div>
+
                 {user && (
                   <Link
                     href={route("profile.edit")}

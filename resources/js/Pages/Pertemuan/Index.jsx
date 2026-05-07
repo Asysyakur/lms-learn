@@ -6,9 +6,14 @@ import { decorateMeetingSteps } from "@/data/meetingSteps";
 export default function Pertemuan({ id, meeting, steps = [], completedSteps = 0 }) {
   const meetingSteps = decorateMeetingSteps(steps);
   const progressPercent = meetingSteps.length > 0 ? Math.round((completedSteps / meetingSteps.length) * 100) : 0;
+  const nextStep = meetingSteps[0]?.step || 1;
 
   return (
-    <AppLayout title={meeting?.title || `Pertemuan ${id}`} showTitleBar={false} showMobileNav={false}>
+    <AppLayout
+      title={meeting?.title || `Pertemuan ${id}`}
+      showTitleBar={false}
+      showMobileNav={false}
+    >
       <div className="course-shell">
         <div className="course-hero">
           <div>

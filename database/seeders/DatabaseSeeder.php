@@ -46,21 +46,21 @@ class DatabaseSeeder extends Seeder
                 'meeting_number' => 1,
                 'title' => 'Pertemuan 1',
                 'description' => 'Mengenal konsep dasar OOP dan menganalisis contoh sederhana.',
-                'exploration_mode' => 'analysis',
+                'code_language' => null,
                 'assessment_mode' => 'quiz',
             ],
             [
                 'meeting_number' => 2,
                 'title' => 'Pertemuan 2',
                 'description' => 'Eksplorasi OOP dengan studi kasus dan praktik compile code.',
-                'exploration_mode' => 'code_compile',
+                'code_language' => 'javascript',
                 'assessment_mode' => 'quiz',
             ],
             [
                 'meeting_number' => 3,
                 'title' => 'Pertemuan 3',
                 'description' => 'Eksplorasi lanjutan dengan studi kasus dan compile code.',
-                'exploration_mode' => 'code_compile',
+                'code_language' => 'javascript',
                 'assessment_mode' => 'essay',
             ],
         ];
@@ -98,14 +98,18 @@ class DatabaseSeeder extends Seeder
                     'step_type' => 'exploration',
                     'title' => 'Eksplorasi',
                     'description' => 'Isi sesuai instruksi khusus tiap pertemuan.',
-                    'exploration_mode' => $blueprint['exploration_mode'],
-                    'code_language' => $blueprint['exploration_mode'] === 'code_compile' ? 'javascript' : null,
-                    'exploration_prompt' => $blueprint['exploration_mode'] === 'analysis'
-                        ? 'Analisis studi kasus berikut dan tulis hasil pengamatanmu.'
-                        : 'Compile codingan berikut dan jelaskan hasil yang muncul.',
+                    'code_language' => $blueprint['code_language'],
+                    'exploration_prompt' => $blueprint['code_language'] ? 'Compile codingan berikut dan jelaskan hasil yang muncul.' : 'Analisis studi kasus berikut dan tulis hasil pengamatanmu.',
                 ],
                 [
                     'step_number' => 4,
+                    'step_type' => 'review',
+                    'title' => 'Bandingkan dan Perbaiki',
+                    'description' => 'Bandingkan jawaban eksplorasi dan edit jika perlu.',
+                    'review_prompt' => 'Tinjau jawaban eksplorasimu lalu perbaiki jika ada bagian yang kurang tepat.',
+                ],
+                [
+                    'step_number' => 5,
                     'step_type' => 'practice',
                     'title' => 'Latihan Soal',
                     'description' => 'Kerjakan kuis pilihan ganda atau essay sesuai pertemuan.',
@@ -121,13 +125,6 @@ class DatabaseSeeder extends Seeder
                             'D. OOP hanya untuk desain UI.',
                         ]
                         : null,
-                ],
-                [
-                    'step_number' => 5,
-                    'step_type' => 'review',
-                    'title' => 'Bandingkan dan Perbaiki',
-                    'description' => 'Bandingkan jawaban eksplorasi dan edit jika perlu.',
-                    'review_prompt' => 'Tinjau jawaban eksplorasimu lalu perbaiki jika ada bagian yang kurang tepat.',
                 ],
                 [
                     'step_number' => 6,
@@ -162,7 +159,6 @@ class DatabaseSeeder extends Seeder
                     ]),
                     'exploration' => MeetingStepExploration::create([
                         'meeting_step_id' => $meetingStep->id,
-                        'exploration_mode' => $step['exploration_mode'],
                         'code_language' => $step['code_language'],
                         'exploration_prompt' => $step['exploration_prompt'],
                     ]),

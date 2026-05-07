@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MeetingStep;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
@@ -38,7 +39,7 @@ class StepController extends Controller
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
             'materials' => 'nullable',
-            'case_studies' => 'nullable',
+            'materials.*.blocks.*.image_file' => 'nullable|image|max:2048',
         ]);
 
         $step = MeetingStep::create($request->only([
@@ -77,7 +78,7 @@ class StepController extends Controller
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
             'materials' => 'nullable',
-            'case_studies' => 'nullable',
+            'materials.*.blocks.*.image_file' => 'nullable|image|max:2048',
         ]);
 
         $step->update([
@@ -127,34 +128,24 @@ class StepController extends Controller
                 break;
 
             case 'exploration':
+                $currentExploration = $step->exploration;
                 $explorationData = [
-                    'exploration_mode' => $request->exploration_mode,
                     'exploration_prompt' => $request->exploration_prompt,
                 ];
 
                 if (Schema::hasColumn('meeting_step_explorations', 'code_language')) {
-                    $explorationData['code_language'] = $request->exploration_mode === 'code_compile'
-                        ? ($request->code_language ?: 'javascript')
-                        : null;
+                    // store chosen language (if any). presence of code_language indicates compile-capable material
+                    $explorationData['code_language'] = $request->code_language ?: null;
                 }
 
                 // Accept materials / case studies as array or JSON string
                 if (Schema::hasColumn('meeting_step_explorations', 'materials') && $request->filled('materials')) {
-                    $materials = $request->materials;
-                    if (is_string($materials)) {
-                        $decoded = json_decode($materials, true);
-                        $materials = $decoded === null ? null : $decoded;
-                    }
-                    $explorationData['materials'] = $materials;
-                }
-
-                if (Schema::hasColumn('meeting_step_explorations', 'case_studies') && $request->filled('case_studies')) {
-                    $cases = $request->case_studies;
-                    if (is_string($cases)) {
-                        $decoded = json_decode($cases, true);
-                        $cases = $decoded === null ? null : $decoded;
-                    }
-                    $explorationData['case_studies'] = $cases;
+                    $materials = $this->normalizeExplorationItems($request->input('materials'));
+                    $explorationData['materials'] = $this->storeExplorationImages(
+                        $materials ?? [],
+                        $request->file('materials') ?? [],
+                        $currentExploration ? ($currentExploration->materials ?? []) : [],
+                    );
                 }
 
                 $step->exploration()->updateOrCreate(
@@ -179,6 +170,9 @@ class StepController extends Controller
                     ['meeting_step_id' => $step->id],
                     [
                         'review_prompt' => $request->review_prompt,
+                        'review_code1' => $request->review_code1,
+                        'review_code2' => $request->review_code2,
+                        'review_code_language' => $request->review_code_language ?? 'javascript',
                     ]
                 );
                 break;
@@ -209,5 +203,74 @@ class StepController extends Controller
             ->filter()
             ->values()
             ->all();
+    }
+
+    private function normalizeExplorationItems($items): array
+    {
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = $decoded === null ? [] : $decoded;
+        }
+
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return array_values(array_map(
+            fn ($item) => is_array($item) ? $item : [],
+            $items,
+        ));
+    }
+
+    private function storeExplorationImages(array $items, array $files, array $existingItems): array
+    {
+        return collect($items)
+            ->values()
+            ->map(function (array $item, int $itemIndex) use ($files, $existingItems) {
+                $item['blocks'] = $this->storeExplorationBlockImages(
+                    is_array($item['blocks'] ?? null) ? $item['blocks'] : [],
+                    is_array(data_get($files, $itemIndex . '.blocks')) ? data_get($files, $itemIndex . '.blocks') : [],
+                    is_array($existingItems[$itemIndex]['blocks'] ?? null) ? $existingItems[$itemIndex]['blocks'] : [],
+                );
+
+                return $item;
+            })
+            ->all();
+    }
+
+    private function storeExplorationBlockImages(array $blocks, array $files, array $existingBlocks): array
+    {
+        return collect($blocks)
+            ->values()
+            ->map(function (array $block, int $blockIndex) use ($files, $existingBlocks) {
+                if (($block['type'] ?? null) !== 'image') {
+                    unset($block['image_file']);
+
+                    return $block;
+                }
+
+                $uploadedFile = data_get($files, $blockIndex . '.image_file');
+                $currentUrl = $existingBlocks[$blockIndex]['url'] ?? ($block['url'] ?? null);
+
+                if ($uploadedFile) {
+                    $block['url'] = $this->storeUploadedExplorationImage($uploadedFile, $currentUrl);
+                }
+
+                unset($block['image_file']);
+
+                return $block;
+            })
+            ->all();
+    }
+
+    private function storeUploadedExplorationImage($uploadedFile, ?string $currentUrl = null): string
+    {
+        if ($currentUrl && str_starts_with($currentUrl, '/storage/')) {
+            Storage::disk('public')->delete(ltrim(substr($currentUrl, strlen('/storage/')), '/'));
+        }
+
+        $storedPath = $uploadedFile->store('exploration-images', 'public');
+
+        return '/storage/' . $storedPath;
     }
 }

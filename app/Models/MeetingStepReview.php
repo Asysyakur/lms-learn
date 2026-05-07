@@ -13,6 +13,9 @@ class MeetingStepReview extends Model
     protected $fillable = [
         'meeting_step_id',
         'review_prompt',
+        'review_code1',
+        'review_code2',
+        'review_code_language',
     ];
 
     public function meetingStep(): BelongsTo

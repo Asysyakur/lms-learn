@@ -16,8 +16,8 @@ export const meetingStepBlueprints = [
     accent: false,
   },
   {
-    title: "Ayo Bertanya",
-    desc: "Tulis pertanyaan dan simpan jawabanmu.",
+    title: "Ayo Jawab",
+    desc: "Tulis jawabanmu.",
     step: 2,
     icon: ChatBubbleLeftRightIcon,
     accent: true,
@@ -30,17 +30,17 @@ export const meetingStepBlueprints = [
     accent: false,
   },
   {
-    title: "Latihan Soal",
-    desc: "Kuis pilihan ganda atau essay.",
+    title: "Pembuktian",
+    desc: "Buktikan pemahamanmu dengan latihan soal atau tugas praktis.",
     step: 4,
-    icon: ClipboardDocumentCheckIcon,
+    icon: ArrowPathIcon,
     accent: true,
   },
   {
-    title: "Bandingkan dan Perbaiki",
-    desc: "Tinjau jawaban eksplorasi dan edit jika perlu.",
+    title: "Latihan Soal",
+    desc: "Kuis pilihan ganda atau essay.",
     step: 5,
-    icon: ArrowPathIcon,
+    icon: ClipboardDocumentCheckIcon,
     accent: false,
   },
   {
@@ -63,18 +63,25 @@ const stepBlueprintByType = {
 
 export function decorateMeetingSteps(steps = []) {
   const sourceSteps = steps.length > 0 ? steps : meetingStepBlueprints;
+  const orderedSteps = [...sourceSteps].sort((left, right) => {
+    const leftStep = Number(left.step ?? left.step_number ?? 0);
+    const rightStep = Number(right.step ?? right.step_number ?? 0);
 
-  return sourceSteps.map((stepItem, index) => {
+    return leftStep - rightStep;
+  });
+
+  return orderedSteps.map((stepItem, index) => {
     const blueprint = stepBlueprintByType[stepItem.step_type] || meetingStepBlueprints[index] || {};
+    const stepNumber = Number(stepItem.step ?? stepItem.step_number ?? blueprint.step ?? index + 1);
 
     return {
       ...blueprint,
       ...stepItem,
-      step: stepItem.step || blueprint.step || index + 1,
+      step: stepNumber,
       title: stepItem.title || blueprint.title,
       desc: stepItem.desc || blueprint.desc,
       icon: stepItem.icon || blueprint.icon,
-      accent: typeof stepItem.accent === "boolean" ? stepItem.accent : blueprint.accent,
+      accent: stepNumber % 2 === 0,
     };
   });
 }

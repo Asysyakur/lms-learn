@@ -12,7 +12,6 @@ class MeetingStepExploration extends Model
 
     protected $fillable = [
         'meeting_step_id',
-        'exploration_mode',
         'code_language',
         'exploration_prompt',
         'materials',

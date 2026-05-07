@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\QuizQuestionController;
 use App\Http\Controllers\Admin\QuizSetController;
 use App\Http\Controllers\Admin\StepController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CodeRunnerController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -47,6 +48,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/pertemuan/{id}/step/{step}/response', [LearningController::class, 'saveMeetingStepResponse'])
         ->name('pertemuan.step.response');
+
+    Route::post('/code/run', CodeRunnerController::class)->name('code.run');
 
     Route::get('/about', fn () => Inertia::render('About'))->name('about');
 

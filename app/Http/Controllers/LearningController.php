@@ -24,7 +24,7 @@ class LearningController extends Controller
     {
         $meetings = Meeting::query()
             ->with(['steps' => function ($query) {
-                $query->orderBy('sort_order')->orderBy('step_number');
+                $query->orderBy('step_number');
             }])
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -163,7 +163,7 @@ class LearningController extends Controller
         $meeting = Meeting::query()
             ->with([
                 'steps' => function ($query) {
-                    $query->orderBy('sort_order')->orderBy('step_number');
+                    $query->orderBy('step_number');
                 },
                 'steps.observation',
                 'steps.ask',
@@ -197,7 +197,7 @@ class LearningController extends Controller
         $meeting = Meeting::query()
             ->with([
                 'steps' => function ($query) {
-                    $query->orderBy('sort_order')->orderBy('step_number');
+                    $query->orderBy('step_number');
                 },
                 'steps.observation',
                 'steps.ask',
@@ -236,7 +236,7 @@ class LearningController extends Controller
     {
         $meeting = Meeting::query()
             ->with(['steps' => function ($query) {
-                $query->orderBy('sort_order')->orderBy('step_number');
+                $query->orderBy('step_number');
             }])
             ->findOrFail($id);
 
@@ -262,7 +262,7 @@ class LearningController extends Controller
     {
         $meeting = Meeting::query()
             ->with(['steps' => function ($query) {
-                $query->orderBy('sort_order')->orderBy('step_number');
+                $query->orderBy('step_number');
             }])
             ->findOrFail($id);
 
@@ -379,12 +379,10 @@ class LearningController extends Controller
     private function formatExplorationStep(?MeetingStepExploration $exploration): array
     {
         return [
-            'exploration_mode' => $exploration ? $exploration->exploration_mode : null,
             'code_language' => $exploration ? $exploration->code_language : null,
             'exploration_prompt' => $exploration ? $exploration->exploration_prompt : null,
             'exploration_pdf_url' => $exploration ? $exploration->exploration_pdf_url : null,
             'materials' => $exploration ? $exploration->materials : [],
-            'case_studies' => $exploration ? $exploration->case_studies : [],
         ];
     }
 
@@ -401,6 +399,9 @@ class LearningController extends Controller
     {
         return [
             'review_prompt' => $review ? $review->review_prompt : null,
+            'review_code1' => $review ? $review->review_code1 : null,
+            'review_code2' => $review ? $review->review_code2 : null,
+            'review_code_language' => $review ? $review->review_code_language : 'javascript',
         ];
     }
 
