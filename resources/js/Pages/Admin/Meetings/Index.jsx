@@ -48,8 +48,11 @@ export default function Index({ meetings }) {
                   </div>
 
                 <div className="flex flex-wrap gap-2">
+                  <Link className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" href={`/admin/meetings/${meeting.id}/student-results`}>
+                    Hasil Siswa
+                  </Link>
                   <Link className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-700" href={`/admin/meetings/${meeting.id}/steps`}>
-                    Steps
+                    Detail Steps
                   </Link>
                   <Link className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href={`/admin/meetings/${meeting.id}/edit`}>
                     Edit

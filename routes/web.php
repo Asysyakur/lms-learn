@@ -51,7 +51,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/code/run', CodeRunnerController::class)->name('code.run');
 
-    Route::get('/about', fn () => Inertia::render('About'))->name('about');
+    Route::get('/about', fn() => Inertia::render('About'))->name('about');
 
     // Profile settings
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', fn () => Inertia::render('Admin/Dashboard'))->name('dashboard');
+        Route::get('/', fn() => Inertia::render('Admin/Dashboard'))->name('dashboard');
 
         Route::resource('meetings', MeetingController::class)->except(['show']);
         Route::resource('quiz-sets', QuizSetController::class)->except(['show']);
@@ -81,6 +81,12 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('meetings/{meeting}/steps', [StepController::class, 'index'])
             ->name('meetings.steps');
+
+        Route::get('meetings/{meeting}/student-results', [StepController::class, 'studentResults'])
+            ->name('meetings.student-results');
+
+        Route::get('/admin/meetings/{meeting}/students/{user}', [StepController::class, 'studentDetail'])
+            ->name('meetings.student-detail');
 
         Route::post('steps', [StepController::class, 'store'])
             ->name('steps.store');
@@ -95,4 +101,4 @@ Route::middleware(['auth', 'admin'])
             ->name('steps.destroy');
     });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

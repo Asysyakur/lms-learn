@@ -47,4 +47,9 @@ class MeetingStepAskResponse extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function step(): BelongsTo
+    {
+        return $this->belongsTo(MeetingStep::class, 'meeting_step_id');
+    }
 }

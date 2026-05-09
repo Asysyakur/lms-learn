@@ -41,4 +41,12 @@ class MeetingStepReviewResponse extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function step()
+    {
+        return $this->belongsTo(
+            MeetingStep::class,
+            'meeting_step_id'
+        );
+    }
 }

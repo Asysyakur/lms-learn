@@ -103,28 +103,42 @@ class DatabaseSeeder extends Seeder
                 ],
                 [
                     'step_number' => 4,
+                    'step_type' => 'practice',
+                    'title' => 'Latihan Soal',
+                    'description' => 'Kerjakan latihan soal berikut.',
+
+                    'assessment_items' => [
+
+                        [
+                            'mode' => 'quiz',
+                            'question' => 'Pilih jawaban yang paling tepat tentang konsep OOP berikut.',
+                            'options' => [
+                                'A. OOP berfokus pada objek.',
+                                'B. OOP hanya memakai fungsi.',
+                                'C. OOP tidak mengenal class.',
+                                'D. OOP hanya untuk desain UI.',
+                            ],
+                        ],
+
+                        [
+                            'mode' => 'essay',
+                            'question' => 'Apa itu pemrograman berorientasi objek?',
+                            'options' => [],
+                        ],
+
+                        [
+                            'mode' => 'essay',
+                            'question' => 'Jelaskan penerapan OOP dalam kehidupan sehari-hari.',
+                            'options' => [],
+                        ],
+                    ],
+                ],
+                [
+                    'step_number' => 5,
                     'step_type' => 'review',
                     'title' => 'Bandingkan dan Perbaiki',
                     'description' => 'Bandingkan jawaban eksplorasi dan edit jika perlu.',
                     'review_prompt' => 'Tinjau jawaban eksplorasimu lalu perbaiki jika ada bagian yang kurang tepat.',
-                ],
-                [
-                    'step_number' => 5,
-                    'step_type' => 'practice',
-                    'title' => 'Latihan Soal',
-                    'description' => 'Kerjakan kuis pilihan ganda atau essay sesuai pertemuan.',
-                    'assessment_mode' => $blueprint['assessment_mode'],
-                    'assessment_question' => $blueprint['assessment_mode'] === 'essay'
-                        ? 'Jelaskan secara singkat penerapan konsep OOP pada studi kasus ini.'
-                        : 'Pilih jawaban yang paling tepat tentang konsep OOP berikut.',
-                    'assessment_options' => $blueprint['assessment_mode'] === 'quiz'
-                        ? [
-                            'A. OOP berfokus pada objek.',
-                            'B. OOP hanya memakai fungsi.',
-                            'C. OOP tidak mengenal class.',
-                            'D. OOP hanya untuk desain UI.',
-                        ]
-                        : null,
                 ],
                 [
                     'step_number' => 6,
@@ -147,36 +161,54 @@ class DatabaseSeeder extends Seeder
                 ]);
 
                 match ($step['step_type']) {
+
                     'observe' => MeetingStepObservation::create([
                         'meeting_step_id' => $meetingStep->id,
                         'instruction_text' => $step['instruction_text'],
                         'resource_type' => $step['resource_type'],
                         'resource_url' => $step['resource_url'],
                     ]),
+
                     'ask' => MeetingStepAsk::create([
                         'meeting_step_id' => $meetingStep->id,
                         'question_prompt' => $step['question_prompt'],
                         'order' => 1,
                     ]),
+
                     'exploration' => MeetingStepExploration::create([
                         'meeting_step_id' => $meetingStep->id,
                         'code_language' => $step['code_language'],
                         'exploration_prompt' => $step['exploration_prompt'],
                     ]),
-                    'practice' => MeetingStepPractice::create([
-                        'meeting_step_id' => $meetingStep->id,
-                        'assessment_mode' => $step['assessment_mode'],
-                        'assessment_question' => $step['assessment_question'],
-                        'assessment_options' => $step['assessment_options'],
-                    ]),
+
+                    'practice' => collect($step['assessment_items'])->each(
+                        function ($practice) use ($meetingStep) {
+
+                            MeetingStepPractice::create([
+                                'meeting_step_id' => $meetingStep->id,
+
+                                'assessment_mode' =>
+                                $practice['mode'],
+
+                                'assessment_question' =>
+                                $practice['question'],
+
+                                'assessment_options' =>
+                                $practice['options'] ?? [],
+                            ]);
+                        }
+                    ),
+
                     'review' => MeetingStepReview::create([
                         'meeting_step_id' => $meetingStep->id,
                         'review_prompt' => $step['review_prompt'],
                     ]),
+
                     'reflection' => MeetingStepReflection::create([
                         'meeting_step_id' => $meetingStep->id,
                         'reflection_question' => $step['reflection_question'],
                     ]),
+
                     default => null,
                 };
             }

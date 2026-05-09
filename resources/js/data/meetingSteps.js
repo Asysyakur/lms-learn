@@ -30,18 +30,18 @@ export const meetingStepBlueprints = [
     accent: false,
   },
   {
-    title: "Pembuktian",
-    desc: "Buktikan pemahamanmu dengan latihan soal atau tugas praktis.",
-    step: 4,
-    icon: ArrowPathIcon,
-    accent: true,
-  },
-  {
     title: "Latihan Soal",
     desc: "Kuis pilihan ganda atau essay.",
-    step: 5,
+    step: 4,
     icon: ClipboardDocumentCheckIcon,
     accent: false,
+  },
+  {
+    title: "Pembuktian",
+    desc: "Buktikan pemahamanmu dengan latihan soal atau tugas praktis.",
+    step: 5,
+    icon: ArrowPathIcon,
+    accent: true,
   },
   {
     title: "Refleksi",

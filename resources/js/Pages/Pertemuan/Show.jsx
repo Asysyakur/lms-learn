@@ -1,6 +1,6 @@
 import AppLayout from "@/Layouts/AppLayout";
 import { Link, router } from "@inertiajs/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import StepOneObserve from "@/Pages/Pertemuan/components/Observe";
 import StepTwoAsk from "@/Pages/Pertemuan/components/Ask";
 import StepThreeExploration from "@/Pages/Pertemuan/components/Exploration";
@@ -51,16 +51,18 @@ export default function StepPage({
     const savedCurrentResponse = currentStep
         ? savedResponses[currentStep.step]
         : null;
-    
+
     // Handle multiple ask responses
-    const savedAskResponses = 
-        currentStep?.step_type === "ask" && savedCurrentResponse?.ask_responses
+    const savedAskResponses = useMemo(() => {
+        return currentStep?.step_type === "ask" &&
+            savedCurrentResponse?.ask_responses
             ? savedCurrentResponse.ask_responses.reduce((acc, resp) => {
                   acc[resp.ask_id] = resp.answer_text;
                   return acc;
               }, {})
             : {};
-    
+    }, [currentStep?.step_type, savedCurrentResponse]);
+
     const savedQuestionResponse =
         currentStep?.step_type === "ask"
             ? savedCurrentResponse?.response_text || ""
@@ -75,7 +77,9 @@ export default function StepPage({
             : responseByType("exploration")?.response_payload || null;
     const savedExplorationMode =
         savedExplorationPayload?.mode ||
-        (stepByType("exploration")?.code_language ? "code_compile" : "analysis");
+        (stepByType("exploration")?.code_language
+            ? "code_compile"
+            : "analysis");
     const savedPracticeResponse =
         currentStep?.step_type === "practice"
             ? savedCurrentResponse
@@ -92,10 +96,50 @@ export default function StepPage({
         savedPracticeResponse?.response_payload?.mode ||
         currentStep?.assessment_mode ||
         "quiz";
-    const savedPracticeAnswer =
-        savedPracticeResponse?.response_payload?.answer ||
-        savedPracticeResponse?.response_text ||
-        "";
+    const savedPracticeAnswer = (() => {
+        const payload = savedPracticeResponse?.response_payload;
+
+        if (!payload) {
+            return "";
+        }
+
+        // FORMAT BARU
+        if (payload.items) {
+            return payload.items
+                .map((item, index) => {
+                    return `${index + 1}. ${item.answer || ""}`;
+                })
+                .join("\n");
+        }
+
+        // FORMAT LAMA
+        if (payload.answers) {
+            return savedPracticeResponse?.response_text || "";
+        }
+
+        // FORMAT SUPER LAMA
+        if (payload.answer) {
+            return payload.answer;
+        }
+
+        return savedPracticeResponse?.response_text || "";
+    })();
+    const practiceItems = currentStep?.assessment_items?.length
+        ? currentStep.assessment_items
+        : [
+              {
+                  id: "practice-1",
+                  mode: currentStep?.assessment_mode || "quiz",
+                  question: currentStep?.assessment_question || "",
+                  options: currentStep?.assessment_options || [],
+              },
+          ];
+    const savedPracticeAnswers = savedPracticeResponse?.response_payload?.items
+        ? savedPracticeResponse.response_payload.items.reduce((acc, item) => {
+              acc[item.id] = item.answer || "";
+              return acc;
+          }, {})
+        : {};
     const savedCodeLanguage =
         savedExplorationPayload?.language ||
         currentStep?.code_language ||
@@ -125,7 +169,9 @@ export default function StepPage({
 
     const [questionDraft, setQuestionDraft] = useState(savedQuestionResponse);
     const [questionSaved, setQuestionSaved] = useState(
-        currentStep?.questions?.length > 0 ? savedAskResponses : savedQuestionResponse
+        currentStep?.questions?.length > 0
+            ? savedAskResponses
+            : savedQuestionResponse,
     );
     const [askAnswerDrafts, setAskAnswerDrafts] = useState(savedAskResponses);
     const [explorationDraft, setExplorationDraft] = useState(
@@ -149,6 +195,13 @@ export default function StepPage({
         savedPracticeMode === "essay" ? savedPracticeAnswer : "",
     );
     const [assessmentSaved, setAssessmentSaved] = useState(savedPracticeAnswer);
+    const [assessmentAnswers, setAssessmentAnswers] =
+        useState(savedPracticeAnswers);
+
+    useEffect(() => {
+        setAssessmentAnswers(savedPracticeAnswers);
+    }, [savedPracticeAnswer]);
+
     const [reviewCode1, setReviewCode1] = useState(
         savedReviewData.code1 || currentStep?.review_code1 || "",
     );
@@ -216,35 +269,42 @@ export default function StepPage({
         );
     };
 
-    const saveQuestion = (askId, answer, onSuccess) => {
-        // If ask step has multiple questions
-        if (currentStep?.questions && currentStep.questions.length > 0 && askId) {
-            const responseText = (answer || "").trim();
-            saveResponse(currentStep.step, { 
-                response_text: responseText,
-                ask_id: askId,
-            }, () => {
-                setQuestionSaved((prev) => ({
-                    ...prev,
-                    [askId]: responseText,
-                }));
+    const saveQuestion = (onSuccess) => {
+        const items = currentStep.questions.map((question, index) => ({
+            id: question.id,
+            question: question.question_prompt,
+            answer: (askAnswerDrafts[question.id] || "").trim(),
+        }));
 
-                if (onSuccess) {
+        const savedText = items
+            .map((item, index) => {
+                return `${index + 1}. ${item.answer}`;
+            })
+            .join("\n");
+
+        saveResponse(
+            currentStep.step,
+            {
+                response_text: savedText,
+
+                response_payload: {
+                    items,
+                },
+            },
+            () => {
+                const mapped = {};
+
+                currentStep.questions.forEach((q, index) => {
+                    mapped[q.id] = items[index]?.answer || "";
+                });
+
+                setQuestionSaved(mapped);
+
+                if (typeof onSuccess === "function") {
                     onSuccess();
                 }
-            });
-            return;
-        }
-
-        // Old single question format for backward compatibility
-        const responseText = questionDraft.trim();
-        saveResponse(currentStep.step, { response_text: responseText }, () => {
-            setQuestionSaved(responseText);
-
-            if (onSuccess) {
-                onSuccess();
-            }
-        });
+            },
+        );
     };
 
     const saveExploration = (onSuccess) => {
@@ -274,22 +334,39 @@ export default function StepPage({
     };
 
     const saveAssessment = (onSuccess) => {
-        const activeMode = currentStep?.assessment_mode || assessmentMode;
-        const savedText = activeMode === "quiz" ? quizAnswer : essayAnswer;
+        const firstItem = practiceItems[0] || {};
+
+        const activeMode =
+            firstItem.mode || currentStep?.assessment_mode || assessmentMode;
+
+        const items = practiceItems.map((item) => ({
+            id: item.id,
+            question: item.question,
+            answer: (assessmentAnswers[item.id] || "").trim(),
+        }));
+
+        const savedText = items
+            .map((item, index) => {
+                return `${index + 1}. ${item.answer}`;
+            })
+            .join("\n")
+            .trim();
 
         saveResponse(
             currentStep.step,
             {
-                response_text: savedText.trim(),
+                response_text: savedText,
+
                 response_payload: {
                     mode: activeMode,
-                    answer: savedText.trim(),
+
+                    items,
                 },
             },
             () => {
-                setAssessmentSaved(savedText.trim());
+                setAssessmentSaved(savedText);
 
-                if (onSuccess) {
+                if (typeof onSuccess === "function") {
                     onSuccess();
                 }
             },
@@ -299,9 +376,9 @@ export default function StepPage({
     const saveReview = (onSuccess) => {
         const isCompileMode = Boolean(
             currentStep?.review_code_language ||
-                currentStep?.code_language ||
-                reviewCode1 ||
-                reviewCode2,
+            currentStep?.code_language ||
+            reviewCode1 ||
+            reviewCode2,
         );
         let responseText = "";
 
@@ -369,11 +446,18 @@ export default function StepPage({
             savedPracticeMode === "essay" ? savedPracticeAnswer : "",
         );
         setAssessmentSaved(savedPracticeAnswer);
-        setReviewCode1(savedReviewData.code1 || currentStep?.review_code1 || "");
-        setReviewCode2(savedReviewData.code2 || currentStep?.review_code2 || "");
+        setAssessmentAnswers(savedPracticeAnswers);
+        setReviewCode1(
+            savedReviewData.code1 || currentStep?.review_code1 || "",
+        );
+        setReviewCode2(
+            savedReviewData.code2 || currentStep?.review_code2 || "",
+        );
         setReviewCode1Output(savedReviewData.output1);
         setReviewCode2Output(savedReviewData.output2);
-        setCodingLanguage(currentStep?.review_code_language || savedCodeLanguage);
+        setCodingLanguage(
+            currentStep?.review_code_language || savedCodeLanguage,
+        );
         setReviewSaved(savedReviewResponse);
         setReflectionDraft(savedReflectionResponse);
         setReflectionSaved(savedReflectionResponse);
@@ -415,6 +499,8 @@ export default function StepPage({
                         questionDraft={questionDraft}
                         setQuestionDraft={setQuestionDraft}
                         questionSaved={questionSaved}
+                        askAnswerDrafts={askAnswerDrafts}
+                        setAskAnswerDrafts={setAskAnswerDrafts}
                         onSave={saveQuestion}
                         nextLabel={nextStepTitle()}
                         onNext={goNext}
@@ -448,6 +534,8 @@ export default function StepPage({
                         setQuizAnswer={setQuizAnswer}
                         essayAnswer={essayAnswer}
                         setEssayAnswer={setEssayAnswer}
+                        assessmentAnswers={assessmentAnswers}
+                        setAssessmentAnswers={setAssessmentAnswers}
                         assessmentSaved={assessmentSaved}
                         onSave={saveAssessment}
                     />

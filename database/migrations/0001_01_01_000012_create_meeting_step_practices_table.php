@@ -15,8 +15,6 @@ return new class extends Migration
             $table->text('assessment_question')->nullable();
             $table->json('assessment_options')->nullable();
             $table->timestamps();
-
-            $table->unique('meeting_step_id');
         });
     }
 

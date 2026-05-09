@@ -84,12 +84,31 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
             : step?.ask?.question_prompt
               ? [
                     {
-                      id: step.ask.id || null,
-                      question_prompt: step.ask.question_prompt,
-                      order: 1,
+                        id: step.ask.id || null,
+                        question_prompt: step.ask.question_prompt,
+                        order: 1,
                     },
                 ]
               : [],
+    );
+    const [practiceItems, setPracticeItems] = useState(
+        Array.isArray(step?.practices) && step.practices.length > 0
+            ? step.practices.map((item, index) => ({
+                  id: item.id || `practice-${index + 1}`,
+                  mode: item.assessment_mode || "quiz",
+                  question: item.assessment_question || "",
+                  options: Array.isArray(item.assessment_options)
+                      ? item.assessment_options.join("\n")
+                      : "",
+              }))
+            : [
+                  {
+                      id: "practice-1",
+                      mode: "quiz",
+                      question: "",
+                      options: "",
+                  },
+              ],
     );
     const materialTextRefs = useRef({});
     const materialSelectionRefs = useRef({});
@@ -152,8 +171,7 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
         }
     };
 
-    const getMaterialKey = (parentIdx, blockIdx) =>
-        `${parentIdx}-${blockIdx}`;
+    const getMaterialKey = (parentIdx, blockIdx) => `${parentIdx}-${blockIdx}`;
 
     const saveUndoSnapshot = (key, value) => {
         const stack = materialUndoRefs.current[key] || [];
@@ -369,6 +387,27 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                 questions: questions,
             };
         }
+        if (data.step_type === "practice") {
+            const cleanedPracticeItems = practiceItems
+                .map((item, index) => ({
+                    id: item.id || `practice-${index + 1}`,
+                    mode: item.mode || "quiz",
+                    question: item.question || "",
+                    options: item.options || "",
+                }))
+                .filter((item) => item.question.trim() !== "");
+            const firstItem = cleanedPracticeItems[0] || practiceItems[0];
+
+            submitData = {
+                ...data,
+                assessment_mode: firstItem?.mode || data.assessment_mode,
+                assessment_question:
+                    firstItem?.question || data.assessment_question,
+                assessment_options:
+                    firstItem?.options || data.assessment_options,
+                assessment_items: cleanedPracticeItems,
+            };
+        }
 
         if (isEdit) {
             transform((formData) => {
@@ -522,10 +561,13 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    const newOrder = Math.max(
-                                        ...questions.map((q) => q.order || 0),
-                                        0,
-                                    ) + 1;
+                                    const newOrder =
+                                        Math.max(
+                                            ...questions.map(
+                                                (q) => q.order || 0,
+                                            ),
+                                            0,
+                                        ) + 1;
                                     setQuestions([
                                         ...questions,
                                         {
@@ -543,7 +585,8 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
 
                         {questions.length === 0 ? (
                             <p className="text-sm text-slate-500 italic">
-                                Belum ada pertanyaan. Klik "Tambah Pertanyaan" untuk menambah.
+                                Belum ada pertanyaan. Klik "Tambah Pertanyaan"
+                                untuk menambah.
                             </p>
                         ) : (
                             <div className="space-y-3">
@@ -555,7 +598,8 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                         <div className="flex items-start gap-3">
                                             <div className="flex-1">
                                                 <label className="block text-xs font-semibold text-slate-600 mb-1">
-                                                    Pertanyaan #{q.order || idx + 1}
+                                                    Pertanyaan #
+                                                    {q.order || idx + 1}
                                                 </label>
                                                 <textarea
                                                     className="w-full min-h-16 rounded-lg border-slate-300 text-sm"
@@ -565,7 +609,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                         const updated = [
                                                             ...questions,
                                                         ];
-                                                        updated[idx].question_prompt =
+                                                        updated[
+                                                            idx
+                                                        ].question_prompt =
                                                             e.target.value;
                                                         setQuestions(updated);
                                                     }}
@@ -749,7 +795,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                         <div className="flex gap-2 mb-2 text-xs">
                                                             <button
                                                                 type="button"
-                                                                onMouseDown={(e) =>
+                                                                onMouseDown={(
+                                                                    e,
+                                                                ) =>
                                                                     e.preventDefault()
                                                                 }
                                                                 className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
@@ -769,7 +817,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                onMouseDown={(e) =>
+                                                                onMouseDown={(
+                                                                    e,
+                                                                ) =>
                                                                     e.preventDefault()
                                                                 }
                                                                 className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
@@ -789,7 +839,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                onMouseDown={(e) =>
+                                                                onMouseDown={(
+                                                                    e,
+                                                                ) =>
                                                                     e.preventDefault()
                                                                 }
                                                                 className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
@@ -809,7 +861,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                             </button>
                                                             <button
                                                                 type="button"
-                                                                onMouseDown={(e) =>
+                                                                onMouseDown={(
+                                                                    e,
+                                                                ) =>
                                                                     e.preventDefault()
                                                                 }
                                                                 className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
@@ -1089,51 +1143,119 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                 )}
 
                 {data.step_type === "practice" && (
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Mode Assessment
-                            </label>
-                            <select
-                                className="mt-1 w-full rounded-lg border-slate-300"
-                                value={data.assessment_mode}
-                                onChange={(e) =>
-                                    setData("assessment_mode", e.target.value)
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h3 className="font-semibold text-slate-900">
+                                    Daftar Latihan Soal
+                                </h3>
+                                <p className="text-sm text-slate-500">
+                                    Guru bisa mencampur pilihan ganda dan essay
+                                    dalam satu step.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                                onClick={() =>
+                                    setPracticeItems([
+                                        ...practiceItems,
+                                        {
+                                            id: `practice-${Date.now()}`,
+                                            mode: "quiz",
+                                            question: "",
+                                            options: "",
+                                        },
+                                    ])
                                 }
                             >
-                                <option value="quiz">Quiz</option>
-                                <option value="essay">Essay</option>
-                            </select>
-                            <label className="mt-4 block text-sm font-semibold text-slate-700">
-                                Pertanyaan
-                            </label>
-                            <textarea
-                                className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                value={data.assessment_question}
-                                onChange={(e) =>
-                                    setData(
-                                        "assessment_question",
-                                        e.target.value,
-                                    )
-                                }
-                            />
+                                + Tambah Soal
+                            </button>
                         </div>
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Opsi Jawaban
-                            </label>
-                            <textarea
-                                className="mt-1 min-h-40 w-full rounded-lg border-slate-300"
-                                placeholder="Satu opsi per baris"
-                                value={data.assessment_options}
-                                onChange={(e) =>
-                                    setData(
-                                        "assessment_options",
-                                        e.target.value,
-                                    )
-                                }
-                            />
-                        </div>
+
+                        {practiceItems.map((item, index) => (
+                            <div
+                                key={item.id || index}
+                                className="rounded-lg border border-slate-200 bg-white p-4"
+                            >
+                                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                    <div className="font-semibold text-slate-900">
+                                        Soal {index + 1}
+                                    </div>
+                                    {practiceItems.length > 1 && (
+                                        <button
+                                            type="button"
+                                            className="rounded-lg border border-red-200 px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-50"
+                                            onClick={() =>
+                                                setPracticeItems(
+                                                    practiceItems.filter(
+                                                        (_, itemIndex) =>
+                                                            itemIndex !== index,
+                                                    ),
+                                                )
+                                            }
+                                        >
+                                            Hapus
+                                        </button>
+                                    )}
+                                </div>
+
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700">
+                                            Tipe Soal
+                                        </label>
+                                        <select
+                                            className="mt-1 w-full rounded-lg border-slate-300"
+                                            value={item.mode}
+                                            onChange={(e) => {
+                                                const next = [...practiceItems];
+                                                next[index].mode =
+                                                    e.target.value;
+                                                setPracticeItems(next);
+                                            }}
+                                        >
+                                            <option value="quiz">
+                                                Pilihan ganda
+                                            </option>
+                                            <option value="essay">Essay</option>
+                                        </select>
+
+                                        <label className="mt-4 block text-sm font-semibold text-slate-700">
+                                            Pertanyaan
+                                        </label>
+                                        <textarea
+                                            className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                            value={item.question}
+                                            onChange={(e) => {
+                                                const next = [...practiceItems];
+                                                next[index].question =
+                                                    e.target.value;
+                                                setPracticeItems(next);
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700">
+                                            Opsi Jawaban
+                                        </label>
+                                        <textarea
+                                            className="mt-1 min-h-40 w-full rounded-lg border-slate-300 disabled:bg-slate-100"
+                                            placeholder="Satu opsi per baris"
+                                            disabled={item.mode === "essay"}
+                                            value={item.options}
+                                            onChange={(e) => {
+                                                const next = [...practiceItems];
+                                                next[index].options =
+                                                    e.target.value;
+                                                setPracticeItems(next);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 )}
 

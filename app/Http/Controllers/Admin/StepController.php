@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Meeting;
 use App\Models\MeetingStep;
+use App\Models\MeetingStepCompletion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
@@ -17,13 +20,13 @@ class StepController extends Controller
             'observation',
             'asks',
             'exploration',
-            'practice',
+            'practices',
             'review',
             'reflection'
         ])
-        ->where('meeting_id', $meetingId)
-        ->orderBy('step_number')
-        ->get();
+            ->where('meeting_id', $meetingId)
+            ->orderBy('step_number')
+            ->get();
 
         return Inertia::render('Admin/Steps/Index', [
             'steps' => $steps,
@@ -45,10 +48,10 @@ class StepController extends Controller
         $step = MeetingStep::create($request->only([
             'meeting_id',
             'step_number',
-                'step_type',
-                'title',
-                'description',
-            ]));
+            'step_type',
+            'title',
+            'description',
+        ]));
 
         $this->handleStepType($step, $request);
 
@@ -61,7 +64,7 @@ class StepController extends Controller
             'observation',
             'asks',
             'exploration',
-            'practice',
+            'practices',
             'review',
             'reflection'
         ]);
@@ -121,7 +124,7 @@ class StepController extends Controller
             case 'ask':
                 // Support single question (backward compat) or array of questions
                 $questions = [];
-                
+
                 if ($request->filled('question_prompt')) {
                     // Single question mode (backward compatible)
                     $questions[] = [
@@ -131,18 +134,18 @@ class StepController extends Controller
                 } elseif ($request->filled('questions') && is_array($request->input('questions'))) {
                     // Multiple questions mode
                     $questions = collect($request->input('questions'))
-                        ->filter(fn ($q) => isset($q['question_prompt']) && !empty($q['question_prompt']))
+                        ->filter(fn($q) => isset($q['question_prompt']) && !empty($q['question_prompt']))
                         ->values()
-                        ->map(fn ($q, $index) => [
+                        ->map(fn($q, $index) => [
                             'question_prompt' => $q['question_prompt'],
                             'order' => $q['order'] ?? ($index + 1),
                         ])
                         ->all();
                 }
-                
+
                 // Delete existing asks for this step
                 $step->asks()->delete();
-                
+
                 // Create new asks
                 foreach ($questions as $question) {
                     $step->asks()->create($question);
@@ -177,14 +180,24 @@ class StepController extends Controller
                 break;
 
             case 'practice':
-                $step->practice()->updateOrCreate(
-                    ['meeting_step_id' => $step->id],
-                    [
-                        'assessment_mode' => $request->assessment_mode,
-                        'assessment_question' => $request->assessment_question,
-                        'assessment_options' => $this->normalizeOptions($request->assessment_options),
-                    ]
+
+                $assessmentItems = $this->normalizeAssessmentItems(
+                    $request->input('assessment_items')
                 );
+
+                // hapus semua soal lama
+                $step->practices()->delete();
+
+                // simpan semua soal baru
+                foreach ($assessmentItems as $item) {
+
+                    $step->practices()->create([
+                        'assessment_mode' => $item['mode'],
+                        'assessment_question' => $item['question'],
+                        'assessment_options' => $item['options'],
+                    ]);
+                }
+
                 break;
 
             case 'review':
@@ -221,9 +234,37 @@ class StepController extends Controller
         }
 
         return collect(preg_split('/\r\n|\r|\n/', $options))
-            ->map(fn ($option) => trim($option))
+            ->map(fn($option) => trim($option))
             ->filter()
             ->values()
+            ->all();
+    }
+
+    private function normalizeAssessmentItems($items): array
+    {
+        if (is_string($items)) {
+            $decoded = json_decode($items, true);
+            $items = $decoded === null ? [] : $decoded;
+        }
+
+        if (! is_array($items)) {
+            return [];
+        }
+
+        return collect($items)
+            ->filter(fn($item) => is_array($item) && ! empty(trim($item['question'] ?? '')))
+            ->values()
+            ->map(function ($item, $index) {
+                $mode = ($item['mode'] ?? 'quiz') === 'essay' ? 'essay' : 'quiz';
+
+                return [
+                    'id' => $item['id'] ?? ('practices-' . ($index + 1)),
+                    'mode' => $mode,
+                    'question' => trim($item['question']),
+                    'options' => $mode === 'quiz' ? $this->normalizeOptions($item['options'] ?? null) : [],
+                    'order' => $index + 1,
+                ];
+            })
             ->all();
     }
 
@@ -239,7 +280,7 @@ class StepController extends Controller
         }
 
         return array_values(array_map(
-            fn ($item) => is_array($item) ? $item : [],
+            fn($item) => is_array($item) ? $item : [],
             $items,
         ));
     }
@@ -294,5 +335,251 @@ class StepController extends Controller
         $storedPath = $uploadedFile->store('exploration-images', 'public');
 
         return '/storage/' . $storedPath;
+    }
+
+    public function studentResults($meetingId)
+    {
+        $meeting = Meeting::with('steps')->findOrFail($meetingId);
+
+        $students = User::query()
+            ->get()
+            ->map(function ($student) use ($meeting) {
+
+                $completedSteps = MeetingStepCompletion::query()
+                    ->where('meeting_id', $meeting->id)
+                    ->where('user_id', $student->id)
+                    ->count();
+
+                $totalSteps = $meeting->steps->count();
+
+                $progress = $totalSteps > 0
+                    ? round(($completedSteps / $totalSteps) * 100)
+                    : 0;
+
+                return [
+                    'id' => $student->id,
+                    'name' => $student->name,
+                    'email' => $student->email,
+                    'completed_steps' => $completedSteps,
+                    'total_steps' => $totalSteps,
+                    'progress' => $progress,
+                ];
+            });
+
+        return Inertia::render(
+            'Admin/Meetings/StudentResults/Index',
+            [
+                'meeting' => $meeting,
+                'students' => $students,
+            ]
+        );
+    }
+
+    public function studentDetail($meetingId, $userId)
+    {
+        $meeting = Meeting::with('steps')->findOrFail($meetingId);
+
+        $meetingStepIds = $meeting->steps->pluck('id');
+
+        $student = User::with([
+
+            'askResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.asks');
+            },
+            'practiceResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.practices');
+            },
+
+            'reflectionResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.reflection');
+            },
+
+            'observationResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.observation');
+            },
+
+            'explorationResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.exploration');
+            },
+
+            'reviewResponses' => function ($query) use ($meetingStepIds) {
+                $query->whereIn('meeting_step_id', $meetingStepIds)
+                    ->with('step.review');
+            },
+
+        ])->findOrFail($userId);
+
+        $responses = collect()
+
+            ->merge(
+                $student->askResponses->groupBy('meeting_step_id')->map(function ($group) {
+
+                    $first = $group->first();
+
+                    $questions = $first->step
+                        ? $first->step->asks
+                        : collect();
+
+                    $formattedItems = $questions->map(function ($ask) use ($group) {
+
+                        $matchedAnswer = $group
+                            ->firstWhere('meeting_step_ask_id', $ask->id);
+
+                        return [
+                            'question' => $ask->question_prompt,
+                            'answer' => $matchedAnswer?->answer_text ?? '-',
+                        ];
+                    });
+
+                    return [
+                        'type' => 'Ask',
+                        'step_title' => $first->step?->title,
+                        'step_type' => $first->step?->step_type,
+                        'items' => $formattedItems->values()->toArray(),
+                    ];
+                })
+            )
+            ->merge(
+                $student->practiceResponses->map(function ($item) {
+
+                    $questions = $item->step
+                        ? $item->step->practices
+                        : collect();
+
+                    $payloadItems = $item->practice_payload['items'] ?? [];
+
+                    $formattedItems = $questions->map(function ($practice, $index) use ($payloadItems) {
+
+                        $matchedAnswer = collect($payloadItems)
+                            ->first(fn($payloadItem, $payloadIndex) => $payloadIndex === $index);
+
+                        return [
+                            'question' => $practice->assessment_question,
+                            'mode' => $practice->assessment_mode,
+                            'options' => $practice->assessment_options,
+                            'answer' => $matchedAnswer['answer'] ?? '-',
+                        ];
+                    });
+
+                    return [
+                        'type' => 'Practice',
+                        'step_title' => $item->step?->title,
+                        'step_type' => $item->step?->step_type,
+                        'items' => $formattedItems,
+                    ];
+                })
+            )
+
+            ->merge(
+                $student->reflectionResponses->map(function ($item) {
+
+                    $question = null;
+
+                    if ($item->step?->reflection) {
+                        $reflection = $item->step->reflection;
+
+                        $question =
+                            $reflection->question
+                            ?? $reflection->reflection_question
+                            ?? null;
+                    }
+
+                    return [
+                        'type' => 'Reflection',
+                        'step_title' => $item->step?->title,
+                        'step_type' => $item->step?->step_type,
+                        'question' => $question,
+                        'answer' => $item->reflection_text,
+                    ];
+                })
+            )
+
+            ->merge(
+                $student->observationResponses->map(function ($item) {
+
+                    $question = null;
+
+                    if ($item->step?->observation) {
+                        $observation = $item->step->observation;
+
+                        $question =
+                            $observation->instruction
+                            ?? $observation->question
+                            ?? null;
+                    }
+
+                    return [
+                        'type' => 'Observation',
+                        'step_title' => $item->step?->title,
+                        'step_type' => $item->step?->step_type,
+                        'question' => $question,
+                        'answer' => $item->observation_text,
+                    ];
+                })
+            )
+
+            ->merge(
+                $student->explorationResponses->map(function ($item) {
+
+                    $question = null;
+
+                    if ($item->step?->exploration) {
+                        $exploration = $item->step->exploration;
+
+                        $question =
+                            $exploration->case_study
+                            ?? $exploration->question
+                            ?? null;
+                    }
+
+                    return [
+                        'type' => 'Exploration',
+                        'step_title' => $item->step?->title,
+                        'step_type' => $item->step?->step_type,
+                        'question' => $question,
+                        'answer' => $item->exploration_text,
+                    ];
+                })
+            )
+
+            ->merge(
+                $student->reviewResponses->map(function ($item) {
+
+                    $question = null;
+
+                    if ($item->step?->review) {
+                        $review = $item->step->review;
+
+                        $question =
+                            $review->question
+                            ?? $review->review_question
+                            ?? null;
+                    }
+
+                    return [
+                        'type' => 'Review',
+                        'step_title' => $item->step?->title,
+                        'step_type' => $item->step?->step_type,
+                        'question' => $question,
+                        'answer' => $item->review_text,
+                    ];
+                })
+            )
+
+            ->values();
+
+        return Inertia::render(
+            'Admin/Meetings/StudentResults/Show',
+            [
+                'meeting' => $meeting,
+                'student' => $student,
+                'responses' => $responses,
+            ]
+        );
     }
 }

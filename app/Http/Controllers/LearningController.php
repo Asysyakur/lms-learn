@@ -173,7 +173,7 @@ class LearningController extends Controller
                 'steps.observation',
                 'steps.asks',
                 'steps.exploration',
-                'steps.practice',
+                'steps.practices',
                 'steps.review',
                 'steps.reflection',
             ])
@@ -207,7 +207,7 @@ class LearningController extends Controller
                 'steps.observation',
                 'steps.asks',
                 'steps.exploration',
-                'steps.practice',
+                'steps.practices',
                 'steps.review',
                 'steps.reflection',
             ])
@@ -298,17 +298,37 @@ class LearningController extends Controller
                     'observed_at' => now(),
                 ]
             );
-        } elseif ($stepType === 'ask' && $askId) {
-            MeetingStepAskResponse::query()->updateOrCreate(
-                ['meeting_step_ask_id' => $askId, 'user_id' => $userId],
-                [
-                    'meeting_id' => $meeting->id,
-                    'meeting_step_id' => $meetingStep->id,
-                    'answer_text' => $responseText,
-                    'answer_payload' => $responsePayload,
-                    'answered_at' => now(),
-                ]
-            );
+        } elseif ($stepType === 'ask') {
+
+            $payload = $responsePayload ?? [];
+
+            $items = $payload['items'] ?? [];
+
+            foreach ($items as $item) {
+
+                $ask = MeetingStepAsk::find($item['id']);
+
+                if (!$ask) {
+                    continue;
+                }
+
+                MeetingStepAskResponse::query()->updateOrCreate(
+                    [
+                        'meeting_step_id' => $meetingStep->id,
+                        'meeting_step_ask_id' => $ask->id,
+                        'user_id' => $userId,
+                    ],
+                    [
+                        'meeting_id' => $meeting->id,
+
+                        'answer_text' => $item['answer'] ?? null,
+
+                        'answer_payload' => $item,
+
+                        'answered_at' => now(),
+                    ]
+                );
+            }
         } elseif ($stepType === 'exploration') {
             MeetingStepExplorationResponse::query()->updateOrCreate(
                 ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
@@ -320,15 +340,29 @@ class LearningController extends Controller
                 ]
             );
         } elseif ($stepType === 'practice') {
+
+            $payload = $responsePayload ?? [];
+
+            $items = $payload['items'] ?? [];
+
+            $practiceText = collect($items)
+                ->map(function ($item, $index) {
+                    return ($index + 1) . '. ' . ($item['answer'] ?? '-');
+                })
+                ->implode("\n");
+
             MeetingStepPracticeResponse::query()->updateOrCreate(
-                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_step_id' => $meetingStep->id,
+                    'user_id' => $userId,
+                ],
                 [
                     'meeting_id' => $meeting->id,
-                    'practice_text' => $responseText,
-                    'practice_payload' => $responsePayload ?? [
-                        'mode' => $meetingStep->practice?->assessment_mode ?? 'quiz',
-                        'answer' => $responseText,
-                    ],
+
+                    'practice_text' => $practiceText,
+
+                    'practice_payload' => $payload,
+
                     'practiced_at' => now(),
                 ]
             );
@@ -377,7 +411,7 @@ class LearningController extends Controller
             case 'exploration':
                 return array_merge($base, $this->formatExplorationStep($step->exploration));
             case 'practice':
-                return array_merge($base, $this->formatPracticeStep($step->practice));
+                return array_merge($base, $this->formatPracticeStep($step->practices));
             case 'review':
                 return array_merge($base, $this->formatReviewStep($step->review));
             case 'reflection':
@@ -515,9 +549,9 @@ class LearningController extends Controller
         if (!$step) {
             return ['questions' => []];
         }
-        
+
         $asks = $step->asks()->orderBy('order')->get();
-        
+
         return [
             'questions' => $asks->map(function ($question) {
                 return [
@@ -539,12 +573,42 @@ class LearningController extends Controller
         ];
     }
 
-    private function formatPracticeStep(?MeetingStepPractice $practice): array
+    private function formatPracticeStep($practices): array
     {
+        $allItems = collect($practices)->flatMap(function ($practice, $index) {
+
+            $items = is_array($practice->assessment_items)
+                ? $practice->assessment_items
+                : [];
+
+            if (count($items)) {
+                return collect($items)->map(function ($item, $itemIndex) use ($practice, $index) {
+
+                    return [
+                        'id' => $item['id'] ?? ('practice-' . $index . '-' . $itemIndex),
+
+                        'mode' => $item['mode'] ?? $practice->assessment_mode ?? 'essay',
+
+                        'question' => $item['question'] ?? $practice->assessment_question,
+
+                        'options' => $item['options'] ?? $practice->assessment_options ?? [],
+                    ];
+                });
+            }
+
+            return [[
+                'id' => 'practice-' . ($index + 1),
+
+                'mode' => $practice->assessment_mode ?: 'essay',
+
+                'question' => $practice->assessment_question,
+
+                'options' => $practice->assessment_options ?: [],
+            ]];
+        })->values()->toArray();
+
         return [
-            'assessment_mode' => $practice ? $practice->assessment_mode : null,
-            'assessment_question' => $practice ? $practice->assessment_question : null,
-            'assessment_options' => $practice ? $practice->assessment_options : null,
+            'assessment_items' => $allItems,
         ];
     }
 

@@ -93,4 +93,12 @@ class MeetingStep extends Model
     {
         return $this->hasMany(MeetingStepReflectionResponse::class);
     }
+
+    public function practices()
+    {
+        return $this->hasMany(
+            MeetingStepPractice::class,
+            'meeting_step_id'
+        );
+    }
 }

@@ -16,12 +16,14 @@ class MeetingStepPractice extends Model
         'assessment_mode',
         'assessment_question',
         'assessment_options',
+        'assessment_items',
     ];
 
     protected function casts(): array
     {
         return [
             'assessment_options' => 'array',
+            'assessment_items' => 'array',
         ];
     }
 
