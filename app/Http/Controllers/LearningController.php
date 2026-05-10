@@ -656,10 +656,8 @@ class LearningController extends Controller
     private function formatReviewStep(?MeetingStepReview $review): array
     {
         return [
-            'review_prompt' => $review ? $review->review_prompt : null,
-            'review_code1' => $review ? $review->review_code1 : null,
-            'review_code2' => $review ? $review->review_code2 : null,
-            'review_code_language' => $review ? $review->review_code_language : 'javascript',
+            'instruction_text' => $review?->instruction_text,
+            'proof_questions' => $review?->proof_questions ?? [],
         ];
     }
 

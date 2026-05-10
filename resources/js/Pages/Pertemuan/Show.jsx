@@ -218,6 +218,13 @@ export default function StepPage({
         currentStep?.review_code_language || savedCodeLanguage,
     );
     const [reviewSaved, setReviewSaved] = useState(savedReviewResponse);
+    const [reviewAnswers, setReviewAnswers] = useState(
+        (currentStep?.proof_questions || []).map((question, index) => ({
+            question,
+            review_answer: "",
+            evidence: null,
+        })),
+    );
     const [reflectionDraft, setReflectionDraft] = useState(
         savedReflectionResponse,
     );
@@ -374,32 +381,36 @@ export default function StepPage({
     };
 
     const saveReview = (onSuccess) => {
-        const isCompileMode = Boolean(
-            currentStep?.review_code_language ||
-            currentStep?.code_language ||
-            reviewCode1 ||
-            reviewCode2,
+        const proofQuestions = currentStep?.proof_questions || [];
+
+        const practicePayload = responseByType("practice")?.response_payload;
+
+        const practiceItems = practicePayload?.items || [];
+
+        const items = proofQuestions.map((question, index) => ({
+            question,
+            student_answer: practiceItems[index]?.answer || "",
+            review_answer: reviewAnswers[index]?.review_answer || "",
+            evidence: reviewAnswers[index]?.evidence || null,
+        }));
+
+        saveResponse(
+            currentStep.step,
+            {
+                response_text: "Review submitted",
+
+                response_payload: {
+                    items,
+                },
+            },
+            () => {
+                setReviewSaved("Review submitted");
+
+                if (onSuccess) {
+                    onSuccess();
+                }
+            },
         );
-        let responseText = "";
-
-        if (isCompileMode) {
-            responseText = JSON.stringify({
-                code1: reviewCode1.trim(),
-                code2: reviewCode2.trim(),
-                output1: reviewCode1Output,
-                output2: reviewCode2Output,
-            });
-        } else {
-            responseText = "";
-        }
-
-        saveResponse(currentStep.step, { response_text: responseText }, () => {
-            setReviewSaved(responseText);
-
-            if (onSuccess) {
-                onSuccess();
-            }
-        });
     };
 
     const saveReflection = (onSuccess) => {
@@ -545,24 +556,18 @@ export default function StepPage({
                 return (
                     <StepFiveReview
                         stepData={currentStep}
-                        explorationSaved={explorationSaved}
-                        explorationMode={savedExplorationMode}
-                        explorationOutput={
-                            savedExplorationPayload?.output || ""
+                        savedResponse={savedCurrentResponse}
+                        practiceResponses={(
+                            savedPracticeResponse?.response_payload?.items || []
+                        ).map((item) => ({
+                            question: item.question,
+                            answer: item.answer,
+                        }))}
+                        onSave={(payload) =>
+                            saveResponse(currentStep.step, payload, goNext)
                         }
-                        reviewCode1={reviewCode1}
-                        setReviewCode1={setReviewCode1}
-                        reviewCode1Output={reviewCode1Output}
-                        setReviewCode1Output={setReviewCode1Output}
-                        reviewCode2={reviewCode2}
-                        setReviewCode2={setReviewCode2}
-                        reviewCode2Output={reviewCode2Output}
-                        setReviewCode2Output={setReviewCode2Output}
-                        codeLanguage={codingLanguage}
-                        setCodingLanguage={setCodingLanguage}
-                        onSave={saveReview}
                         nextLabel={nextStepTitle()}
-                        onNext={() => saveReview(goNext)}
+                        onNext={goNext}
                     />
                 );
             case "reflection":

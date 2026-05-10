@@ -13,11 +13,16 @@ class MeetingStepReview extends Model
 
     protected $fillable = [
         'meeting_step_id',
-        'review_prompt',
-        'review_code1',
-        'review_code2',
-        'review_code_language',
+        'instruction_text',
+        'proof_questions',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'proof_questions' => 'array',
+        ];
+    }
 
     public function meetingStep(): BelongsTo
     {

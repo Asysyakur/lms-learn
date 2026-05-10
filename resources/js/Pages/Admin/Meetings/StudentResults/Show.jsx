@@ -134,6 +134,63 @@ export default function Show({ meeting, student, responses = [] }) {
                                             ),
                                         )}
                                     </div>
+                                ) : response.type === "Review" &&
+                                  Array.isArray(response.items) ? (
+                                    <div className="space-y-6">
+                                        {response.items.map(
+                                            (item, itemIndex) => (
+                                                <div
+                                                    key={itemIndex}
+                                                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                                                >
+                                                    <div className="mb-4">
+                                                        <div className="mb-2 text-sm font-semibold text-blue-700">
+                                                            Pertanyaan{" "}
+                                                            {itemIndex + 1}
+                                                        </div>
+
+                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                            {item.question}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-4 rounded-xl bg-white p-4">
+                                                        <div className="mb-2 text-xs font-semibold text-slate-500">
+                                                            Jawaban Awal Siswa
+                                                        </div>
+
+                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                            {item.student_answer ||
+                                                                "-"}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mb-4 rounded-xl bg-white p-4">
+                                                        <div className="mb-2 text-xs font-semibold text-slate-500">
+                                                            Pembuktian & Argumen
+                                                        </div>
+
+                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                            {item.review_answer ||
+                                                                "-"}
+                                                        </div>
+                                                    </div>
+
+                                                    {item.evidence && (
+                                                        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                                                            <img
+                                                                src={
+                                                                    item.evidence
+                                                                }
+                                                                alt="Bukti"
+                                                                className="max-h-[400px] w-full object-contain"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
                                 ) : response.items ? (
                                     <div className="space-y-4">
                                         {" "}

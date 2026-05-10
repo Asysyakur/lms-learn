@@ -206,15 +206,15 @@ class StepController extends Controller
                 break;
 
             case 'review':
+
                 $step->review()->updateOrCreate(
                     ['meeting_step_id' => $step->id],
                     [
-                        'review_prompt' => $request->review_prompt,
-                        'review_code1' => $request->review_code1,
-                        'review_code2' => $request->review_code2,
-                        'review_code_language' => $request->review_code_language ?? 'javascript',
+                        'instruction_text' => $request->instruction_text,
+                        'proof_questions' => $request->proof_questions ?? [],
                     ]
                 );
+
                 break;
 
             case 'reflection':
@@ -569,28 +569,49 @@ class StepController extends Controller
             ->merge(
                 $student->reviewResponses->map(function ($item) {
 
-                    $question = null;
-
-                    if ($item->step?->review) {
-                        $review = $item->step->review;
-
-                        $question =
-                            $review->question
-                            ?? $review->review_question
-                            ?? null;
-                    }
+                    $payloadItems =
+                        $item->review_payload['items'] ?? [];
 
                     return [
+
                         'type' => 'Review',
-                        'step_title' => $item->step?->title,
-                        'step_type' => $item->step?->step_type,
-                        'question' => $question,
-                        'answer' => $item->review_text,
-                        'step_order' => $item->step?->step_number,
+
+                        'step_title' =>
+                        $item->step?->title,
+
+                        'step_type' =>
+                        $item->step?->step_type,
+
+                        'step_order' =>
+                        $item->step?->step_number,
+
+                        'items' => collect($payloadItems)
+                            ->map(function ($reviewItem, $index) {
+
+                                return [
+
+                                    'question' =>
+                                    $reviewItem['question']
+                                        ?? '-',
+
+                                    'student_answer' =>
+                                    $reviewItem['student_answer']
+                                        ?? '-',
+
+                                    'review_answer' =>
+                                    $reviewItem['review_answer']
+                                        ?? '-',
+
+                                    'evidence' =>
+                                    $reviewItem['evidence']
+                                        ?? null,
+                                ];
+                            })
+                            ->values()
+                            ->toArray(),
                     ];
                 })
             )
-
             ->sortBy('step_order')
             ->values();
 

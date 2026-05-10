@@ -140,6 +140,9 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
             )
                 ? step.practice.assessment_options.join("\n")
                 : "",
+            proof_questions: Array.isArray(step?.review?.proof_questions)
+                ? step.review.proof_questions
+                : [],
             review_prompt: step?.review?.review_prompt ?? "",
             review_code1: step?.review?.review_code1 ?? "",
             review_code2: step?.review?.review_code2 ?? "",
@@ -1505,7 +1508,7 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                             />
                                         </div>
                                     </div>
-                                    
+
                                     <div className="space-y-2">
                                         {mission.questions.map((q, qidx) => (
                                             <div
@@ -1690,97 +1693,66 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                 )}
 
                 {data.step_type === "review" && (
-                    <div className="space-y-4">
+                    <div className="space-y-6">
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Prompt Review
+                            <label className="mb-2 block text-sm font-medium">
+                                Instruksi Pembuktian
                             </label>
+
                             <textarea
-                                className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                placeholder="Instruksi untuk siswa saat review"
-                                value={data.review_prompt}
+                                value={data.instruction_text}
                                 onChange={(e) =>
-                                    setData("review_prompt", e.target.value)
+                                    setData("instruction_text", e.target.value)
                                 }
+                                rows={6}
+                                className="w-full rounded-xl border border-slate-300"
                             />
                         </div>
 
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 space-y-4">
+                        <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-slate-900">
-                                    Template Codingan (Opsional)
+                                <h3 className="font-semibold">
+                                    Pertanyaan Pembuktian
                                 </h3>
-                                <span className="text-xs text-slate-600">
-                                    Untuk mode compile code
-                                </span>
-                            </div>
 
-                            <div className="max-w-xs">
-                                <label className="block text-xs font-semibold text-slate-700">
-                                    Bahasa Pemrograman
-                                </label>
-                                <select
-                                    className="mt-1 w-full rounded-lg border-slate-300 text-sm"
-                                    value={data.review_code_language}
-                                    onChange={(e) =>
-                                        setData(
-                                            "review_code_language",
-                                            e.target.value,
-                                        )
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setData("proof_questions", [
+                                            ...data.proof_questions,
+                                            {
+                                                question: "",
+                                            },
+                                        ])
                                     }
+                                    className="rounded-lg bg-blue-500 px-4 py-2 text-white"
                                 >
-                                    {CODE_LANGUAGES.map((lang) => (
-                                        <option
-                                            key={lang.value}
-                                            value={lang.value}
-                                        >
-                                            {lang.label}
-                                        </option>
-                                    ))}
-                                </select>
+                                    Tambah
+                                </button>
                             </div>
 
-                            {/* Code Block 1 */}
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    Codingan Template 1
-                                </label>
-                                <textarea
-                                    className="mt-1 min-h-40 w-full rounded-lg border-slate-300 font-mono text-sm"
-                                    placeholder="Masukkan template codingan pertama..."
-                                    value={data.review_code1}
-                                    onChange={(e) =>
-                                        setData("review_code1", e.target.value)
-                                    }
-                                />
-                                {data.review_code1 && (
-                                    <CodePreview
-                                        code={data.review_code1}
-                                        language={data.review_code_language}
-                                    />
-                                )}
-                            </div>
+                            {data.proof_questions.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className="rounded-xl border p-4"
+                                >
+                                    <textarea
+                                        value={item.question}
+                                        onChange={(e) => {
+                                            const updated = [
+                                                ...data.proof_questions,
+                                            ];
 
-                            {/* Code Block 2 */}
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    Codingan Template 2
-                                </label>
-                                <textarea
-                                    className="mt-1 min-h-40 w-full rounded-lg border-slate-300 font-mono text-sm"
-                                    placeholder="Masukkan template codingan kedua..."
-                                    value={data.review_code2}
-                                    onChange={(e) =>
-                                        setData("review_code2", e.target.value)
-                                    }
-                                />
-                                {data.review_code2 && (
-                                    <CodePreview
-                                        code={data.review_code2}
-                                        language={data.review_code_language}
+                                            updated[index].question =
+                                                e.target.value;
+
+                                            setData("proof_questions", updated);
+                                        }}
+                                        rows={3}
+                                        className="w-full rounded-lg border"
                                     />
-                                )}
-                            </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
