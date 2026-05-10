@@ -17,6 +17,7 @@ class MeetingStepExplorationResponse extends Model
         'exploration_text',
         'exploration_payload',
         'explored_at',
+        'mission_index',
     ];
 
     protected function casts(): array

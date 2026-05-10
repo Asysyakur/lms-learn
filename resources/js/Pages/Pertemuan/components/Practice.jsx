@@ -131,19 +131,27 @@ export default function StepFourPractice({
             </div>
 
             <div className="course-detail-card space-y-3">
-                <h3 className="course-detail-title">Catatan</h3>
-                <p className="course-detail-text">
-                    Latihan soal bisa berisi pilihan ganda, essay, atau
-                    kombinasi keduanya.
-                </p>
-                <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
-                    <div className="font-semibold text-slate-900">
-                        Jawaban tersimpan
-                    </div>
-                    <p className="mt-2">
-                        {assessmentSaved ||
-                            "Belum ada jawaban latihan soal yang disimpan."}
-                    </p>
+                <h3 className="course-detail-title">Jawaban Tersimpan</h3>
+
+                <div className="space-y-3">
+                    {practiceItems.map((item, index) => (
+                        <div
+                            key={item.id || index}
+                            className="pb-3 border-b border-slate-200 last:border-b-0"
+                        >
+                            <p className="text-xs font-semibold text-slate-600">
+                                Soal {index + 1}:
+                            </p>
+
+                            <p className="text-sm text-slate-700 mt-1">
+                                {getAnswer(item) || (
+                                    <span className="italic text-slate-400">
+                                        Belum dijawab
+                                    </span>
+                                )}
+                            </p>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>

@@ -330,12 +330,24 @@ class LearningController extends Controller
                 );
             }
         } elseif ($stepType === 'exploration') {
+
             MeetingStepExplorationResponse::query()->updateOrCreate(
-                ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
+                [
+                    'meeting_step_id' => $meetingStep->id,
+                    'user_id' => $userId,
+
+                    'mission_index' =>
+                    $responsePayload['mission_index'] ?? 0,
+                ],
                 [
                     'meeting_id' => $meeting->id,
-                    'exploration_text' => $responseText,
-                    'exploration_payload' => $responsePayload,
+
+                    'exploration_text' =>
+                    json_encode($responsePayload),
+
+                    'exploration_payload' =>
+                    $responsePayload,
+
                     'explored_at' => now(),
                 ]
             );
@@ -397,9 +409,15 @@ class LearningController extends Controller
     {
         $base = [
             'id' => $step->id,
+
+            'meeting_id' => $step->meeting_id,
+
             'step' => $step->step_number,
+
             'step_type' => $step->step_type,
+
             'title' => $step->title,
+
             'desc' => $step->description,
         ];
 
@@ -498,8 +516,18 @@ class LearningController extends Controller
 
         // Map exploration responses
         foreach ($explorationResponses as $response) {
-            $stepNumber = $response->meetingStep->step_number;
-            $responses[$stepNumber] = [
+
+            $stepNumber =
+                $response->meetingStep->step_number;
+
+            if (!isset($responses[$stepNumber])) {
+                $responses[$stepNumber] = [
+                    'exploration_responses' => [],
+                ];
+            }
+
+            $responses[$stepNumber]['exploration_responses'][] = [
+                'mission_index' => $response->mission_index,
                 'response_text' => $response->exploration_text,
                 'response_payload' => $response->exploration_payload,
             ];
@@ -566,10 +594,23 @@ class LearningController extends Controller
     private function formatExplorationStep(?MeetingStepExploration $exploration): array
     {
         return [
-            'code_language' => $exploration ? $exploration->code_language : null,
-            'exploration_prompt' => $exploration ? $exploration->exploration_prompt : null,
-            'exploration_pdf_url' => $exploration ? $exploration->exploration_pdf_url : null,
-            'materials' => $exploration ? $exploration->materials : [],
+            'code_language' =>
+            $exploration?->code_language,
+
+            'exploration_prompt' =>
+            $exploration?->exploration_prompt,
+
+            'materials' =>
+            $exploration?->materials ?? [],
+
+            'exploration_mode' =>
+            $exploration?->exploration_mode,
+
+            'case_studies' =>
+            $exploration?->case_studies ?? [],
+
+            'missions' =>
+            $exploration?->missions ?? [],
         ];
     }
 

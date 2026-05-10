@@ -75,26 +75,88 @@ export default function Show({ meeting, student, responses = [] }) {
                                     </p>
                                 </div>
 
-                                {response.items ? (
+                                {response.type === "Exploration" &&
+                                Array.isArray(response.answer) ? (
+                                    <div className="space-y-6">
+                                        {response.answer.map(
+                                            (mission, missionIndex) => (
+                                                <div
+                                                    key={missionIndex}
+                                                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                                                >
+                                                    <div className="mb-4 rounded-xl border border-orange-200 bg-orange-50 p-4">
+                                                        <div className="text-sm font-semibold text-orange-700">
+                                                            {mission.mission_title ||
+                                                                `Mission ${missionIndex + 1}`}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="space-y-4">
+                                                        {mission.items?.map(
+                                                            (
+                                                                item,
+                                                                itemIndex,
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        itemIndex
+                                                                    }
+                                                                    className="rounded-xl border border-slate-200 bg-white p-4"
+                                                                >
+                                                                    <div className="mb-2 text-sm font-semibold text-blue-700">
+                                                                        Pertanyaan{" "}
+                                                                        {itemIndex +
+                                                                            1}
+                                                                    </div>
+
+                                                                    <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
+                                                                        {
+                                                                            item.question
+                                                                        }
+                                                                    </div>
+
+                                                                    <div className="rounded-lg bg-slate-50 p-3">
+                                                                        <div className="mb-1 text-xs font-semibold text-slate-500">
+                                                                            Jawaban
+                                                                            Siswa
+                                                                        </div>
+
+                                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                                            {item.answer ||
+                                                                                "-"}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                ) : response.items ? (
                                     <div className="space-y-4">
+                                        {" "}
                                         {response.items.map(
                                             (item, itemIndex) => (
                                                 <div
                                                     key={itemIndex}
                                                     className="rounded-xl border border-slate-200 bg-slate-50 p-4"
                                                 >
+                                                    {" "}
                                                     <div className="mb-2 text-sm font-semibold text-blue-700">
+                                                        {" "}
                                                         Pertanyaan{" "}
-                                                        {itemIndex + 1}
-                                                    </div>
-
+                                                        {itemIndex + 1}{" "}
+                                                    </div>{" "}
                                                     <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
-                                                        {item.question}
-                                                    </div>
-
+                                                        {" "}
+                                                        {item.question}{" "}
+                                                    </div>{" "}
                                                     {item.mode === "quiz" &&
                                                         item.options && (
                                                             <div className="mb-4 space-y-2">
+                                                                {" "}
                                                                 {item.options.map(
                                                                     (
                                                                         option,
@@ -104,56 +166,58 @@ export default function Show({ meeting, student, responses = [] }) {
                                                                             key={
                                                                                 optionIndex
                                                                             }
-                                                                            className={`rounded-lg border px-3 py-2 text-sm ${
-                                                                                item.answer ===
-                                                                                option
-                                                                                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                                                                                    : "border-slate-200 bg-white text-slate-700"
-                                                                            }`}
+                                                                            className={`rounded-lg border px-3 py-2 text-sm ${item.answer === option ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-200 bg-white text-slate-700"}`}
                                                                         >
+                                                                            {" "}
                                                                             {
                                                                                 option
-                                                                            }
+                                                                            }{" "}
                                                                         </div>
                                                                     ),
-                                                                )}
+                                                                )}{" "}
                                                             </div>
-                                                        )}
-
+                                                        )}{" "}
                                                     <div className="rounded-lg bg-white p-3">
+                                                        {" "}
                                                         <div className="mb-1 text-xs font-semibold text-slate-500">
-                                                            Jawaban Siswa
-                                                        </div>
-
+                                                            {" "}
+                                                            Jawaban Siswa{" "}
+                                                        </div>{" "}
                                                         <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                            {item.answer || "-"}
-                                                        </div>
-                                                    </div>
+                                                            {" "}
+                                                            {item.answer ||
+                                                                "-"}{" "}
+                                                        </div>{" "}
+                                                    </div>{" "}
                                                 </div>
                                             ),
-                                        )}
+                                        )}{" "}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
+                                        {" "}
                                         <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                                            {" "}
                                             <div className="mb-2 text-sm font-semibold text-blue-700">
-                                                Pertanyaan
-                                            </div>
-
+                                                {" "}
+                                                Pertanyaan{" "}
+                                            </div>{" "}
                                             <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                {response.question || "-"}
-                                            </div>
-                                        </div>
-
+                                                {" "}
+                                                {response.question || "-"}{" "}
+                                            </div>{" "}
+                                        </div>{" "}
                                         <div className="rounded-xl bg-slate-50 p-4">
+                                            {" "}
                                             <div className="mb-2 text-sm font-semibold text-slate-700">
-                                                Jawaban Siswa
-                                            </div>
-
+                                                {" "}
+                                                Jawaban Siswa{" "}
+                                            </div>{" "}
                                             <pre className="whitespace-pre-wrap break-words text-sm text-slate-700">
-                                                {response.answer || "-"}
-                                            </pre>
-                                        </div>
+                                                {" "}
+                                                {response.answer || "-"}{" "}
+                                            </pre>{" "}
+                                        </div>{" "}
                                     </div>
                                 )}
                             </div>

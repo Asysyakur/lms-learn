@@ -521,6 +521,7 @@ export default function StepPage({
                         explorationSaved={explorationSaved}
                         onSave={saveExploration}
                         nextLabel={nextStepTitle()}
+                        savedResponses={savedResponses}
                         onNext={() => saveExploration(goNext)}
                     />
                 );

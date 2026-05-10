@@ -12,6 +12,7 @@ export default function StepThreeExploration({
     codeLanguage,
     setCompileOutput,
     onNext,
+    savedResponses,
     nextLabel = "Lanjut",
 }) {
     const languageOptions = [
@@ -21,12 +22,221 @@ export default function StepThreeExploration({
         { value: "html", label: "HTML" },
         { value: "css", label: "CSS" },
     ];
+    function CaseStudyCard({ study }) {
+        const [output, setOutput] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [selectedLang, setSelectedLang] = useState(
+            study.language || "python",
+        );
+        const preRef = useRef(null);
+        const lineRef = useRef(null);
+        const rawCode = String(study.code || "");
+        const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
+        const lineHeight = 22; // px per line (approx)
+        const preHeight = Math.min(
+            720,
+            Math.max(120, codeLines.length * lineHeight),
+        );
 
+        const runCode = async () => {
+            setLoading(true);
+            setOutput("");
+
+            try {
+                if (selectedLang === "python" || selectedLang === "php") {
+                    const response = await window.axios.post(
+                        route("code.run"),
+                        {
+                            language: selectedLang,
+                            code: study.code,
+                            inputs: [],
+                        },
+                    );
+
+                    setOutput(response.data.output || "Program selesai.");
+                } else if (selectedLang === "javascript") {
+                    // Run in-browser for JS
+                    const logs = [];
+                    const originalLog = console.log;
+                    const originalWarn = console.warn;
+                    const originalError = console.error;
+
+                    console.log = (...args) => logs.push(args.join(" "));
+                    console.warn = (...args) => logs.push(args.join(" "));
+                    console.error = (...args) => logs.push(args.join(" "));
+
+                    try {
+                        const result = Function(
+                            '"use strict";\n' + study.code,
+                        )();
+                        if (result !== undefined) logs.push(String(result));
+                        setOutput(
+                            logs.join("\n") || "Program berhasil dijalankan.",
+                        );
+                    } catch (e) {
+                        setOutput(e.name + ": " + e.message);
+                    } finally {
+                        console.log = originalLog;
+                        console.warn = originalWarn;
+                        console.error = originalError;
+                    }
+                } else {
+                    setOutput("Bahasa ini belum didukung untuk dijalankan.");
+                }
+            } catch (error) {
+                setOutput(
+                    error.response?.data?.output ||
+                        error.response?.data?.message ||
+                        error.message ||
+                        "Terjadi kesalahan saat menjalankan program.",
+                );
+            } finally {
+                setLoading(false);
+            }
+        };
+        return (
+            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+                        {study.number || 1}
+                    </div>
+
+                    <h3 className="text-lg font-bold text-slate-900">
+                        {study.title}
+                    </h3>
+                </div>
+
+                <div className="overflow-hidden rounded-2xl bg-[#0B1120]">
+                    <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+                        <div />
+
+                        <div className="flex items-center gap-2">
+                            <select
+                                value={selectedLang}
+                                onChange={(e) =>
+                                    setSelectedLang(e.target.value)
+                                }
+                                className="rounded-xl bg-[#1E293B] px-3 py-1 text-sm text-slate-200"
+                            >
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="php">PHP</option>
+                                <option value="html">HTML</option>
+                                <option value="css">CSS</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto overflow-y-hidden">
+                        <div className="flex min-w-max font-mono text-sm">
+                            <div
+                                ref={lineRef}
+                                className="select-none bg-[#071623] px-4 py-3 text-slate-500"
+                            >
+                                {codeLines.map((_, i) => (
+                                    <div
+                                        key={i}
+                                        style={{
+                                            height: lineHeight,
+                                            lineHeight: `${lineHeight}px`,
+                                        }}
+                                        className="text-right pr-1"
+                                    >
+                                        {i + 1}
+                                    </div>
+                                ))}
+                            </div>
+
+                            <pre
+                                ref={preRef}
+                                onScroll={(e) => {
+                                    if (lineRef.current)
+                                        lineRef.current.scrollTop =
+                                            e.target.scrollTop;
+                                }}
+                                className="m-0 bg-[#0B1120] px-5 py-4 text-slate-200 overflow-visible"
+                            >
+                                <code>
+                                    {codeLines.map((line, idx) => (
+                                        <div
+                                            key={idx}
+                                            style={{
+                                                height: lineHeight,
+                                                lineHeight: `${lineHeight}px`,
+                                            }}
+                                            className="whitespace-pre"
+                                        >
+                                            {line || " "}
+                                        </div>
+                                    ))}
+                                </code>
+                            </pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={runCode}
+                            disabled={loading}
+                            className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        >
+                            {loading ? "Running..." : "▶ Run"}
+                        </button>
+
+                        <button
+                            className="rounded-xl border border-slate-300 px-5 py-2 text-sm font-semibold"
+                            onClick={() => setOutput("")}
+                        >
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="mb-2 font-semibold text-slate-700">
+                        Output Program
+                    </div>
+
+                    <pre className="whitespace-pre-wrap text-sm text-slate-700">
+                        {output ||
+                            "Output akan muncul di sini setelah menekan tombol Run."}
+                    </pre>
+                </div>
+            </div>
+        );
+    }
     const materials =
         stepData?.materials || stepData?.exploration_materials || [];
     const [activeTab, setActiveTab] = useState("materials");
     const [activeMaterialIndex, setActiveMaterialIndex] = useState(0);
+    const [activeMissionIndex, setActiveMissionIndex] = useState(0);
+    const [missionAnswers, setMissionAnswers] = useState({});
+    const [savingMission, setSavingMission] = useState(false);
     const materialRefs = useRef([]);
+
+    useEffect(() => {
+        const saved = savedResponses?.[Number(stepData.step)];
+
+        console.log(saved);
+
+        if (!saved?.exploration_responses) return;
+
+        const answers = {};
+
+        saved.exploration_responses.forEach((missionResponse) => {
+            const missionIndex = Number(missionResponse.mission_index);
+
+            missionResponse.response_payload?.items?.forEach((item, qidx) => {
+                answers[`${missionIndex}-${qidx}`] = item.answer || "";
+            });
+        });
+
+        console.log(answers);
+
+        setMissionAnswers(answers);
+    }, [savedResponses, stepData.step]);
 
     const scrollToMaterial = (index) => {
         setActiveMaterialIndex(index);
@@ -90,7 +300,8 @@ export default function StepThreeExploration({
             const scrollTop = window.scrollY || window.pageYOffset || 0;
             const viewportBottom = scrollTop + window.innerHeight;
             const pageBottom =
-                document.documentElement.scrollHeight || document.body.scrollHeight;
+                document.documentElement.scrollHeight ||
+                document.body.scrollHeight;
 
             if (viewportBottom >= pageBottom - 8) {
                 setActiveMaterialIndex(sections.length - 1);
@@ -139,25 +350,82 @@ export default function StepThreeExploration({
         return aliases[lang?.toLowerCase()] || lang || "javascript";
     };
 
+    const saveMission = async (mission, missionIndex) => {
+        try {
+            setSavingMission(true);
+
+            const payload = {
+                mission_index: missionIndex,
+                mission_title: mission.title,
+
+                items: mission.questions.map((question, qidx) => ({
+                    question,
+                    answer: missionAnswers[`${missionIndex}-${qidx}`] || "",
+                })),
+            };
+
+            await window.axios.post(
+                route("pertemuan.step.response", {
+                    id: stepData.meeting_id,
+                    step: stepData.step,
+                }),
+                {
+                    response_text: JSON.stringify(payload),
+                    response_payload: payload,
+                },
+            );
+
+            alert("Mission berhasil disimpan 😹");
+        } catch (e) {
+            console.error(e);
+            alert("Gagal menyimpan mission 😭");
+        } finally {
+            setSavingMission(false);
+        }
+    };
+
     return (
-        <div className="course-detail-grid">
+        <div
+            className={
+                activeTab === "materials" ? "course-detail-grid" : "space-y-6"
+            }
+        >
             <div className="course-detail-card space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <BeakerIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     Eksplorasi per pertemuan
                 </div>
+                <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+                    {[
+                        {
+                            key: "materials",
+                            label: "Materi",
+                        },
 
-                <div className="course-exploration-box">
-                    <p className="font-semibold text-slate-900">
-                        Pelajari dan eksplorasi lebih dalam dengan materi, studi
-                        kasus, atau tugas praktis yang disediakan di bagian ini.
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">
-                        {stepData?.exploration_prompt ||
-                            "Bagian ini nanti bisa berisi tugas berbeda sesuai materi dan kebutuhan pertemuan yang sedang dibuka."}
-                    </p>
+                        {
+                            key: "case-studies",
+                            label: "Studi Kasus",
+                        },
+
+                        {
+                            key: "missions",
+                            label: "Mission",
+                        },
+                    ].map((tab) => (
+                        <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                                activeTab === tab.key
+                                    ? "bg-blue-600 text-white shadow"
+                                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
                 </div>
-
                 {/* PDF Viewer Section */}
                 {stepData?.exploration_pdf_url && (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -189,144 +457,431 @@ export default function StepThreeExploration({
                     </div>
                 )}
 
-                {/* Materials Section */}
-                <div className="rounded-lg border border-slate-200 bg-white overflow-auto space-y-6 p-4">
-                    {materials.map((m, idx) => (
-                        <div
-                            key={idx}
-                            ref={(el) => (materialRefs.current[idx] = el)}
-                            data-material-index={idx}
-                            className="pb-4 border-b border-slate-100 last:border-b-0"
-                        >
-                            <h5 className="font-semibold text-slate-900 mb-3 text-lg">
-                                {m.title || `Materi ${idx + 1}`}
-                            </h5>
+                {activeTab === "materials" && (
+                    <>
+                        <div className="rounded-lg border border-slate-200 bg-white overflow-auto space-y-6 p-4">
+                            {materials.map((m, idx) => (
+                                <div
+                                    key={idx}
+                                    ref={(el) =>
+                                        (materialRefs.current[idx] = el)
+                                    }
+                                    data-material-index={idx}
+                                    className="pb-4 border-b border-slate-100 last:border-b-0"
+                                >
+                                    <h5 className="font-semibold text-slate-900 mb-3 text-lg">
+                                        {m.title || `Materi ${idx + 1}`}
+                                    </h5>
 
-                            {Array.isArray(m.blocks) ? (
-                                <div className="space-y-4">
-                                    {m.blocks.map((block, bidx) => (
-                                        <div key={bidx}>
-                                            {block.type === "text" && (
-                                                <div
-                                                    className="prose prose-sm max-w-none text-slate-700 [&_ul]:my-2 [&_ol]:my-2 [&_ul]:pl-6 [&_ol]:pl-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:my-1"
-                                                    style={{
-                                                        whiteSpace: "pre-wrap",
-                                                        wordBreak: "break-word",
-                                                    }}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: block.content,
-                                                    }}
-                                                />
-                                            )}
-                                            {block.type === "image" && (
-                                                <img
-                                                    src={block.url}
-                                                    alt={
-                                                        block.alt ||
-                                                        "Materi gambar"
-                                                    }
-                                                    className="rounded-lg max-w-full"
-                                                />
-                                            )}
-                                            {block.type === "code" && (
-                                                <div className="relative">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            copyToClipboard(
-                                                                block.code,
-                                                            )
-                                                        }
-                                                        className="absolute top-2 right-2 bg-slate-600 hover:bg-slate-700 text-white px-3 py-1 text-xs rounded z-10"
-                                                    >
-                                                        Salin
-                                                    </button>
-                                                    <div
-                                                        className="mt-2 p-3 rounded overflow-auto"
-                                                        style={{
-                                                            background:
-                                                                "#282C34",
-                                                        }}
-                                                    >
+                                    {Array.isArray(m.blocks) ? (
+                                        <div className="space-y-4">
+                                            {m.blocks.map((block, bidx) => (
+                                                <div key={bidx}>
+                                                    {block.type === "text" && (
                                                         <div
-                                                            dangerouslySetInnerHTML={{
-                                                                __html:
-                                                                    highlightedCode[
-                                                                        `m-${idx}-${bidx}`
-                                                                    ] ||
-                                                                    `<pre><code>${block.code}</code></pre>`,
-                                                            }}
+                                                            className="prose prose-sm max-w-none text-slate-700 [&_ul]:my-2 [&_ol]:my-2 [&_ul]:pl-6 [&_ol]:pl-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:my-1"
                                                             style={{
-                                                                background:
-                                                                    "#282C34",
-                                                                padding:
-                                                                    "0.5rem",
-                                                                borderRadius:
-                                                                    "0.375rem",
-                                                                fontSize:
-                                                                    "14px",
-                                                                lineHeight:
-                                                                    "1.5",
-                                                                fontFamily:
-                                                                    "monospace",
+                                                                whiteSpace:
+                                                                    "pre-wrap",
+                                                                wordBreak:
+                                                                    "break-word",
+                                                            }}
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: block.content,
                                                             }}
                                                         />
+                                                    )}
+                                                    {block.type === "image" && (
+                                                        <img
+                                                            src={block.url}
+                                                            alt={
+                                                                block.alt ||
+                                                                "Materi gambar"
+                                                            }
+                                                            className="rounded-lg max-w-full"
+                                                        />
+                                                    )}
+                                                    {block.type === "code" && (
+                                                        <div className="relative">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    copyToClipboard(
+                                                                        block.code,
+                                                                    )
+                                                                }
+                                                                className="absolute top-2 right-2 bg-slate-600 hover:bg-slate-700 text-white px-3 py-1 text-xs rounded z-10"
+                                                            >
+                                                                Salin
+                                                            </button>
+                                                            <div
+                                                                className="mt-2 p-3 rounded overflow-auto"
+                                                                style={{
+                                                                    background:
+                                                                        "#282C34",
+                                                                }}
+                                                            >
+                                                                <div
+                                                                    dangerouslySetInnerHTML={{
+                                                                        __html:
+                                                                            highlightedCode[
+                                                                                `m-${idx}-${bidx}`
+                                                                            ] ||
+                                                                            `<pre><code>${block.code}</code></pre>`,
+                                                                    }}
+                                                                    style={{
+                                                                        background:
+                                                                            "#282C34",
+                                                                        padding:
+                                                                            "0.5rem",
+                                                                        borderRadius:
+                                                                            "0.375rem",
+                                                                        fontSize:
+                                                                            "14px",
+                                                                        lineHeight:
+                                                                            "1.5",
+                                                                        fontFamily:
+                                                                            "monospace",
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div
+                                            className="prose prose-sm max-w-none text-slate-700"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    m.content ||
+                                                    "<p>Tidak ada konten materi.</p>",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+                {activeTab === "case-studies" && (
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-3xl font-bold text-slate-900">
+                                    Aktivitas Eksplorasi
+                                </h2>
+
+                                <p className="mt-2 text-slate-600">
+                                    Jalankan kedua program di bawah ini lalu
+                                    analisis output-nya.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-700">
+                            Jalankan masing-masing program dengan menekan tombol
+                            Run dan perhatikan hasil output pada bagian bawah.
+                        </div>
+
+                        <div className="space-y-8">
+                            {stepData.case_studies?.map((study, idx) => (
+                                <div
+                                    key={idx}
+                                    className="grid gap-6 xl:grid-cols-2"
+                                >
+                                    <CaseStudyCard
+                                        study={{
+                                            ...study,
+                                            title:
+                                                study.left_title ||
+                                                "Program Prosedural",
+                                            code: study.left_code,
+                                            number: 1,
+                                        }}
+                                    />
+
+                                    <CaseStudyCard
+                                        study={{
+                                            ...study,
+                                            title:
+                                                study.right_title ||
+                                                "Program Berorientasi Objek (PBO)",
+                                            code: study.right_code,
+                                            number: 2,
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="rounded-2xl border border-yellow-200 bg-yellow-50 px-5 py-4 text-sm text-yellow-700">
+                            Setelah menjalankan program dan menganalisis
+                            hasilnya, lanjutkan ke bagian mission.
+                        </div>
+
+                        <button
+                            className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                            onClick={() => setActiveTab("missions")}
+                        >
+                            Lanjut ke Mission
+                        </button>
+                    </div>
+                )}
+                {activeTab === "missions" && (
+                    <>
+                        {/* MISSIONS */}
+                        {Array.isArray(stepData?.missions) &&
+                            stepData.missions.length > 0 && (
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-xl font-bold text-slate-900">
+                                            Missions
+                                        </h3>
+                                    </div>
+
+                                    {stepData.missions
+                                        .slice(
+                                            activeMissionIndex,
+                                            activeMissionIndex + 1,
+                                        )
+                                        .map((mission, midx) => (
+                                            <div
+                                                key={midx}
+                                                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6"
+                                            >
+                                                <div>
+                                                    <h4 className="text-2xl font-bold text-slate-900">
+                                                        {mission.title}
+                                                    </h4>
+
+                                                    <p className="mt-2 text-slate-600">
+                                                        {mission.description}
+                                                    </p>
+                                                </div>
+
+                                                <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                                                    {/* KIRI - GAMBAR */}
+                                                    <div className="space-y-6">
+                                                        {/* GAMBAR A */}
+                                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                                            <div className="mb-3 flex items-center gap-2">
+                                                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+                                                                    A
+                                                                </div>
+
+                                                                <div className="text-sm font-semibold text-slate-700">
+                                                                    Gambar A
+                                                                </div>
+                                                            </div>
+
+                                                            <img
+                                                                src={
+                                                                    mission.left_image
+                                                                }
+                                                                alt="Gambar A"
+                                                                className="w-full rounded-2xl border border-slate-200"
+                                                            />
+                                                        </div>
+
+                                                        {/* GAMBAR B */}
+                                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                                            <div className="mb-3 flex items-center gap-2">
+                                                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
+                                                                    B
+                                                                </div>
+
+                                                                <div className="text-sm font-semibold text-slate-700">
+                                                                    Gambar B
+                                                                </div>
+                                                            </div>
+
+                                                            <img
+                                                                src={
+                                                                    mission.right_image
+                                                                }
+                                                                alt="Gambar B"
+                                                                className="w-full rounded-2xl border border-slate-200"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* KANAN - PERTANYAAN */}
+                                                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                                                        <div className="mb-6">
+                                                            <h5 className="text-2xl font-bold text-slate-900">
+                                                                Jawab Pertanyaan
+                                                            </h5>
+
+                                                            <p className="mt-2 text-sm text-slate-600">
+                                                                Jawablah
+                                                                berdasarkan
+                                                                hasil
+                                                                pengamatanmu
+                                                                terhadap kedua
+                                                                gambar.
+                                                            </p>
+                                                        </div>
+
+                                                        <div className="space-y-5">
+                                                            {mission.questions?.map(
+                                                                (q, qidx) => (
+                                                                    <div
+                                                                        key={
+                                                                            qidx
+                                                                        }
+                                                                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                                                                    >
+                                                                        <label className="mb-3 flex items-start gap-3">
+                                                                            <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+                                                                                {qidx +
+                                                                                    1}
+                                                                            </div>
+
+                                                                            <span className="text-sm font-semibold text-slate-700">
+                                                                                {
+                                                                                    q
+                                                                                }
+                                                                            </span>
+                                                                        </label>
+
+                                                                        <textarea
+                                                                            value={
+                                                                                missionAnswers[
+                                                                                    `${activeMissionIndex}-${qidx}`
+                                                                                ] ||
+                                                                                ""
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) =>
+                                                                                setMissionAnswers(
+                                                                                    (
+                                                                                        prev,
+                                                                                    ) => ({
+                                                                                        ...prev,
+                                                                                        [`${activeMissionIndex}-${qidx}`]:
+                                                                                            e
+                                                                                                .target
+                                                                                                .value,
+                                                                                    }),
+                                                                                )
+                                                                            }
+                                                                            className="min-h-32 w-full rounded-2xl border border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-500"
+                                                                            placeholder="Tulis jawabanmu di sini..."
+                                                                        />
+                                                                    </div>
+                                                                ),
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            )}
+                                            </div>
+                                        ))}
+                                    <div className="flex justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                saveMission(
+                                                    stepData.missions[
+                                                        activeMissionIndex
+                                                    ],
+                                                    activeMissionIndex,
+                                                )
+                                            }
+                                            disabled={savingMission}
+                                            className="rounded-2xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                                        >
+                                            {savingMission
+                                                ? "Menyimpan..."
+                                                : "Simpan Mission"}
+                                        </button>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-6">
+                                        {/* PREV */}
+                                        <button
+                                            type="button"
+                                            disabled={activeMissionIndex === 0}
+                                            onClick={() =>
+                                                setActiveMissionIndex((prev) =>
+                                                    Math.max(prev - 1, 0),
+                                                )
+                                            }
+                                            className="rounded-2xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 disabled:opacity-40"
+                                        >
+                                            Sebelumnya
+                                        </button>
+
+                                        <div className="text-sm font-medium text-slate-500">
+                                            Mission {activeMissionIndex + 1}{" "}
+                                            dari {stepData.missions.length}
                                         </div>
-                                    ))}
+
+                                        {/* NEXT */}
+                                        {activeMissionIndex <
+                                        stepData.missions.length - 1 ? (
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    setActiveMissionIndex(
+                                                        (prev) => prev + 1,
+                                                    )
+                                                }
+                                                className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                                            >
+                                                Mission Berikutnya
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={onNext}
+                                                className="rounded-2xl bg-orange-500 px-6 py-3 font-semibold text-white hover:bg-orange-600"
+                                            >
+                                                {nextLabel}
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
-                            ) : (
-                                <div
-                                    className="prose prose-sm max-w-none text-slate-700"
-                                    dangerouslySetInnerHTML={{
-                                        __html:
-                                            m.content ||
-                                            "<p>Tidak ada konten materi.</p>",
-                                    }}
-                                />
                             )}
-                        </div>
-                    ))}
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                    <button
-                        className="course-secondary-button"
-                        onClick={onNext}
-                    >
-                        {nextLabel}
-                    </button>
-                </div>
-            </div>
-
-            <div className="course-detail-card space-y-3 sticky top-4 max-h-fit">
-                <h3 className="font-bold">Daftar Materi</h3>
-                {materials.length > 0 ? (
-                    <ul className="space-y-1 text-sm">
-                        {materials.map((m, idx) => (
-                            <li key={idx}>
-                                <button
-                                    type="button"
-                                    onClick={() => scrollToMaterial(idx)}
-                                    className={`w-full rounded-lg px-3 py-2 text-left font-medium transition ${
-                                        activeMaterialIndex === idx
-                                            ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200"
-                                            : "text-slate-700 hover:bg-slate-100"
-                                    }`}
-                                >
-                                    {m.title || `Materi ${idx + 1}`}
-                                </button>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p className="course-detail-text">
-                        Tidak ada materi tersedia.
-                    </p>
+                    </>
                 )}
             </div>
+            {activeTab === "materials" && (
+                <div className="course-detail-card space-y-3 sticky top-4 max-h-fit">
+                    <h3 className="font-bold">Daftar Materi</h3>
+                    {materials.length > 0 ? (
+                        <ul className="space-y-1 text-sm">
+                            {materials.map((m, idx) => (
+                                <li key={idx}>
+                                    <button
+                                        type="button"
+                                        onClick={() => scrollToMaterial(idx)}
+                                        className={`w-full rounded-lg px-3 py-2 text-left font-medium transition ${
+                                            activeMaterialIndex === idx
+                                                ? "bg-blue-50 text-blue-600 ring-1 ring-blue-200"
+                                                : "text-slate-700 hover:bg-slate-100"
+                                        }`}
+                                    >
+                                        {m.title || `Materi ${idx + 1}`}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p className="course-detail-text">
+                            Tidak ada materi tersedia.
+                        </p>
+                    )}
+                    <div className="flex justify-end pt-6">
+                        <button
+                            onClick={() => setActiveTab("case-studies")}
+                            className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                        >
+                            Lanjut ke Studi Kasus
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -13,15 +13,18 @@ class MeetingStepExploration extends Model
 
     protected $fillable = [
         'meeting_step_id',
+        'exploration_mode',
         'code_language',
         'exploration_prompt',
         'materials',
         'case_studies',
+        'missions',
     ];
 
     protected $casts = [
         'materials' => 'array',
         'case_studies' => 'array',
+        'missions' => 'array',
     ];
 
     public function meetingStep(): BelongsTo

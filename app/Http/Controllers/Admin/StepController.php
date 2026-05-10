@@ -153,30 +153,35 @@ class StepController extends Controller
                 break;
 
             case 'exploration':
-                $currentExploration = $step->exploration;
+
                 $explorationData = [
-                    'exploration_prompt' => $request->exploration_prompt,
+
+                    'exploration_mode' =>
+                    $request->exploration_mode,
+
+                    'code_language' =>
+                    $request->code_language,
+
+                    'exploration_prompt' =>
+                    $request->exploration_prompt,
+
+                    'materials' =>
+                    $request->materials,
+
+                    'case_studies' =>
+                    $request->case_studies,
+
+                    'missions' => $this->storeMissionImages(
+                        $request->missions ?? [],
+                        $request->file('missions') ?? []
+                    ),
                 ];
-
-                if (Schema::hasColumn('meeting_step_explorations', 'code_language')) {
-                    // store chosen language (if any). presence of code_language indicates compile-capable material
-                    $explorationData['code_language'] = $request->code_language ?: null;
-                }
-
-                // Accept materials / case studies as array or JSON string
-                if (Schema::hasColumn('meeting_step_explorations', 'materials') && $request->filled('materials')) {
-                    $materials = $this->normalizeExplorationItems($request->input('materials'));
-                    $explorationData['materials'] = $this->storeExplorationImages(
-                        $materials ?? [],
-                        $request->file('materials') ?? [],
-                        $currentExploration ? ($currentExploration->materials ?? []) : [],
-                    );
-                }
 
                 $step->exploration()->updateOrCreate(
                     ['meeting_step_id' => $step->id],
                     $explorationData
                 );
+
                 break;
 
             case 'practice':
@@ -440,6 +445,7 @@ class StepController extends Controller
                         'type' => 'Ask',
                         'step_title' => $first->step?->title,
                         'step_type' => $first->step?->step_type,
+                        'step_order' => $first->step?->step_number,
                         'items' => $formattedItems->values()->toArray(),
                     ];
                 })
@@ -470,6 +476,7 @@ class StepController extends Controller
                         'type' => 'Practice',
                         'step_title' => $item->step?->title,
                         'step_type' => $item->step?->step_type,
+                        'step_order' => $item->step?->step_number,
                         'items' => $formattedItems,
                     ];
                 })
@@ -495,6 +502,7 @@ class StepController extends Controller
                         'step_type' => $item->step?->step_type,
                         'question' => $question,
                         'answer' => $item->reflection_text,
+                        'step_order' => $item->step?->step_number,
                     ];
                 })
             )
@@ -519,32 +527,43 @@ class StepController extends Controller
                         'step_type' => $item->step?->step_type,
                         'question' => $question,
                         'answer' => $item->observation_text,
+                        'step_order' => $item->step?->step_number,
                     ];
                 })
             )
 
             ->merge(
-                $student->explorationResponses->map(function ($item) {
 
-                    $question = null;
+                $student->explorationResponses
 
-                    if ($item->step?->exploration) {
-                        $exploration = $item->step->exploration;
+                    ->groupBy('meeting_step_id')
 
-                        $question =
-                            $exploration->case_study
-                            ?? $exploration->question
-                            ?? null;
-                    }
+                    ->map(function ($group) {
 
-                    return [
-                        'type' => 'Exploration',
-                        'step_title' => $item->step?->title,
-                        'step_type' => $item->step?->step_type,
-                        'question' => $question,
-                        'answer' => $item->exploration_text,
-                    ];
-                })
+                        $first = $group->first();
+
+                        return [
+
+                            'type' => 'Exploration',
+
+                            'step_title' =>
+                            $first->step?->title,
+
+                            'step_type' =>
+                            $first->step?->step_type,
+
+                            'answer' => $group
+                                ->map(
+                                    fn($item) =>
+                                    $item->exploration_payload
+                                )
+                                ->values()
+                                ->toArray(),
+
+                            'step_order' => $first->step?->step_number,
+                        ];
+                    })
+
             )
 
             ->merge(
@@ -567,10 +586,12 @@ class StepController extends Controller
                         'step_type' => $item->step?->step_type,
                         'question' => $question,
                         'answer' => $item->review_text,
+                        'step_order' => $item->step?->step_number,
                     ];
                 })
             )
 
+            ->sortBy('step_order')
             ->values();
 
         return Inertia::render(
@@ -581,5 +602,50 @@ class StepController extends Controller
                 'responses' => $responses,
             ]
         );
+    }
+
+    private function storeMissionImages(array $missions, array $files): array
+    {
+        return collect($missions)
+            ->map(function ($mission, $index) use ($files) {
+
+                $leftFile =
+                    data_get($files, $index . '.left_image_file');
+
+                $rightFile =
+                    data_get($files, $index . '.right_image_file');
+
+                // upload gambar kiri
+                if ($leftFile) {
+
+                    $path = $leftFile->store(
+                        'mission-images',
+                        'public'
+                    );
+
+                    $mission['left_image'] =
+                        '/storage/' . $path;
+                }
+
+                // upload gambar kanan
+                if ($rightFile) {
+
+                    $path = $rightFile->store(
+                        'mission-images',
+                        'public'
+                    );
+
+                    $mission['right_image'] =
+                        '/storage/' . $path;
+                }
+
+                // hapus temporary file
+                unset($mission['left_image_file']);
+                unset($mission['right_image_file']);
+
+                return $mission;
+            })
+            ->values()
+            ->toArray();
     }
 }
