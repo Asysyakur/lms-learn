@@ -5,7 +5,7 @@ import StepOneObserve from "@/Pages/Pertemuan/components/Observe";
 import StepTwoAsk from "@/Pages/Pertemuan/components/Ask";
 import StepThreeExploration from "@/Pages/Pertemuan/components/Exploration";
 import StepFourPractice from "@/Pages/Pertemuan/components/Practice";
-import StepFiveReview from "@/Pages/Pertemuan/components/Review";
+import StepFiveReview from "@/Pages/Student/Steps/StepFiveReview";
 import StepSixReflection from "@/Pages/Pertemuan/components/Reflection";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
 
@@ -84,10 +84,6 @@ export default function StepPage({
         currentStep?.step_type === "practice"
             ? savedCurrentResponse
             : responseByType("practice") || null;
-    const savedReviewResponse =
-        currentStep?.step_type === "review"
-            ? savedCurrentResponse?.response_text || ""
-            : responseByType("review")?.response_text || "";
     const savedReflectionResponse =
         currentStep?.step_type === "reflection"
             ? savedCurrentResponse?.response_text || ""
@@ -124,16 +120,23 @@ export default function StepPage({
 
         return savedPracticeResponse?.response_text || "";
     })();
-    const practiceItems = currentStep?.assessment_items?.length
-        ? currentStep.assessment_items
-        : [
-              {
-                  id: "practice-1",
-                  mode: currentStep?.assessment_mode || "quiz",
-                  question: currentStep?.assessment_question || "",
-                  options: currentStep?.assessment_options || [],
-              },
-          ];
+    const practiceItems =
+        currentStep?.step_type === "review" && currentStep?.practice_items?.length
+            ? currentStep.practice_items.map((item, index) => ({
+                  practice_index: Number(item.practice_index ?? index),
+                  title: item.title || `Latihan Soal ${index + 1}`,
+                  question: item.question || "",
+              }))
+            : currentStep?.assessment_items?.length
+              ? currentStep.assessment_items
+              : [
+                    {
+                        id: "practice-1",
+                        mode: currentStep?.assessment_mode || "quiz",
+                        question: currentStep?.assessment_question || "",
+                        options: currentStep?.assessment_options || [],
+                    },
+                ];
     const savedPracticeAnswers = savedPracticeResponse?.response_payload?.items
         ? savedPracticeResponse.response_payload.items.reduce((acc, item) => {
               acc[item.id] = item.answer || "";
@@ -144,28 +147,6 @@ export default function StepPage({
         savedExplorationPayload?.language ||
         currentStep?.code_language ||
         "javascript";
-
-    // Parse saved review response to extract code blocks
-    const parseReviewResponse = (reviewText) => {
-        try {
-            const data = JSON.parse(reviewText);
-            return {
-                code1: data.code1 || "",
-                code2: data.code2 || "",
-                output1: data.output1 || "",
-                output2: data.output2 || "",
-            };
-        } catch {
-            return {
-                code1: "",
-                code2: "",
-                output1: "",
-                output2: "",
-            };
-        }
-    };
-
-    const savedReviewData = parseReviewResponse(savedReviewResponse);
 
     const [questionDraft, setQuestionDraft] = useState(savedQuestionResponse);
     const [questionSaved, setQuestionSaved] = useState(
@@ -202,29 +183,6 @@ export default function StepPage({
         setAssessmentAnswers(savedPracticeAnswers);
     }, [savedPracticeAnswer]);
 
-    const [reviewCode1, setReviewCode1] = useState(
-        savedReviewData.code1 || currentStep?.review_code1 || "",
-    );
-    const [reviewCode2, setReviewCode2] = useState(
-        savedReviewData.code2 || currentStep?.review_code2 || "",
-    );
-    const [reviewCode1Output, setReviewCode1Output] = useState(
-        savedReviewData.output1,
-    );
-    const [reviewCode2Output, setReviewCode2Output] = useState(
-        savedReviewData.output2,
-    );
-    const [codingLanguage, setCodingLanguage] = useState(
-        currentStep?.review_code_language || savedCodeLanguage,
-    );
-    const [reviewSaved, setReviewSaved] = useState(savedReviewResponse);
-    const [reviewAnswers, setReviewAnswers] = useState(
-        (currentStep?.proof_questions || []).map((question, index) => ({
-            question,
-            review_answer: "",
-            evidence: null,
-        })),
-    );
     const [reflectionDraft, setReflectionDraft] = useState(
         savedReflectionResponse,
     );
@@ -236,13 +194,14 @@ export default function StepPage({
         router.visit(route("pertemuan.step", { id, step: targetStep }));
     };
 
-    const saveResponse = (targetStep, payload, onSuccess) => {
+    const saveResponse = (targetStep, payload, onSuccess, options = {}) => {
         router.post(
             route("pertemuan.step.response", { id, step: targetStep }),
             payload,
             {
                 preserveScroll: true,
                 preserveState: true,
+                ...options,
                 onSuccess: () => {
                     setLocalCompletedSteps((current) =>
                         Math.max(current, currentStepIndex + 1),
@@ -380,39 +339,6 @@ export default function StepPage({
         );
     };
 
-    const saveReview = (onSuccess) => {
-        const proofQuestions = currentStep?.proof_questions || [];
-
-        const practicePayload = responseByType("practice")?.response_payload;
-
-        const practiceItems = practicePayload?.items || [];
-
-        const items = proofQuestions.map((question, index) => ({
-            question,
-            student_answer: practiceItems[index]?.answer || "",
-            review_answer: reviewAnswers[index]?.review_answer || "",
-            evidence: reviewAnswers[index]?.evidence || null,
-        }));
-
-        saveResponse(
-            currentStep.step,
-            {
-                response_text: "Review submitted",
-
-                response_payload: {
-                    items,
-                },
-            },
-            () => {
-                setReviewSaved("Review submitted");
-
-                if (onSuccess) {
-                    onSuccess();
-                }
-            },
-        );
-    };
-
     const saveReflection = (onSuccess) => {
         const responseText = reflectionDraft.trim();
 
@@ -458,18 +384,6 @@ export default function StepPage({
         );
         setAssessmentSaved(savedPracticeAnswer);
         setAssessmentAnswers(savedPracticeAnswers);
-        setReviewCode1(
-            savedReviewData.code1 || currentStep?.review_code1 || "",
-        );
-        setReviewCode2(
-            savedReviewData.code2 || currentStep?.review_code2 || "",
-        );
-        setReviewCode1Output(savedReviewData.output1);
-        setReviewCode2Output(savedReviewData.output2);
-        setCodingLanguage(
-            currentStep?.review_code_language || savedCodeLanguage,
-        );
-        setReviewSaved(savedReviewResponse);
         setReflectionDraft(savedReflectionResponse);
         setReflectionSaved(savedReflectionResponse);
     }, [
@@ -480,7 +394,6 @@ export default function StepPage({
         savedCodeLanguage,
         savedPracticeMode,
         savedPracticeAnswer,
-        savedReviewResponse,
         savedReflectionResponse,
         savedAskResponses,
         step,
@@ -555,16 +468,22 @@ export default function StepPage({
             case "review":
                 return (
                     <StepFiveReview
+                        meetingId={id}
+                        stepNumber={currentStep.step}
                         stepData={currentStep}
                         savedResponse={savedCurrentResponse}
-                        practiceResponses={(
-                            savedPracticeResponse?.response_payload?.items || []
-                        ).map((item) => ({
+                        practiceResponses={practiceItems.map((item, index) => ({
+                            practice_index: item.practice_index ?? index,
                             question: item.question,
-                            answer: item.answer,
+                            answer:
+                                savedPracticeResponse?.response_payload?.items?.[
+                                    index
+                                ]?.answer || "",
                         }))}
                         onSave={(payload) =>
-                            saveResponse(currentStep.step, payload, goNext)
+                            saveResponse(currentStep.step, payload, goNext, {
+                                forceFormData: true,
+                            })
                         }
                         nextLabel={nextStepTitle()}
                         onNext={goNext}

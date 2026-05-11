@@ -36,14 +36,23 @@ class StepController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $rules = [
             'meeting_id' => 'required',
             'step_number' => 'required|numeric',
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
-            'materials' => 'nullable',
-            'materials.*.blocks.*.image_file' => 'nullable|image|max:2048',
-        ]);
+        ];
+
+        // Only validate image files if not using axios FormData with exploration
+        if ($request->step_type !== 'exploration') {
+            $rules['materials'] = 'nullable';
+            $rules['materials.*.blocks.*.image_file'] = 'nullable|image|max:2048';
+        } else {
+            // For exploration with axios FormData, validate files separately
+            $rules['materials'] = 'nullable';
+        }
+
+        $request->validate($rules);
 
         $step = MeetingStep::create($request->only([
             'meeting_id',
@@ -61,6 +70,7 @@ class StepController extends Controller
     public function edit(MeetingStep $step)
     {
         $step->load([
+            'meeting.steps.practices',
             'observation',
             'asks',
             'exploration',
@@ -76,13 +86,22 @@ class StepController extends Controller
 
     public function update(Request $request, MeetingStep $step)
     {
-        $request->validate([
+        $rules = [
             'step_number' => 'required|numeric',
             'step_type' => 'required|in:observe,ask,exploration,practice,review,reflection',
             'title' => 'required',
-            'materials' => 'nullable',
-            'materials.*.blocks.*.image_file' => 'nullable|image|max:2048',
-        ]);
+        ];
+
+        // Only validate image files if not using axios FormData with exploration
+        if ($request->step_type !== 'exploration') {
+            $rules['materials'] = 'nullable';
+            $rules['materials.*.blocks.*.image_file'] = 'nullable|image|max:2048';
+        } else {
+            // For exploration with axios FormData, validate files separately
+            $rules['materials'] = 'nullable';
+        }
+
+        $request->validate($rules);
 
         $step->update([
             'step_number' => $request->step_number,
@@ -153,6 +172,45 @@ class StepController extends Controller
                 break;
 
             case 'exploration':
+                // Get existing exploration data for fallback
+                $existingExploration = $step->exploration;
+                $existingMaterials = $existingExploration ? ($existingExploration->materials ?? []) : [];
+                $existingMissions = $existingExploration ? ($existingExploration->missions ?? []) : [];
+
+                // Parse materials from FormData if it's a JSON string
+                $materials = $request->input('materials', []);
+                if (is_string($materials)) {
+                    $decoded = json_decode($materials, true);
+                    $materials = $decoded ?? [];
+                }
+
+                // Process material images
+                $materials = $this->storeExplorationImages(
+                    $materials,
+                    $this->extractMaterialFiles($request),
+                    $existingMaterials
+                );
+
+                // Parse case_studies from FormData if it's a JSON string
+                $caseStudies = $request->input('case_studies', []);
+                if (is_string($caseStudies)) {
+                    $decoded = json_decode($caseStudies, true);
+                    $caseStudies = $decoded ?? [];
+                }
+
+                // Parse missions from FormData if it's a JSON string
+                $missions = $request->input('missions', []);
+                if (is_string($missions)) {
+                    $decoded = json_decode($missions, true);
+                    $missions = $decoded ?? [];
+                }
+
+                // Process mission images after decoding missions payload
+                $missions = $this->storeMissionImages(
+                    $missions,
+                    $this->extractMissionFiles($request),
+                    $existingMissions
+                );
 
                 $explorationData = [
 
@@ -166,15 +224,13 @@ class StepController extends Controller
                     $request->exploration_prompt,
 
                     'materials' =>
-                    $request->materials,
+                    $materials,
 
                     'case_studies' =>
-                    $request->case_studies,
+                    $caseStudies,
 
-                    'missions' => $this->storeMissionImages(
-                        $request->missions ?? [],
-                        $request->file('missions') ?? []
-                    ),
+                    'missions' =>
+                    $missions,
                 ];
 
                 $step->exploration()->updateOrCreate(
@@ -211,7 +267,7 @@ class StepController extends Controller
                     ['meeting_step_id' => $step->id],
                     [
                         'instruction_text' => $request->instruction_text,
-                        'proof_questions' => $request->proof_questions ?? [],
+                        'review_items' => $request->review_items ?? [],
                     ]
                 );
 
@@ -226,6 +282,91 @@ class StepController extends Controller
                 );
                 break;
         }
+    }
+
+    private function extractMaterialFiles(Request $request): array
+    {
+        $materialFiles = [];
+        
+        // Method 1: Try using allFiles() which includes all uploaded files
+        $allFiles = $request->allFiles();
+        
+        // Loop through all files and organize by material and block index
+        foreach ($allFiles as $fileKey => $file) {
+            // File keys will be like: materials.0.blocks.0.image_file or materials_0_blocks_0_image_file
+            // Handle both dot notation and underscore notation from different FormData parsers
+            $patterns = [
+                '/materials\.(\d+)\.blocks\.(\d+)\.image_file/',  // dot notation
+                '/materials_(\d+)_blocks_(\d+)_image_file/',       // underscore notation
+            ];
+            
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $fileKey, $matches)) {
+                    if (count($matches) === 3) {
+                        $materialIdx = (int)$matches[1];
+                        $blockIdx = (int)$matches[2];
+                        
+                        if (!isset($materialFiles[$materialIdx])) {
+                            $materialFiles[$materialIdx] = [];
+                        }
+                        if (!isset($materialFiles[$materialIdx]['blocks'])) {
+                            $materialFiles[$materialIdx]['blocks'] = [];
+                        }
+                        
+                        // Store the file
+                        $materialFiles[$materialIdx]['blocks'][$blockIdx] = [
+                            'image_file' => $file
+                        ];
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return $materialFiles;
+    }
+
+    private function extractMissionFiles(Request $request): array
+    {
+        $missionFiles = [];
+        $allFiles = $request->allFiles();
+
+        foreach ($allFiles as $fileKey => $file) {
+            $patterns = [
+                '/missions\.(\d+)\.left_image_file/',
+                '/missions_(\d+)_left_image_file/',
+                '/missions\.(\d+)\.right_image_file/',
+                '/missions_(\d+)_right_image_file/',
+            ];
+
+            foreach ($patterns as $pattern) {
+                if (! preg_match($pattern, $fileKey, $matches)) {
+                    continue;
+                }
+
+                if (count($matches) !== 2) {
+                    continue;
+                }
+
+                $missionIdx = (int) $matches[1];
+
+                if (! isset($missionFiles[$missionIdx])) {
+                    $missionFiles[$missionIdx] = [];
+                }
+
+                if (str_contains($fileKey, 'left_image_file')) {
+                    $missionFiles[$missionIdx]['left_image_file'] = $file;
+                }
+
+                if (str_contains($fileKey, 'right_image_file')) {
+                    $missionFiles[$missionIdx]['right_image_file'] = $file;
+                }
+
+                break;
+            }
+        }
+
+        return $missionFiles;
     }
 
     private function normalizeOptions($options): ?array
@@ -292,54 +433,60 @@ class StepController extends Controller
 
     private function storeExplorationImages(array $items, array $files, array $existingItems): array
     {
-        return collect($items)
-            ->values()
-            ->map(function (array $item, int $itemIndex) use ($files, $existingItems) {
-                $item['blocks'] = $this->storeExplorationBlockImages(
-                    is_array($item['blocks'] ?? null) ? $item['blocks'] : [],
-                    is_array(data_get($files, $itemIndex . '.blocks')) ? data_get($files, $itemIndex . '.blocks') : [],
-                    is_array($existingItems[$itemIndex]['blocks'] ?? null) ? $existingItems[$itemIndex]['blocks'] : [],
-                );
-
-                return $item;
-            })
-            ->all();
+        $result = [];
+        foreach ($items as $itemIndex => $item) {
+            $item['blocks'] = $this->storeExplorationBlockImages(
+                is_array($item['blocks'] ?? null) ? $item['blocks'] : [],
+                is_array(data_get($files, $itemIndex . '.blocks')) ? data_get($files, $itemIndex . '.blocks') : [],
+                is_array($existingItems[$itemIndex]['blocks'] ?? null) ? $existingItems[$itemIndex]['blocks'] : [],
+            );
+            $result[$itemIndex] = $item;
+        }
+        return $result;
     }
 
     private function storeExplorationBlockImages(array $blocks, array $files, array $existingBlocks): array
     {
-        return collect($blocks)
-            ->values()
-            ->map(function (array $block, int $blockIndex) use ($files, $existingBlocks) {
-                if (($block['type'] ?? null) !== 'image') {
-                    unset($block['image_file']);
-
-                    return $block;
-                }
-
-                $uploadedFile = data_get($files, $blockIndex . '.image_file');
-                $currentUrl = $existingBlocks[$blockIndex]['url'] ?? ($block['url'] ?? null);
-
-                if ($uploadedFile) {
-                    $block['url'] = $this->storeUploadedExplorationImage($uploadedFile, $currentUrl);
-                }
-
+        $result = [];
+        foreach ($blocks as $blockIndex => $block) {
+            if (($block['type'] ?? null) !== 'image') {
                 unset($block['image_file']);
+                $result[$blockIndex] = $block;
+                continue;
+            }
 
-                return $block;
-            })
-            ->all();
+            $uploadedFile = data_get($files, $blockIndex . '.image_file');
+            $currentUrl = $existingBlocks[$blockIndex]['url'] ?? ($block['url'] ?? null);
+
+            if ($uploadedFile) {
+                $block['url'] = $this->storeUploadedExplorationImage($uploadedFile, $currentUrl);
+            } elseif ($currentUrl && empty($block['url'] ?? null)) {
+                $this->deleteStoredPublicImage($currentUrl);
+                $block['url'] = null;
+            }
+
+            unset($block['image_file']);
+            $result[$blockIndex] = $block;
+        }
+        return $result;
     }
 
     private function storeUploadedExplorationImage($uploadedFile, ?string $currentUrl = null): string
     {
-        if ($currentUrl && str_starts_with($currentUrl, '/storage/')) {
-            Storage::disk('public')->delete(ltrim(substr($currentUrl, strlen('/storage/')), '/'));
-        }
+        $this->deleteStoredPublicImage($currentUrl);
 
         $storedPath = $uploadedFile->store('exploration-images', 'public');
 
         return '/storage/' . $storedPath;
+    }
+
+    private function deleteStoredPublicImage(?string $url): void
+    {
+        if (! $url || ! str_starts_with($url, '/storage/')) {
+            return;
+        }
+
+        Storage::disk('public')->delete(ltrim(substr($url, strlen('/storage/')), '/'));
     }
 
     public function studentResults($meetingId)
@@ -382,12 +529,15 @@ class StepController extends Controller
 
     public function studentDetail($meetingId, $userId)
     {
-        $meeting = Meeting::with('steps')->findOrFail($meetingId);
+        $meeting = Meeting::with(['steps', 'steps.practices'])->findOrFail($meetingId);
 
         $meetingStepIds = $meeting->steps->pluck('id');
+        $practiceSteps = $meeting->steps
+            ->where('step_type', 'practice')
+            ->sortBy('step_number')
+            ->values();
 
         $student = User::with([
-
             'askResponses' => function ($query) use ($meetingStepIds) {
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.asks');
@@ -396,71 +546,54 @@ class StepController extends Controller
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.practices');
             },
-
             'reflectionResponses' => function ($query) use ($meetingStepIds) {
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.reflection');
             },
-
             'observationResponses' => function ($query) use ($meetingStepIds) {
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.observation');
             },
-
             'explorationResponses' => function ($query) use ($meetingStepIds) {
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.exploration');
             },
-
             'reviewResponses' => function ($query) use ($meetingStepIds) {
                 $query->whereIn('meeting_step_id', $meetingStepIds)
                     ->with('step.review');
             },
-
         ])->findOrFail($userId);
 
         $responses = collect()
-
             ->merge(
                 $student->askResponses->groupBy('meeting_step_id')->map(function ($group) {
-
                     $first = $group->first();
-
-                    $questions = $first->step
-                        ? $first->step->asks
-                        : collect();
+                    $questions = $first->step ? $first->step->asks : collect();
 
                     $formattedItems = $questions->map(function ($ask) use ($group) {
-
-                        $matchedAnswer = $group
-                            ->firstWhere('meeting_step_ask_id', $ask->id);
+                        $matchedAnswer = $group->firstWhere('meeting_step_ask_id', $ask->id);
 
                         return [
                             'question' => $ask->question_prompt,
-                            'answer' => $matchedAnswer?->answer_text ?? '-',
+                            'answer' => isset($matchedAnswer->answer_text) ? $matchedAnswer->answer_text : '-',
                         ];
                     });
 
                     return [
                         'type' => 'Ask',
-                        'step_title' => $first->step?->title,
-                        'step_type' => $first->step?->step_type,
-                        'step_order' => $first->step?->step_number,
+                        'step_title' => $first->step ? $first->step->title : null,
+                        'step_type' => $first->step ? $first->step->step_type : null,
+                        'step_order' => $first->step ? $first->step->step_number : null,
                         'items' => $formattedItems->values()->toArray(),
                     ];
                 })
             )
             ->merge(
                 $student->practiceResponses->map(function ($item) {
-
-                    $questions = $item->step
-                        ? $item->step->practices
-                        : collect();
-
+                    $questions = $item->step ? $item->step->practices : collect();
                     $payloadItems = $item->practice_payload['items'] ?? [];
 
                     $formattedItems = $questions->map(function ($practice, $index) use ($payloadItems) {
-
                         $matchedAnswer = collect($payloadItems)
                             ->first(fn($payloadItem, $payloadIndex) => $payloadIndex === $index);
 
@@ -474,20 +607,18 @@ class StepController extends Controller
 
                     return [
                         'type' => 'Practice',
-                        'step_title' => $item->step?->title,
-                        'step_type' => $item->step?->step_type,
-                        'step_order' => $item->step?->step_number,
+                        'step_title' => $item->step ? $item->step->title : null,
+                        'step_type' => $item->step ? $item->step->step_type : null,
+                        'step_order' => $item->step ? $item->step->step_number : null,
                         'items' => $formattedItems,
                     ];
                 })
             )
-
             ->merge(
                 $student->reflectionResponses->map(function ($item) {
-
                     $question = null;
 
-                    if ($item->step?->reflection) {
+                    if ($item->step && $item->step->reflection) {
                         $reflection = $item->step->reflection;
 
                         $question =
@@ -498,21 +629,19 @@ class StepController extends Controller
 
                     return [
                         'type' => 'Reflection',
-                        'step_title' => $item->step?->title,
-                        'step_type' => $item->step?->step_type,
+                        'step_title' => $item->step ? $item->step->title : null,
+                        'step_type' => $item->step ? $item->step->step_type : null,
                         'question' => $question,
                         'answer' => $item->reflection_text,
-                        'step_order' => $item->step?->step_number,
+                        'step_order' => $item->step ? $item->step->step_number : null,
                     ];
                 })
             )
-
             ->merge(
                 $student->observationResponses->map(function ($item) {
-
                     $question = null;
 
-                    if ($item->step?->observation) {
+                    if ($item->step && $item->step->observation) {
                         $observation = $item->step->observation;
 
                         $question =
@@ -523,92 +652,97 @@ class StepController extends Controller
 
                     return [
                         'type' => 'Observation',
-                        'step_title' => $item->step?->title,
-                        'step_type' => $item->step?->step_type,
+                        'step_title' => $item->step ? $item->step->title : null,
+                        'step_type' => $item->step ? $item->step->step_type : null,
                         'question' => $question,
                         'answer' => $item->observation_text,
-                        'step_order' => $item->step?->step_number,
+                        'step_order' => $item->step ? $item->step->step_number : null,
                     ];
                 })
             )
-
             ->merge(
-
                 $student->explorationResponses
-
                     ->groupBy('meeting_step_id')
-
                     ->map(function ($group) {
-
                         $first = $group->first();
 
                         return [
-
                             'type' => 'Exploration',
-
-                            'step_title' =>
-                            $first->step?->title,
-
-                            'step_type' =>
-                            $first->step?->step_type,
-
-                            'answer' => $group
-                                ->map(
-                                    fn($item) =>
-                                    $item->exploration_payload
-                                )
+                            'step_title' => $first->step ? $first->step->title : null,
+                            'step_type' => $first->step ? $first->step->step_type : null,
+                            'items' => $group
+                                ->map(fn($item) => $item->exploration_payload)
                                 ->values()
                                 ->toArray(),
-
-                            'step_order' => $first->step?->step_number,
+                            'step_order' => $first->step ? $first->step->step_number : null,
                         ];
                     })
-
             )
-
             ->merge(
-                $student->reviewResponses->map(function ($item) {
+                $student->reviewResponses->map(function ($item) use ($practiceSteps) {
+                    $payloadItems = collect($item->review_payload['items'] ?? []);
+                    $practiceStep = $item->step
+                        ? $practiceSteps
+                            ->filter(function ($candidate) use ($item) {
+                                return $candidate->step_number < $item->step->step_number;
+                            })
+                            ->sortByDesc('step_number')
+                            ->first()
+                        : null;
+                    $practiceItems = ($practiceStep && $practiceStep->practices)
+                        ? $practiceStep->practices->values()
+                        : collect();
 
-                    $payloadItems =
-                        $item->review_payload['items'] ?? [];
+                    $groups = $practiceItems->isNotEmpty()
+                        ? $practiceItems->map(function ($practice, $index) use ($payloadItems) {
+                            $items = $payloadItems
+                                ->filter(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0) === $index)
+                                ->values();
 
-                    return [
-
-                        'type' => 'Review',
-
-                        'step_title' =>
-                        $item->step?->title,
-
-                        'step_type' =>
-                        $item->step?->step_type,
-
-                        'step_order' =>
-                        $item->step?->step_number,
-
-                        'items' => collect($payloadItems)
-                            ->map(function ($reviewItem, $index) {
+                            return [
+                                'practice_index' => $index,
+                                'practice_title' => $practice->assessment_mode === 'essay'
+                                    ? 'Essay'
+                                    : 'Latihan Soal ' . ($index + 1),
+                                'practice_question' => $practice->assessment_question,
+                                'practice_answer' => $items->first()['student_answer'] ?? '-',
+                                'items' => $items->map(function ($reviewItem, $reviewIndex) {
+                                    return [
+                                        'title' => $reviewItem['title'] ?? ('Review ' . ($reviewIndex + 1)),
+                                        'question' => $reviewItem['question'] ?? '-',
+                                        'review_answer' => $reviewItem['review_answer'] ?? '-',
+                                        'evidence' => $reviewItem['evidence'] ?? null,
+                                    ];
+                                })->values()->toArray(),
+                            ];
+                        })
+                        : $payloadItems
+                            ->groupBy(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0))
+                            ->map(function ($items, $practiceIndex) {
+                                $first = $items->first() ?? [];
 
                                 return [
-
-                                    'question' =>
-                                    $reviewItem['question']
-                                        ?? '-',
-
-                                    'student_answer' =>
-                                    $reviewItem['student_answer']
-                                        ?? '-',
-
-                                    'review_answer' =>
-                                    $reviewItem['review_answer']
-                                        ?? '-',
-
-                                    'evidence' =>
-                                    $reviewItem['evidence']
-                                        ?? null,
+                                    'practice_index' => $practiceIndex,
+                                    'practice_title' => $first['title'] ?? ('Latihan Soal ' . ($practiceIndex + 1)),
+                                    'practice_question' => $first['question'] ?? '-',
+                                    'practice_answer' => $first['student_answer'] ?? '-',
+                                    'items' => $items->map(function ($reviewItem, $reviewIndex) {
+                                        return [
+                                            'title' => $reviewItem['title'] ?? ('Review ' . ($reviewIndex + 1)),
+                                            'question' => $reviewItem['question'] ?? '-',
+                                            'review_answer' => $reviewItem['review_answer'] ?? '-',
+                                            'evidence' => $reviewItem['evidence'] ?? null,
+                                        ];
+                                    })->values()->toArray(),
                                 ];
-                            })
-                            ->values()
-                            ->toArray(),
+                            });
+
+                    return [
+                        'type' => 'Review',
+                        'step_title' => $item->step ? $item->step->title : null,
+                        'step_type' => $item->step ? $item->step->step_type : null,
+                        'step_order' => $item->step ? $item->step->step_number : null,
+                        'items' => $groups->values()->toArray(),
                     ];
                 })
             )
@@ -625,16 +759,20 @@ class StepController extends Controller
         );
     }
 
-    private function storeMissionImages(array $missions, array $files): array
+    private function storeMissionImages(array $missions, array $files, array $existingMissions = []): array
     {
         return collect($missions)
-            ->map(function ($mission, $index) use ($files) {
+            ->map(function ($mission, $index) use ($files, $existingMissions) {
 
                 $leftFile =
                     data_get($files, $index . '.left_image_file');
 
                 $rightFile =
                     data_get($files, $index . '.right_image_file');
+
+                $existingMission = $existingMissions[$index] ?? [];
+                $currentLeftUrl = $existingMission['left_image'] ?? ($mission['left_image'] ?? null);
+                $currentRightUrl = $existingMission['right_image'] ?? ($mission['right_image'] ?? null);
 
                 // upload gambar kiri
                 if ($leftFile) {
@@ -646,6 +784,9 @@ class StepController extends Controller
 
                     $mission['left_image'] =
                         '/storage/' . $path;
+                } elseif ($currentLeftUrl && empty($mission['left_image'] ?? null)) {
+                    $this->deleteStoredPublicImage($currentLeftUrl);
+                    $mission['left_image'] = null;
                 }
 
                 // upload gambar kanan
@@ -658,6 +799,9 @@ class StepController extends Controller
 
                     $mission['right_image'] =
                         '/storage/' . $path;
+                } elseif ($currentRightUrl && empty($mission['right_image'] ?? null)) {
+                    $this->deleteStoredPublicImage($currentRightUrl);
+                    $mission['right_image'] = null;
                 }
 
                 // hapus temporary file

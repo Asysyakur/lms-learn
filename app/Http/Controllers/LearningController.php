@@ -21,6 +21,7 @@ use App\Models\QuizAttempt;
 use App\Models\QuizSet;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class LearningController extends Controller
@@ -179,8 +180,8 @@ class LearningController extends Controller
             ])
             ->findOrFail($id);
 
-        $steps = $meeting->steps->map(function (MeetingStep $step) {
-            return $this->formatMeetingStep($step);
+        $steps = $meeting->steps->map(function (MeetingStep $step) use ($meeting) {
+            return $this->formatMeetingStep($step, $meeting->steps);
         })->values();
         $completedSteps = $this->completedStepCount($meeting);
 
@@ -213,8 +214,8 @@ class LearningController extends Controller
             ])
             ->findOrFail($id);
 
-        $steps = $meeting->steps->map(function (MeetingStep $item) {
-            return $this->formatMeetingStep($item);
+        $steps = $meeting->steps->map(function (MeetingStep $item) use ($meeting) {
+            return $this->formatMeetingStep($item, $meeting->steps);
         })->values();
 
         $activeStep = $meeting->steps->firstWhere('step_number', $step);
@@ -231,7 +232,7 @@ class LearningController extends Controller
             ],
             'step' => $step,
             'steps' => $steps,
-            'stepData' => $activeStep ? $this->formatMeetingStep($activeStep) : null,
+            'stepData' => $activeStep ? $this->formatMeetingStep($activeStep, $meeting->steps) : null,
             'completedSteps' => $completedSteps,
             'savedResponses' => $savedResponses,
         ]);
@@ -277,12 +278,15 @@ class LearningController extends Controller
 
         $validated = $request->validate([
             'response_text' => ['nullable', 'string'],
-            'response_payload' => ['nullable', 'array'],
             'ask_id' => ['nullable', 'integer'],
         ]);
 
         $responseText = $validated['response_text'] ?? null;
-        $responsePayload = $validated['response_payload'] ?? null;
+        $responsePayload = $request->input('response_payload');
+        if (is_string($responsePayload)) {
+            $decodedPayload = json_decode($responsePayload, true);
+            $responsePayload = is_array($decodedPayload) ? $decodedPayload : [];
+        }
         $askId = $validated['ask_id'] ?? null;
         $stepType = $meetingStep->step_type;
         $userId = Auth::id();
@@ -379,12 +383,35 @@ class LearningController extends Controller
                 ]
             );
         } elseif ($stepType === 'review') {
+            $payload = $responsePayload ?? [];
+            $items = collect($payload['items'] ?? [])
+                ->values()
+                ->map(function ($item, $index) use ($request) {
+                    $evidenceFile = $request->file("response_payload.items.$index.evidence");
+                    $evidence = $item['evidence'] ?? null;
+
+                    if ($evidenceFile) {
+                        $storedPath = $evidenceFile->store('review-evidence', 'public');
+                        $evidence = '/storage/' . $storedPath;
+                    }
+
+                    return [
+                        'practice_index' => (int) ($item['practice_index'] ?? $index),
+                        'title' => $item['title'] ?? '',
+                        'question' => $item['question'] ?? '',
+                        'student_answer' => $item['student_answer'] ?? '',
+                        'review_answer' => $item['review_answer'] ?? '',
+                        'evidence' => $evidence,
+                    ];
+                })
+                ->all();
+
             MeetingStepReviewResponse::query()->updateOrCreate(
                 ['meeting_step_id' => $meetingStep->id, 'user_id' => $userId],
                 [
                     'meeting_id' => $meeting->id,
                     'review_text' => $responseText,
-                    'review_payload' => $responsePayload,
+                    'review_payload' => array_merge($payload, ['items' => $items]),
                     'reviewed_at' => now(),
                 ]
             );
@@ -405,7 +432,7 @@ class LearningController extends Controller
         return back();
     }
 
-    private function formatMeetingStep(MeetingStep $step): array
+    private function formatMeetingStep(MeetingStep $step, $allSteps = null): array
     {
         $base = [
             'id' => $step->id,
@@ -431,7 +458,7 @@ class LearningController extends Controller
             case 'practice':
                 return array_merge($base, $this->formatPracticeStep($step->practices));
             case 'review':
-                return array_merge($base, $this->formatReviewStep($step->review));
+                return array_merge($base, $this->formatReviewStep($step, $allSteps));
             case 'reflection':
                 return array_merge($base, $this->formatReflectionStep($step->reflection));
             default:
@@ -595,22 +622,22 @@ class LearningController extends Controller
     {
         return [
             'code_language' =>
-            $exploration?->code_language,
+            $exploration ? $exploration->code_language : null,
 
             'exploration_prompt' =>
-            $exploration?->exploration_prompt,
+            $exploration ? $exploration->exploration_prompt : null,
 
             'materials' =>
-            $exploration?->materials ?? [],
+            $exploration ? ($exploration->materials ?? []) : [],
 
             'exploration_mode' =>
-            $exploration?->exploration_mode,
+            $exploration ? $exploration->exploration_mode : null,
 
             'case_studies' =>
-            $exploration?->case_studies ?? [],
+            $exploration ? ($exploration->case_studies ?? []) : [],
 
             'missions' =>
-            $exploration?->missions ?? [],
+            $exploration ? ($exploration->missions ?? []) : [],
         ];
     }
 
@@ -653,11 +680,40 @@ class LearningController extends Controller
         ];
     }
 
-    private function formatReviewStep(?MeetingStepReview $review): array
+    private function formatReviewStep(MeetingStep $step, $allSteps = null): array
     {
+        $practiceItems = [];
+
+        if ($allSteps) {
+            $practiceStep = collect($allSteps)
+                ->filter(function (MeetingStep $candidate) use ($step) {
+                    return $candidate->step_type === 'practice'
+                        && $candidate->step_number < $step->step_number;
+                })
+                ->sortByDesc('step_number')
+                ->first();
+
+            if ($practiceStep && $practiceStep->practices) {
+                $practiceItems = $practiceStep->practices
+                    ->values()
+                    ->map(function ($practice, $index) {
+                        return [
+                            'practice_index' => $index,
+                            'title' => $practice->assessment_mode === 'essay'
+                                ? 'Essay'
+                                : 'Latihan Soal ' . ($index + 1),
+                            'question' => $practice->assessment_question,
+                        ];
+                    })
+                    ->values()
+                    ->all();
+            }
+        }
+
         return [
-            'instruction_text' => $review?->instruction_text,
-            'proof_questions' => $review?->proof_questions ?? [],
+            'instruction_text' => $step->review ? $step->review->instruction_text : null,
+            'review_items' => $step->review ? ($step->review->review_items ?? []) : [],
+            'practice_items' => $practiceItems,
         ];
     }
 

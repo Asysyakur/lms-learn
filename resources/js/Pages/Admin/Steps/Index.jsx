@@ -33,7 +33,11 @@ export default function Index({ steps, meetingId }) {
                 Tutup
               </button>
             </div>
-            <StepForm meetingId={meetingId} onSuccess={() => setShowForm(false)} />
+            <StepForm
+              meetingId={meetingId}
+              meetingSteps={steps}
+              onSuccess={() => setShowForm(false)}
+            />
           </div>
         )}
       </div>

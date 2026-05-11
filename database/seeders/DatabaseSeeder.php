@@ -208,21 +208,27 @@ Dalam presentasi, setiap kelompok perlu:
 
                     ',
 
-                    'proof_questions' => [
+                    'review_items' => [
 
                         [
+                            'practice_index' => 0,
+                            'title' => 'Perbedaan Pengelolaan Data dan Fungsi',
                             'question' =>
 
                             'Masalah apa yang muncul pada program prosedural yang dapat diatasi dengan pendekatan PBO melalui perbedaan pengelolaan data dan fungsi? Sertakan bukti untuk menguatkan jawabanmu!',
                         ],
 
                         [
+                            'practice_index' => 1,
+                            'title' => 'Fokus Objek dalam PBO',
                             'question' =>
 
                             'Apa manfaat dari fokus objek dalam PBO dibanding prosedural dalam menjalankan program? Sertakan bukti hasil pengamatanmu!',
                         ],
 
                         [
+                            'practice_index' => 2,
+                            'title' => 'PBO dan Kompleksitas Program',
                             'question' =>
 
                             'Jelaskan bagaimana PBO dapat membantu mengatasi masalah pada program prosedural dan memudahkan pengembangan program yang semakin kompleks.',
@@ -347,8 +353,8 @@ Dalam presentasi, setiap kelompok perlu:
                         'instruction_text' =>
                         $step['instruction_text'],
 
-                        'proof_questions' =>
-                        $step['proof_questions'],
+                        'review_items' =>
+                        $step['review_items'],
                     ]),
 
                     /*

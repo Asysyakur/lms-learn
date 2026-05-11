@@ -68,7 +68,12 @@ const CODE_LANGUAGES = [
     { value: "css", label: "CSS" },
 ];
 
-export default function StepForm({ meetingId, step = null, onSuccess = null }) {
+export default function StepForm({
+    meetingId,
+    meetingSteps = [],
+    step = null,
+    onSuccess = null,
+}) {
     const isEdit = Boolean(step);
     const [highlightedCode, setHighlightedCode] = useState({});
     const [draggedBlock, setDraggedBlock] = useState(null);
@@ -110,6 +115,16 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                   },
               ],
     );
+    const [reviewItems, setReviewItems] = useState(
+        Array.isArray(step?.review?.review_items)
+            ? step.review.review_items.map((item, index) => ({
+                  practice_index: Number(item.practice_index ?? 0),
+                  title: item.title || `Review ${index + 1}`,
+                  question: item.question || "",
+              }))
+            : [],
+    );
+    const [reviewGroupTitles, setReviewGroupTitles] = useState({});
     const materialTextRefs = useRef({});
     const materialSelectionRefs = useRef({});
     const materialUndoRefs = useRef({});
@@ -140,8 +155,8 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
             )
                 ? step.practice.assessment_options.join("\n")
                 : "",
-            proof_questions: Array.isArray(step?.review?.proof_questions)
-                ? step.review.proof_questions
+            review_items: Array.isArray(step?.review?.review_items)
+                ? step.review.review_items
                 : [],
             review_prompt: step?.review?.review_prompt ?? "",
             review_code1: step?.review?.review_code1 ?? "",
@@ -178,6 +193,74 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
     };
 
     const getMaterialKey = (parentIdx, blockIdx) => `${parentIdx}-${blockIdx}`;
+
+    const getReviewPracticeItems = () => {
+        const candidateSteps = Array.isArray(step?.meeting?.steps)
+            ? step.meeting.steps
+            : meetingSteps;
+        const currentStepNumber = Number(step?.step_number ?? data.step_number);
+        const practiceSteps = (candidateSteps || [])
+            .filter(
+                (candidate) =>
+                    candidate.step_type === "practice" &&
+                    (currentStepNumber
+                        ? candidate.step_number < currentStepNumber
+                        : true),
+            )
+            .sort((left, right) => left.step_number - right.step_number);
+        const practiceStep = practiceSteps[practiceSteps.length - 1];
+
+        if (!practiceStep?.practices) {
+            return [];
+        }
+
+        return practiceStep.practices.map((practice, index) => ({
+            practice_index: index,
+            title:
+                practice.assessment_mode === "essay"
+                    ? `Essay ${index + 1}`
+                    : `Latihan Soal ${index + 1}`,
+            question: practice.assessment_question || "",
+        }));
+    };
+
+    const updateReviewGroupTitle = (practiceIndex, title) => {
+        setReviewGroupTitles((current) => ({
+            ...current,
+            [practiceIndex]: title,
+        }));
+
+        setReviewItems((currentItems) =>
+            currentItems.map((item) =>
+                Number(item.practice_index ?? 0) === practiceIndex
+                    ? { ...item, title }
+                    : item,
+            ),
+        );
+    };
+
+    useEffect(() => {
+        const nextTitles = {};
+
+        (reviewItems || []).forEach((item, index) => {
+            const practiceIndex = Number(item.practice_index ?? 0);
+
+            if (!nextTitles[practiceIndex]) {
+                nextTitles[practiceIndex] =
+                    item.title || `Essay ${practiceIndex + 1}`;
+            }
+
+            if (!item.title) {
+                nextTitles[practiceIndex] =
+                    nextTitles[practiceIndex] || `Essay ${index + 1}`;
+            }
+        });
+
+        setReviewGroupTitles((current) => ({
+            ...nextTitles,
+            ...current,
+        }));
+    }, []);
 
     const saveUndoSnapshot = (key, value) => {
         const stack = materialUndoRefs.current[key] || [];
@@ -382,7 +465,33 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
         setData(parentType, arr);
     };
 
-    function submit(e) {
+    const clearMaterialImage = (materialIdx, blockIdx) => {
+        const arr = [...(data.materials || [])];
+
+        if (!arr[materialIdx]?.blocks?.[blockIdx]) {
+            return;
+        }
+
+        arr[materialIdx].blocks[blockIdx].url = "";
+        arr[materialIdx].blocks[blockIdx].image_file = null;
+
+        setData("materials", arr);
+    };
+
+    const clearMissionImage = (missionIdx, side) => {
+        const arr = [...(data.missions || [])];
+
+        if (!arr[missionIdx]) {
+            return;
+        }
+
+        arr[missionIdx][`${side}_image`] = "";
+        arr[missionIdx][`${side}_image_file`] = null;
+
+        setData("missions", arr);
+    };
+
+    async function submit(e) {
         e.preventDefault();
 
         // For ask type, convert questions array to form data
@@ -413,6 +522,138 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                     firstItem?.options || data.assessment_options,
                 assessment_items: cleanedPracticeItems,
             };
+        }
+
+        if (data.step_type === "review") {
+            const cleanedReviewItems = reviewItems
+                .map((item) => ({
+                    practice_index: Number(item.practice_index ?? 0),
+                    title:
+                        reviewGroupTitles[Number(item.practice_index ?? 0)] ||
+                        item.title ||
+                        `Essay ${Number(item.practice_index ?? 0) + 1}`,
+                    question: item.question || "",
+                }))
+                .filter(
+                    (item) =>
+                        item.question.trim() !== "" || item.title.trim() !== "",
+                );
+
+            submitData = {
+                ...data,
+                review_items: cleanedReviewItems,
+            };
+        }
+
+        // Handle file uploads for exploration materials
+        if (data.step_type === "exploration" && data.materials) {
+            const formData = new FormData();
+            
+            // Add all form fields except files first
+            const materialsWithoutFiles = data.materials.map((material) => ({
+                ...material,
+                blocks: (material.blocks || []).map((block) => {
+                    const { image_file, ...blockWithoutFile } = block;
+                    return blockWithoutFile;
+                }),
+            }));
+
+            submitData = {
+                ...data,
+                materials: materialsWithoutFiles,
+                ...submitData,
+            };
+
+            // Append simple text fields directly (not JSON stringified)
+            const textFields = ['meeting_id', 'step_number', 'step_type', 'title', 'description', 'instruction_text', 'exploration_mode', 'code_language', 'exploration_prompt', 'resource_type', 'resource_url', 'reflection_question'];
+            textFields.forEach((field) => {
+                if (submitData[field] !== undefined && submitData[field] !== null) {
+                    formData.append(field, String(submitData[field]));
+                }
+            });
+
+            // Append complex objects as JSON
+            if (submitData.materials) formData.append("materials", JSON.stringify(submitData.materials));
+            if (submitData.case_studies) formData.append("case_studies", JSON.stringify(submitData.case_studies));
+            if (submitData.missions) formData.append("missions", JSON.stringify(submitData.missions));
+
+            // Append files from materials
+            data.materials.forEach((material, materialIdx) => {
+                if (material.blocks) {
+                    material.blocks.forEach((block, blockIdx) => {
+                        if (block.image_file && block.image_file instanceof File) {
+                            formData.append(
+                                `materials.${materialIdx}.blocks.${blockIdx}.image_file`,
+                                block.image_file
+                            );
+                        }
+                    });
+                }
+            });
+
+            // Append files from missions
+            data.missions?.forEach((mission, missionIdx) => {
+                if (mission.left_image_file instanceof File) {
+                    formData.append(
+                        `missions.${missionIdx}.left_image_file`,
+                        mission.left_image_file,
+                    );
+                }
+
+                if (mission.right_image_file instanceof File) {
+                    formData.append(
+                        `missions.${missionIdx}.right_image_file`,
+                        mission.right_image_file,
+                    );
+                }
+            });
+
+            // Submit via axios with FormData
+            if (isEdit) {
+                formData.append("_method", "put");
+                try {
+                    await window.axios.post(`/admin/steps/${step.id}`, formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+
+                    window.location.href = route("admin.meetings.steps", {
+                        meeting: data.meeting_id,
+                    });
+                } catch (error) {
+                    const message =
+                        error.response?.data?.message ||
+                        error.response?.data?.error ||
+                        "Gagal menyimpan step. Silakan coba lagi.";
+
+                    alert(message);
+                    console.error(error);
+                }
+            } else {
+                try {
+                    await window.axios.post("/admin/steps", formData, {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                        },
+                    });
+
+                    reset();
+                    onSuccess?.();
+                    window.location.href = route("admin.meetings.steps", {
+                        meeting: data.meeting_id,
+                    });
+                } catch (error) {
+                    const message =
+                        error.response?.data?.message ||
+                        error.response?.data?.error ||
+                        "Gagal membuat step. Silakan coba lagi.";
+
+                    alert(message);
+                    console.error(error);
+                }
+            }
+            return;
         }
 
         if (isEdit) {
@@ -969,16 +1210,34 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                 )}
                                                 {block.type === "image" && (
                                                     <>
-                                                        {block.url && (
-                                                            <img
-                                                                src={block.url}
-                                                                alt={
-                                                                    block.alt ||
-                                                                    "Pratinjau gambar"
-                                                                }
-                                                                className="mb-2 max-h-48 w-full rounded border border-slate-200 object-contain bg-white"
-                                                            />
-                                                        )}
+                                                        <div className="mb-2 flex items-start justify-between gap-3">
+                                                            {block.url && (
+                                                                <img
+                                                                    src={block.url}
+                                                                    alt={
+                                                                        block.alt ||
+                                                                        "Pratinjau gambar"
+                                                                    }
+                                                                    className="max-h-48 w-full rounded border border-slate-200 object-contain bg-white"
+                                                                />
+                                                            )}
+
+                                                            {(block.url ||
+                                                                block.image_file) && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() =>
+                                                                        clearMaterialImage(
+                                                                            midx,
+                                                                            bidx,
+                                                                        )
+                                                                    }
+                                                                    className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                                >
+                                                                    Hapus gambar
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                         <input
                                                             className="w-full text-sm rounded border-slate-300 mb-1"
                                                             placeholder="URL gambar"
@@ -1440,13 +1699,31 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                 Gambar A
                                             </label>
 
-                                            {mission.left_image && (
-                                                <img
-                                                    src={mission.left_image}
-                                                    alt="Gambar kiri"
-                                                    className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                />
-                                            )}
+                                            <div className="flex items-start justify-between gap-3">
+                                                {mission.left_image && (
+                                                    <img
+                                                        src={mission.left_image}
+                                                        alt="Gambar kiri"
+                                                        className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                    />
+                                                )}
+
+                                                {(mission.left_image ||
+                                                    mission.left_image_file) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            clearMissionImage(
+                                                                midx,
+                                                                "left",
+                                                            )
+                                                        }
+                                                        className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                    >
+                                                        Hapus gambar
+                                                    </button>
+                                                )}
+                                            </div>
 
                                             <input
                                                 type="file"
@@ -1477,13 +1754,31 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                                                 Gambar B
                                             </label>
 
-                                            {mission.right_image && (
-                                                <img
-                                                    src={mission.right_image}
-                                                    alt="Gambar kanan"
-                                                    className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                />
-                                            )}
+                                            <div className="flex items-start justify-between gap-3">
+                                                {mission.right_image && (
+                                                    <img
+                                                        src={mission.right_image}
+                                                        alt="Gambar kanan"
+                                                        className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                    />
+                                                )}
+
+                                                {(mission.right_image ||
+                                                    mission.right_image_file) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            clearMissionImage(
+                                                                midx,
+                                                                "right",
+                                                            )
+                                                        }
+                                                        className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                    >
+                                                        Hapus gambar
+                                                    </button>
+                                                )}
+                                            </div>
 
                                             <input
                                                 type="file"
@@ -1710,49 +2005,162 @@ export default function StepForm({ meetingId, step = null, onSuccess = null }) {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="font-semibold">
-                                    Pertanyaan Pembuktian
-                                </h3>
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setData("proof_questions", [
-                                            ...data.proof_questions,
-                                            {
-                                                question: "",
-                                            },
-                                        ])
-                                    }
-                                    className="rounded-lg bg-blue-500 px-4 py-2 text-white"
-                                >
-                                    Tambah
-                                </button>
+                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                                Review akan mengikuti practice step sebelumnya.
+                                Tambahkan beberapa review untuk tiap soal latihan
+                                jika diperlukan.
                             </div>
 
-                            {data.proof_questions.map((item, index) => (
-                                <div
-                                    key={index}
-                                    className="rounded-xl border p-4"
-                                >
-                                    <textarea
-                                        value={item.question}
-                                        onChange={(e) => {
-                                            const updated = [
-                                                ...data.proof_questions,
-                                            ];
-
-                                            updated[index].question =
-                                                e.target.value;
-
-                                            setData("proof_questions", updated);
-                                        }}
-                                        rows={3}
-                                        className="w-full rounded-lg border"
-                                    />
+                            {getReviewPracticeItems().length === 0 ? (
+                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                                    Belum ada practice step sebelumnya yang bisa
+                                    dijadikan acuan untuk review.
                                 </div>
-                            ))}
+                            ) : (
+                                getReviewPracticeItems().map(
+                                    (practiceItem) => {
+                                        const children = reviewItems.filter(
+                                            (item) =>
+                                                Number(
+                                                    item.practice_index ?? 0,
+                                                ) === practiceItem.practice_index,
+                                        );
+
+                                        return (
+                                            <div
+                                                key={practiceItem.practice_index}
+                                                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                                            >
+                                                <div className="mb-4 rounded-lg bg-slate-50 p-4">
+                                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                                        Latihan Soal {practiceItem.practice_index + 1}
+                                                    </p>
+                                                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                                        {practiceItem.question}
+                                                    </p>
+                                                </div>
+
+                                                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3">
+                                                    <label className="block text-xs font-semibold text-slate-600">
+                                                        Judul Review Grup
+                                                    </label>
+                                                    <input
+                                                        className="mt-1 w-full rounded-lg border-slate-300"
+                                                        value={
+                                                            reviewGroupTitles[
+                                                                practiceItem.practice_index
+                                                            ] ||
+                                                            practiceItem.title ||
+                                                            `Essay ${practiceItem.practice_index + 1}`
+                                                        }
+                                                        onChange={(e) =>
+                                                            updateReviewGroupTitle(
+                                                                practiceItem.practice_index,
+                                                                e.target.value,
+                                                            )
+                                                        }
+                                                        placeholder={`Contoh: Essay ${practiceItem.practice_index + 1}`}
+                                                    />
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    {children.length === 0 ? (
+                                                        <p className="text-sm text-slate-500 italic">
+                                                            Belum ada review
+                                                            turunan untuk soal
+                                                            ini.
+                                                        </p>
+                                                    ) : (
+                                                        children.map(
+                                                            (item, childIndex) => {
+                                                                const reviewItemIndex = reviewItems.findIndex(
+                                                                    (candidate) =>
+                                                                        candidate === item,
+                                                                );
+                                                                const reviewGroupTitle =
+                                                                    reviewGroupTitles[
+                                                                        practiceItem.practice_index
+                                                                    ] ||
+                                                                    practiceItem.title ||
+                                                                    `Latihan Soal ${practiceItem.practice_index + 1}`;
+
+                                                                return (
+                                                                    <div
+                                                                        key={`${practiceItem.practice_index}-${childIndex}`}
+                                                                        className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                                                                    >
+                                                                        <div className="flex items-start justify-between gap-3">
+                                                                            <div className="flex-1 space-y-3">
+                                                                                <div>
+                                                                                    <label className="block text-xs font-semibold text-slate-600">
+                                                                                        Pertanyaan Review
+                                                                                    </label>
+                                                                                    <textarea
+                                                                                        className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                                                                        value={item.question}
+                                                                                        onChange={(e) => {
+                                                                                            const updated = [...reviewItems];
+                                                                                            updated[reviewItemIndex] = {
+                                                                                                ...updated[reviewItemIndex],
+                                                                                                        question: e.target.value,
+                                                                                                        title: reviewGroupTitle,
+                                                                                            };
+                                                                                            setReviewItems(updated);
+                                                                                        }}
+                                                                                    />
+                                                                                </div>
+                                                                            </div>
+
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    setReviewItems(
+                                                                                        reviewItems.filter(
+                                                                                            (_, reviewIndex) =>
+                                                                                                reviewIndex !==
+                                                                                                reviewItemIndex,
+                                                                                        ),
+                                                                                    );
+                                                                                }}
+                                                                                className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-700"
+                                                                            >
+                                                                                Hapus
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            },
+                                                        )
+                                                    )}
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setReviewItems([
+                                                                ...reviewItems,
+                                                                {
+                                                                    practice_index:
+                                                                        practiceItem.practice_index,
+                                                                    title:
+                                                                        reviewGroupTitles[
+                                                                            practiceItem.practice_index
+                                                                        ] ||
+                                                                        practiceItem.title ||
+                                                                        `Essay ${practiceItem.practice_index + 1}`,
+                                                                    question: "",
+                                                                },
+                                                            ])
+                                                        }
+                                                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                                    >
+                                                        + Tambah Review
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    },
+                                )
+                            )}
                         </div>
                     </div>
                 )}

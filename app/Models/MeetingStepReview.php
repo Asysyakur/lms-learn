@@ -14,13 +14,13 @@ class MeetingStepReview extends Model
     protected $fillable = [
         'meeting_step_id',
         'instruction_text',
-        'proof_questions',
+        'review_items',
     ];
 
     protected function casts(): array
     {
         return [
-            'proof_questions' => 'array',
+            'review_items' => 'array',
         ];
     }
 
