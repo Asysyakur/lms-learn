@@ -1,5 +1,5 @@
 import AppLayout from "@/Layouts/AppLayout";
-import { Link, router } from "@inertiajs/react";
+import { router } from "@inertiajs/react";
 import { useEffect, useMemo, useState } from "react";
 import StepOneObserve from "@/Pages/Pertemuan/components/Observe";
 import StepTwoAsk from "@/Pages/Pertemuan/components/Ask";
@@ -8,6 +8,30 @@ import StepFourPractice from "@/Pages/Pertemuan/components/Practice";
 import StepFiveReview from "@/Pages/Student/Steps/StepFiveReview";
 import StepSixReflection from "@/Pages/Pertemuan/components/Reflection";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
+
+function extractPracticeAnswer(response) {
+    const payload = response?.response_payload;
+
+    if (!payload) {
+        return "";
+    }
+
+    if (payload.items) {
+        return payload.items
+            .map((item, index) => `${index + 1}. ${item.answer || ""}`)
+            .join("\n");
+    }
+
+    if (payload.answers) {
+        return response?.response_text || "";
+    }
+
+    if (payload.answer) {
+        return payload.answer;
+    }
+
+    return response?.response_text || "";
+}
 
 export default function StepPage({
     id,
@@ -75,11 +99,6 @@ export default function StepPage({
         currentStep?.step_type === "exploration"
             ? savedCurrentResponse?.response_payload || null
             : responseByType("exploration")?.response_payload || null;
-    const savedExplorationMode =
-        savedExplorationPayload?.mode ||
-        (stepByType("exploration")?.code_language
-            ? "code_compile"
-            : "analysis");
     const savedPracticeResponse =
         currentStep?.step_type === "practice"
             ? savedCurrentResponse
@@ -92,34 +111,7 @@ export default function StepPage({
         savedPracticeResponse?.response_payload?.mode ||
         currentStep?.assessment_mode ||
         "quiz";
-    const savedPracticeAnswer = (() => {
-        const payload = savedPracticeResponse?.response_payload;
-
-        if (!payload) {
-            return "";
-        }
-
-        // FORMAT BARU
-        if (payload.items) {
-            return payload.items
-                .map((item, index) => {
-                    return `${index + 1}. ${item.answer || ""}`;
-                })
-                .join("\n");
-        }
-
-        // FORMAT LAMA
-        if (payload.answers) {
-            return savedPracticeResponse?.response_text || "";
-        }
-
-        // FORMAT SUPER LAMA
-        if (payload.answer) {
-            return payload.answer;
-        }
-
-        return savedPracticeResponse?.response_text || "";
-    })();
+    const savedPracticeAnswer = extractPracticeAnswer(savedPracticeResponse);
     const practiceItems =
         currentStep?.step_type === "review" && currentStep?.practice_items?.length
             ? currentStep.practice_items.map((item, index) => ({
@@ -179,9 +171,6 @@ export default function StepPage({
     const [assessmentAnswers, setAssessmentAnswers] =
         useState(savedPracticeAnswers);
 
-    useEffect(() => {
-        setAssessmentAnswers(savedPracticeAnswers);
-    }, [savedPracticeAnswer]);
 
     const [reflectionDraft, setReflectionDraft] = useState(
         savedReflectionResponse,
@@ -192,6 +181,10 @@ export default function StepPage({
 
     const goToStep = (targetStep) => {
         router.visit(route("pertemuan.step", { id, step: targetStep }));
+    };
+
+    const goToOverview = () => {
+        router.visit(route("pertemuan", { id }));
     };
 
     const saveResponse = (targetStep, payload, onSuccess, options = {}) => {
@@ -236,7 +229,25 @@ export default function StepPage({
     };
 
     const saveQuestion = (onSuccess) => {
-        const items = currentStep.questions.map((question, index) => ({
+        if (!currentStep?.questions?.length) {
+            const responseText = questionDraft.trim();
+
+            saveResponse(
+                currentStep.step,
+                { response_text: responseText },
+                () => {
+                    setQuestionSaved(responseText);
+
+                    if (typeof onSuccess === "function") {
+                        onSuccess();
+                    }
+                },
+            );
+
+            return;
+        }
+
+        const items = currentStep.questions.map((question) => ({
             id: question.id,
             question: question.question_prompt,
             answer: (askAnswerDrafts[question.id] || "").trim(),
@@ -426,7 +437,6 @@ export default function StepPage({
                         askAnswerDrafts={askAnswerDrafts}
                         setAskAnswerDrafts={setAskAnswerDrafts}
                         onSave={saveQuestion}
-                        nextLabel={nextStepTitle()}
                         onNext={goNext}
                     />
                 );
@@ -434,16 +444,6 @@ export default function StepPage({
                 return (
                     <StepThreeExploration
                         stepData={currentStep}
-                        explorationDraft={explorationDraft}
-                        setExplorationDraft={setExplorationDraft}
-                        explorationCode={explorationCode}
-                        setExplorationCode={setExplorationCode}
-                        codeLanguage={codeLanguage}
-                        setCodeLanguage={setCodeLanguage}
-                        compileOutput={compileOutput}
-                        setCompileOutput={setCompileOutput}
-                        explorationSaved={explorationSaved}
-                        onSave={saveExploration}
                         nextLabel={nextStepTitle()}
                         savedResponses={savedResponses}
                         onNext={() => saveExploration(goNext)}
@@ -453,8 +453,6 @@ export default function StepPage({
                 return (
                     <StepFourPractice
                         stepData={currentStep}
-                        assessmentMode={assessmentMode}
-                        setAssessmentMode={setAssessmentMode}
                         quizAnswer={quizAnswer}
                         setQuizAnswer={setQuizAnswer}
                         essayAnswer={essayAnswer}
@@ -463,6 +461,8 @@ export default function StepPage({
                         setAssessmentAnswers={setAssessmentAnswers}
                         assessmentSaved={assessmentSaved}
                         onSave={saveAssessment}
+                        onNext={() => saveAssessment(goNext)}
+                        nextLabel={nextStepTitle()}
                     />
                 );
             case "review":
@@ -480,11 +480,6 @@ export default function StepPage({
                                     index
                                 ]?.answer || "",
                         }))}
-                        onSave={(payload) =>
-                            saveResponse(currentStep.step, payload, goNext, {
-                                forceFormData: true,
-                            })
-                        }
                         nextLabel={nextStepTitle()}
                         onNext={goNext}
                     />
@@ -496,7 +491,7 @@ export default function StepPage({
                         reflectionDraft={reflectionDraft}
                         setReflectionDraft={setReflectionDraft}
                         reflectionSaved={reflectionSaved}
-                        onSave={saveReflection}
+                        onSave={() => saveReflection(goToOverview)}
                     />
                 );
             default:
@@ -510,7 +505,7 @@ export default function StepPage({
                             admin untuk menyesuaikan konfigurasi step.
                         </p>
                         <button
-                            className="btn-primary w-full sm:w-auto"
+                            className="course-step-primary-button w-full sm:w-auto"
                             onClick={() =>
                                 completeStep(currentStep.step, goNext)
                             }

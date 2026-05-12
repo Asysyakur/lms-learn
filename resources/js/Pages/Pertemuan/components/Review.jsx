@@ -1,6 +1,9 @@
-import { ArrowRightIcon, PaperClipIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import {
+    ArrowUpTrayIcon,
+    PaperClipIcon,
+    XMarkIcon,
+} from "@heroicons/react/24/solid";
 import { useEffect, useMemo, useState } from "react";
-import { router } from "@inertiajs/react";
 
 function getPracticeAnswerMap(practiceResponses) {
     return (practiceResponses || []).reduce((accumulator, item, index) => {
@@ -72,7 +75,6 @@ export default function StepFiveReview({
     stepData,
     savedResponse,
     practiceResponses = [],
-    onSave,
     onNext,
     nextLabel = "Lanjut",
 }) {
@@ -103,6 +105,22 @@ export default function StepFiveReview({
 
     const clearEvidenceFile = (index) => {
         handleAnswerChange(index, "evidence", null);
+    };
+
+    const getEvidenceLabel = (evidence) => {
+        if (!evidence) {
+            return "Belum ada file dipilih";
+        }
+
+        if (typeof evidence === "string") {
+            return `Bukti tersimpan: ${evidence}`;
+        }
+
+        if (evidence instanceof File) {
+            return `File dipilih: ${evidence.name}`;
+        }
+
+        return "File siap diunggah";
     };
 
     const submitReview = async () => {
@@ -160,7 +178,6 @@ export default function StepFiveReview({
             // Call onNext to proceed to next step
             onNext?.();
         } catch (error) {
-            console.error("Error submitting review:", error);
             alert("Gagal menyimpan jawaban. Silakan coba lagi.");
         } finally {
             setIsSubmitting(false);
@@ -245,11 +262,32 @@ export default function StepFiveReview({
                                             Upload Bukti
                                         </label>
 
-                                        <div className="flex gap-2">
+                                        <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+                                            <label
+                                                htmlFor={`evidence-upload-${item.flatIndex}`}
+                                                className="flex cursor-pointer items-center justify-between gap-4 rounded-xl bg-slate-50 px-4 py-3 transition hover:bg-slate-100"
+                                            >
+                                                <div className="min-w-0">
+                                                    <p className="text-sm font-semibold text-slate-800">
+                                                        Pilih file bukti
+                                                    </p>
+
+                                                    <p className="mt-1 text-xs text-slate-500">
+                                                        PNG, JPG, PDF. Klik area ini untuk memilih file.
+                                                    </p>
+                                                </div>
+
+                                                <span className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                                                    <ArrowUpTrayIcon className="h-4 w-4" />
+                                                    Upload
+                                                </span>
+                                            </label>
+
                                             <input
+                                                id={`evidence-upload-${item.flatIndex}`}
                                                 type="file"
                                                 accept="image/*,application/pdf"
-                                                className="flex-1 rounded-xl border border-slate-300 bg-white"
+                                                className="sr-only"
                                                 onChange={(e) => {
                                                     const file = e.target.files?.[0] ?? null;
 
@@ -261,31 +299,26 @@ export default function StepFiveReview({
                                                 }}
                                             />
 
-                                            {answers[item.flatIndex]?.evidence && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => clearEvidenceFile(item.flatIndex)}
-                                                    className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-red-600 hover:bg-red-100"
-                                                    title="Hapus file bukti"
-                                                >
-                                                    <XMarkIcon className="h-5 w-5" />
-                                                </button>
-                                            )}
+                                            <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                                                <p className="min-w-0 text-xs font-medium text-slate-600">
+                                                    {getEvidenceLabel(
+                                                        answers[item.flatIndex]?.evidence,
+                                                    )}
+                                                </p>
+
+                                                {answers[item.flatIndex]?.evidence && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => clearEvidenceFile(item.flatIndex)}
+                                                        className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100"
+                                                        title="Hapus file bukti"
+                                                    >
+                                                        <XMarkIcon className="h-4 w-4" />
+                                                        Hapus
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
-
-                                        {answers[item.flatIndex]?.evidence &&
-                                            typeof answers[item.flatIndex].evidence === "string" && (
-                                                <p className="mt-2 text-xs text-slate-500">
-                                                    Bukti tersimpan: {answers[item.flatIndex].evidence}
-                                                </p>
-                                            )}
-
-                                        {answers[item.flatIndex]?.evidence &&
-                                            answers[item.flatIndex].evidence instanceof File && (
-                                                <p className="mt-2 text-xs text-slate-500">
-                                                    File dipilih: {answers[item.flatIndex].evidence.name}
-                                                </p>
-                                            )}
                                     </div>
                                 </div>
                             ))}
@@ -298,7 +331,7 @@ export default function StepFiveReview({
                 <button
                     onClick={submitReview}
                     disabled={isSubmitting}
-                    className="rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="course-step-primary-button"
                     type="button"
                 >
                     {isSubmitting ? "Menyimpan..." : "Simpan Jawaban"}
@@ -307,12 +340,10 @@ export default function StepFiveReview({
                 <button
                     onClick={onNext}
                     disabled={isSubmitting}
-                    className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="course-step-secondary-button"
                     type="button"
                 >
                     {nextLabel}
-
-                    <ArrowRightIcon className="h-4 w-4" />
                 </button>
             </div>
         </div>

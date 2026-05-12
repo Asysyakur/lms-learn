@@ -1,8 +1,7 @@
 import {
     ChatBubbleLeftRightIcon,
-    PaperAirplaneIcon,
 } from "@heroicons/react/24/solid";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 
 export default function StepTwoAsk({
     stepData,
@@ -13,10 +12,8 @@ export default function StepTwoAsk({
     onNext,
     askAnswerDrafts,
     setAskAnswerDrafts,
-    nextLabel = "Lanjut",
 }) {
     const questions = stepData?.questions || [];
-    const isSingleQuestion = questions.length <= 1;
 
     // Initialize from props
     useEffect(() => {
@@ -32,7 +29,7 @@ export default function StepTwoAsk({
         }
 
         setAskAnswerDrafts({});
-    }, [stepData?.questions, questionSaved]);
+    }, [questions, questionSaved, setAskAnswerDrafts]);
 
     const handleAnswerChange = (askId, value) => {
         setAskAnswerDrafts((prev) => ({
@@ -97,7 +94,7 @@ export default function StepTwoAsk({
                     </div>
                 ) : (
                     /* Old single question format for backward compatibility */
-                    <>
+                    <div className="space-y-3">
                         <label className="course-field-label">
                             Pertanyaan Siswa
                         </label>
@@ -109,16 +106,20 @@ export default function StepTwoAsk({
                                 setQuestionDraft(event.target.value)
                             }
                         />
-                    </>
+                    </div>
                 )}
 
                 <div className="flex flex-wrap gap-3">
-                    <button className="btn-primary" onClick={handleSaveAll}>
-                        <PaperAirplaneIcon className="h-5 w-5" />
+                    <button
+                        type="button"
+                        className="course-step-primary-button"
+                        onClick={handleSaveAll}
+                    >
                         Simpan Jawaban
                     </button>
                     <button
-                        className="course-secondary-button"
+                        type="button"
+                        className="course-step-secondary-button"
                         onClick={handleNext}
                     >
                         Lanjut
@@ -139,7 +140,7 @@ export default function StepTwoAsk({
                                     Pertanyaan {idx + 1}:
                                 </p>
                                 <p className="text-sm text-slate-700 mt-1">
-                                    {questionSaved[question.id] || (
+                                    {questionSaved?.[question.id] || (
                                         <span className="italic text-slate-400">
                                             Belum dijawab
                                         </span>

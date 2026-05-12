@@ -1,42 +1,24 @@
 import { useState, useRef, useEffect } from "react";
-import {
-    BeakerIcon,
-    PencilSquareIcon,
-    DocumentIcon,
-} from "@heroicons/react/24/solid";
+import { BeakerIcon, DocumentIcon } from "@heroicons/react/24/solid";
+import { Toast } from "@/Components/FlashToast";
 import { codeToHtml } from "shiki";
 
 export default function StepThreeExploration({
     stepData,
-    explorationCode,
-    codeLanguage,
-    setCompileOutput,
     onNext,
     savedResponses,
     nextLabel = "Lanjut",
 }) {
-    const languageOptions = [
-        { value: "javascript", label: "JavaScript" },
-        { value: "python", label: "Python" },
-        { value: "php", label: "PHP" },
-        { value: "html", label: "HTML" },
-        { value: "css", label: "CSS" },
-    ];
     function CaseStudyCard({ study }) {
         const [output, setOutput] = useState("");
         const [loading, setLoading] = useState(false);
         const [selectedLang, setSelectedLang] = useState(
             study.language || "python",
         );
-        const preRef = useRef(null);
         const lineRef = useRef(null);
         const rawCode = String(study.code || "");
         const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
         const lineHeight = 22; // px per line (approx)
-        const preHeight = Math.min(
-            720,
-            Math.max(120, codeLines.length * lineHeight),
-        );
 
         const runCode = async () => {
             setLoading(true);
@@ -127,8 +109,8 @@ export default function StepThreeExploration({
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto overflow-y-hidden">
-                        <div className="flex min-w-max font-mono text-sm">
+                    <div className="h-[32rem] overflow-auto">
+                        <div className="flex min-w-full font-mono text-sm">
                             <div
                                 ref={lineRef}
                                 className="select-none bg-[#071623] px-4 py-3 text-slate-500"
@@ -148,13 +130,12 @@ export default function StepThreeExploration({
                             </div>
 
                             <pre
-                                ref={preRef}
                                 onScroll={(e) => {
                                     if (lineRef.current)
                                         lineRef.current.scrollTop =
                                             e.target.scrollTop;
                                 }}
-                                className="m-0 bg-[#0B1120] px-5 py-4 text-slate-200 overflow-visible"
+                                className="m-0 min-h-full bg-[#0B1120] px-5 py-4 text-slate-200"
                             >
                                 <code>
                                     {codeLines.map((line, idx) => (
@@ -180,13 +161,13 @@ export default function StepThreeExploration({
                         <button
                             onClick={runCode}
                             disabled={loading}
-                            className="rounded-xl bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                            className="course-step-primary-button"
                         >
                             {loading ? "Running..." : "▶ Run"}
                         </button>
 
                         <button
-                            className="rounded-xl border border-slate-300 px-5 py-2 text-sm font-semibold"
+                            className="course-step-secondary-button"
                             onClick={() => setOutput("")}
                         >
                             Reset
@@ -219,8 +200,6 @@ export default function StepThreeExploration({
     useEffect(() => {
         const saved = savedResponses?.[Number(stepData.step)];
 
-        console.log(saved);
-
         if (!saved?.exploration_responses) return;
 
         const answers = {};
@@ -232,8 +211,6 @@ export default function StepThreeExploration({
                 answers[`${missionIndex}-${qidx}`] = item.answer || "";
             });
         });
-
-        console.log(answers);
 
         setMissionAnswers(answers);
     }, [savedResponses, stepData.step]);
@@ -252,38 +229,55 @@ export default function StepThreeExploration({
 
     const [highlightedCode, setHighlightedCode] = useState({});
 
+    // Toast state (use shared Toast component)
+    const [toastMessage, setToastMessage] = useState(null);
+    const [toastIsError, setToastIsError] = useState(false);
+
     // Highlight code blocks ketika material berubah
     useEffect(() => {
         const highlightAllCodes = async () => {
             const allCodes = [];
+
             materials.forEach((m, midx) => {
-                if (Array.isArray(m.blocks)) {
-                    m.blocks.forEach((block, bidx) => {
-                        if (block.type === "code") {
-                            allCodes.push({
-                                key: `m-${midx}-${bidx}`,
-                                code: block.code,
-                                lang: block.language,
-                            });
-                        }
+                if (!Array.isArray(m.blocks)) return;
+
+                m.blocks.forEach((block, bidx) => {
+                    if (block.type !== "code") return;
+
+                    allCodes.push({
+                        key: `m-${midx}-${bidx}`,
+                        code: block.code,
+                        lang: block.language,
                     });
-                }
+                });
             });
-            const newHighlighted = { ...highlightedCode };
+
+            const generated = {};
+
             for (const item of allCodes) {
-                if (!newHighlighted[item.key]) {
-                    try {
-                        const html = await codeToHtml(item.code, {
-                            lang: getLanguageAlias(item.lang || "javascript"),
-                            theme: "one-dark-pro",
-                        });
-                        newHighlighted[item.key] = html;
-                    } catch (e) {
-                        console.error("Shiki error:", e);
-                    }
+                try {
+                    generated[item.key] = await codeToHtml(item.code, {
+                        lang: getLanguageAlias(item.lang || "javascript"),
+                        theme: "one-dark-pro",
+                    });
+                } catch (e) {
+                    // Ignore highlight failures and keep raw code fallback.
                 }
             }
-            setHighlightedCode(newHighlighted);
+
+            setHighlightedCode((prev) => {
+                const next = { ...prev };
+                let changed = false;
+
+                Object.entries(generated).forEach(([key, html]) => {
+                    if (!next[key]) {
+                        next[key] = html;
+                        changed = true;
+                    }
+                });
+
+                return changed ? next : prev;
+            });
         };
 
         highlightAllCodes();
@@ -375,10 +369,13 @@ export default function StepThreeExploration({
                 },
             );
 
-            alert("Mission berhasil disimpan 😹");
+            setToastMessage("Mission berhasil disimpan.");
+            setToastIsError(false);
+            window.setTimeout(() => setToastMessage(null), 3280);
         } catch (e) {
-            console.error(e);
-            alert("Gagal menyimpan mission 😭");
+            setToastMessage("Gagal menyimpan mission.");
+            setToastIsError(true);
+            window.setTimeout(() => setToastMessage(null), 3280);
         } finally {
             setSavingMission(false);
         }
@@ -449,7 +446,7 @@ export default function StepThreeExploration({
                             <a
                                 href={stepData.exploration_pdf_url}
                                 download
-                                className="course-secondary-button inline-block text-center"
+                                className="course-step-secondary-button"
                             >
                                 Download PDF
                             </a>
@@ -622,7 +619,7 @@ export default function StepThreeExploration({
                         </div>
 
                         <button
-                            className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                            className="course-step-primary-button"
                             onClick={() => setActiveTab("missions")}
                         >
                             Lanjut ke Mission
@@ -635,12 +632,6 @@ export default function StepThreeExploration({
                         {Array.isArray(stepData?.missions) &&
                             stepData.missions.length > 0 && (
                                 <div className="space-y-6">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-slate-900">
-                                            Missions
-                                        </h3>
-                                    </div>
-
                                     {stepData.missions
                                         .slice(
                                             activeMissionIndex,
@@ -661,7 +652,7 @@ export default function StepThreeExploration({
                                                     </p>
                                                 </div>
 
-                                                <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                                                <div className="grid items-stretch gap-6 xl:grid-cols-[1.1fr_0.9fr]">
                                                     {/* KIRI - GAMBAR */}
                                                     <div className="space-y-6">
                                                         {/* GAMBAR A */}
@@ -675,14 +666,15 @@ export default function StepThreeExploration({
                                                                     Gambar A
                                                                 </div>
                                                             </div>
-
-                                                            <img
-                                                                src={
-                                                                    mission.left_image
-                                                                }
-                                                                alt="Gambar A"
-                                                                className="w-full rounded-2xl border border-slate-200"
-                                                            />
+                                                            <div className="mb-3 overflow-auto rounded-lg border border-slate-200 max-h-96 bg-white">
+                                                                <img
+                                                                    src={
+                                                                        mission.left_image
+                                                                    }
+                                                                    alt="Gambar A"
+                                                                    className="w-full h-auto object-contain rounded-2xl"
+                                                                />
+                                                            </div>
                                                         </div>
 
                                                         {/* GAMBAR B */}
@@ -696,14 +688,15 @@ export default function StepThreeExploration({
                                                                     Gambar B
                                                                 </div>
                                                             </div>
-
-                                                            <img
-                                                                src={
-                                                                    mission.right_image
-                                                                }
-                                                                alt="Gambar B"
-                                                                className="w-full rounded-2xl border border-slate-200"
-                                                            />
+                                                            <div className="mb-3 overflow-auto rounded-lg border border-slate-200 max-h-96 bg-white">
+                                                                <img
+                                                                    src={
+                                                                        mission.right_image
+                                                                    }
+                                                                    alt="Gambar B"
+                                                                    className="w-full h-auto object-contain rounded-2xl"
+                                                                />
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -724,56 +717,61 @@ export default function StepThreeExploration({
                                                             </p>
                                                         </div>
 
-                                                        <div className="space-y-5">
-                                                            {mission.questions?.map(
-                                                                (q, qidx) => (
-                                                                    <div
-                                                                        key={
-                                                                            qidx
-                                                                        }
-                                                                        className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                                                                    >
-                                                                        <label className="mb-3 flex items-start gap-3">
-                                                                            <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
-                                                                                {qidx +
-                                                                                    1}
-                                                                            </div>
+                                                        <div className="h-[52rem] overflow-hidden">
+                                                            <div className="h-full space-y-5 overflow-y-auto">
+                                                                {mission.questions?.map(
+                                                                    (
+                                                                        q,
+                                                                        qidx,
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                qidx
+                                                                            }
+                                                                            className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                                                                        >
+                                                                            <label className="mb-3 flex items-start gap-3">
+                                                                                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+                                                                                    {qidx +
+                                                                                        1}
+                                                                                </div>
 
-                                                                            <span className="text-sm font-semibold text-slate-700">
-                                                                                {
-                                                                                    q
+                                                                                <span className="text-sm font-semibold text-slate-700">
+                                                                                    {
+                                                                                        q
+                                                                                    }
+                                                                                </span>
+                                                                            </label>
+
+                                                                            <textarea
+                                                                                value={
+                                                                                    missionAnswers[
+                                                                                        `${activeMissionIndex}-${qidx}`
+                                                                                    ] ||
+                                                                                    ""
                                                                                 }
-                                                                            </span>
-                                                                        </label>
-
-                                                                        <textarea
-                                                                            value={
-                                                                                missionAnswers[
-                                                                                    `${activeMissionIndex}-${qidx}`
-                                                                                ] ||
-                                                                                ""
-                                                                            }
-                                                                            onChange={(
-                                                                                e,
-                                                                            ) =>
-                                                                                setMissionAnswers(
-                                                                                    (
-                                                                                        prev,
-                                                                                    ) => ({
-                                                                                        ...prev,
-                                                                                        [`${activeMissionIndex}-${qidx}`]:
-                                                                                            e
-                                                                                                .target
-                                                                                                .value,
-                                                                                    }),
-                                                                                )
-                                                                            }
-                                                                            className="min-h-32 w-full rounded-2xl border border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-500"
-                                                                            placeholder="Tulis jawabanmu di sini..."
-                                                                        />
-                                                                    </div>
-                                                                ),
-                                                            )}
+                                                                                onChange={(
+                                                                                    e,
+                                                                                ) =>
+                                                                                    setMissionAnswers(
+                                                                                        (
+                                                                                            prev,
+                                                                                        ) => ({
+                                                                                            ...prev,
+                                                                                            [`${activeMissionIndex}-${qidx}`]:
+                                                                                                e
+                                                                                                    .target
+                                                                                                    .value,
+                                                                                        }),
+                                                                                    )
+                                                                                }
+                                                                                className="min-h-32 w-full rounded-2xl border border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-500"
+                                                                                placeholder="Tulis jawabanmu di sini..."
+                                                                            />
+                                                                        </div>
+                                                                    ),
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -791,7 +789,7 @@ export default function StepThreeExploration({
                                                 )
                                             }
                                             disabled={savingMission}
-                                            className="rounded-2xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                                            className="course-step-primary-button disabled:opacity-50"
                                         >
                                             {savingMission
                                                 ? "Menyimpan..."
@@ -808,7 +806,7 @@ export default function StepThreeExploration({
                                                     Math.max(prev - 1, 0),
                                                 )
                                             }
-                                            className="rounded-2xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 disabled:opacity-40"
+                                            className="course-step-secondary-button disabled:opacity-40"
                                         >
                                             Sebelumnya
                                         </button>
@@ -828,14 +826,14 @@ export default function StepThreeExploration({
                                                         (prev) => prev + 1,
                                                     )
                                                 }
-                                                className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                                                className="course-step-primary-button"
                                             >
                                                 Mission Berikutnya
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={onNext}
-                                                className="rounded-2xl bg-orange-500 px-6 py-3 font-semibold text-white hover:bg-orange-600"
+                                                className="course-step-primary-button"
                                             >
                                                 {nextLabel}
                                             </button>
@@ -875,13 +873,44 @@ export default function StepThreeExploration({
                     <div className="flex justify-end pt-6">
                         <button
                             onClick={() => setActiveTab("case-studies")}
-                            className="rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
+                            className="course-step-primary-button"
                         >
                             Lanjut ke Studi Kasus
                         </button>
                     </div>
                 </div>
             )}
+            {/* Shared toast for client-side messages */}
+            <
+                /* eslint-disable-next-line react/jsx-no-undef */
+                Toast
+                message={toastMessage}
+                isError={toastIsError}
+            />
         </div>
     );
 }
+
+// Toast markup (rendered at root so styles are consistent with admin)
+function ExplorationToast({ phase, message, isError }) {
+    if (!message || phase === "idle") return null;
+
+    const phaseClass = phase === "exit" ? "toast-exit" : "toast-enter";
+
+    return (
+        <div className="fixed right-4 top-4 z-50 w-[calc(100vw-2rem)] max-w-sm">
+            <div
+                className={`${phaseClass} overflow-hidden rounded-2xl border px-4 py-3 shadow-lg backdrop-blur ${isError ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
+            >
+                <div className={`toast-progress ${isError ? "toast-progress-error" : "toast-progress-success"}`} />
+                <p className="text-sm font-semibold">{message}</p>
+            </div>
+        </div>
+    );
+}
+
+// Attach the toast UI to `window.__exploration_toast_container` so it's possible
+// to render it from the component root without lifting state across files.
+// The actual rendering is handled inside the component via state; keep this
+// export for potential future reuse.
+ExplorationToast.displayName = "ExplorationToast";

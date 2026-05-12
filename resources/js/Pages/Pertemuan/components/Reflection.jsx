@@ -26,7 +26,7 @@ export default function StepSixReflection({
           onChange={(event) => setReflectionDraft(event.target.value)}
         />
 
-        <button className="btn-primary w-full sm:w-auto" onClick={onSave}>
+        <button className="course-step-primary-button w-full sm:w-auto" onClick={onSave}>
           Simpan Jawaban
         </button>
       </div>

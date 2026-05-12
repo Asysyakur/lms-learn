@@ -1,17 +1,16 @@
-import { ClipboardDocumentCheckIcon } from "@heroicons/react/24/solid";
+import { ArrowRightIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/solid";
 
 export default function StepFourPractice({
     stepData,
-    assessmentMode,
-    setAssessmentMode,
     quizAnswer,
     setQuizAnswer,
     essayAnswer,
     setEssayAnswer,
     assessmentAnswers = {},
     setAssessmentAnswers,
-    assessmentSaved,
     onSave,
+    onNext,
+    nextLabel = "Lanjut",
 }) {
     const practiceItems =
         Array.isArray(stepData?.assessment_items) &&
@@ -84,7 +83,7 @@ export default function StepFourPractice({
                                 <textarea
                                     className="course-textarea mt-3"
                                     placeholder="Tulis jawaban essay di sini..."
-                                    value={getAnswer(item)}
+                                    value={getAnswer(item) || ""}
                                     onChange={(event) =>
                                         updateAnswer(item, event.target.value)
                                     }
@@ -123,7 +122,7 @@ export default function StepFourPractice({
                 </div>
 
                 <button
-                    className="btn-primary w-full sm:w-auto"
+                    className="course-step-primary-button w-full sm:w-auto"
                     onClick={() => onSave()}
                 >
                     Simpan Latihan Soal
@@ -153,6 +152,19 @@ export default function StepFourPractice({
                         </div>
                     ))}
                 </div>
+
+                {onNext && (
+                    <div className="flex justify-end pt-3">
+                        <button
+                            type="button"
+                            onClick={() => onSave?.(onNext)}
+                            className="course-step-primary-button"
+                        >
+                            {nextLabel}
+                            <ArrowRightIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

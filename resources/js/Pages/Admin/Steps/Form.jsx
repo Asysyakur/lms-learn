@@ -628,7 +628,6 @@ export default function StepForm({
                         "Gagal menyimpan step. Silakan coba lagi.";
 
                     alert(message);
-                    console.error(error);
                 }
             } else {
                 try {
@@ -650,7 +649,6 @@ export default function StepForm({
                         "Gagal membuat step. Silakan coba lagi.";
 
                     alert(message);
-                    console.error(error);
                 }
             }
             return;

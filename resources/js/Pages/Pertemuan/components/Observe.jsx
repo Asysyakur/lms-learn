@@ -2,6 +2,9 @@ import { CloudArrowUpIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 
 export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" }) {
   const resourceUrl = stepData?.resource_url || "";
+  const instructionText =
+    stepData?.instruction_text ||
+    "Buka PPT atau video terlebih dahulu lalu lanjutkan ke pertanyaan siswa.";
   const resourceLabel =
     stepData?.resource_type === "video"
       ? "Video"
@@ -18,7 +21,7 @@ export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" 
         </div>
 
         <p className="course-detail-text">
-          {stepData?.instruction_text || "Buka PPT atau video terlebih dahulu lalu lanjutkan ke pertanyaan siswa."}
+          {instructionText}
         </p>
 
         <ResourcePreview url={resourceUrl} resourceType={stepData?.resource_type} />
@@ -27,9 +30,9 @@ export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" 
       <div className="course-detail-card space-y-3">
         <h3 className="course-detail-title">Instruksi</h3>
         <p className="course-detail-text">
-          {stepData?.instruction_text || "Buka PPT atau video terlebih dahulu. Setelah itu lanjut ke bagian bertanya untuk menuliskan pemahaman awal."}
+          {instructionText}
         </p>
-        <button className="btn-primary w-full" onClick={onNext}>
+        <button className="course-step-primary-button w-full" onClick={onNext}>
           {nextLabel}
         </button>
       </div>
@@ -79,7 +82,7 @@ function ResourcePreview({ url, resourceType }) {
           <span className="font-semibold text-slate-900">Materi:</span>{" "}
           <span className="break-all">{url}</span>
         </div>
-        <a href={url} className="course-secondary-button shrink-0" target="_blank" rel="noreferrer">
+        <a href={url} className="course-step-secondary-button shrink-0" target="_blank" rel="noreferrer">
           Buka Materi
         </a>
       </div>

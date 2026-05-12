@@ -11,7 +11,6 @@ use App\Models\MeetingStepExploration;
 use App\Models\MeetingStepExplorationResponse;
 use App\Models\MeetingStepObservation;
 use App\Models\MeetingStepObservationResponse;
-use App\Models\MeetingStepPractice;
 use App\Models\MeetingStepPracticeResponse;
 use App\Models\MeetingStepReflection;
 use App\Models\MeetingStepReflectionResponse;
@@ -593,9 +592,9 @@ class LearningController extends Controller
     private function formatObservationStep(?MeetingStepObservation $observation): array
     {
         return [
-            'instruction_text' => $observation ? $observation->instruction_text : null,
-            'resource_type' => $observation ? $observation->resource_type : null,
-            'resource_url' => $observation ? $observation->resource_url : null,
+            'instruction_text' => optional($observation)->instruction_text,
+            'resource_type' => optional($observation)->resource_type,
+            'resource_url' => optional($observation)->resource_url,
         ];
     }
 
@@ -621,23 +620,12 @@ class LearningController extends Controller
     private function formatExplorationStep(?MeetingStepExploration $exploration): array
     {
         return [
-            'code_language' =>
-            $exploration ? $exploration->code_language : null,
-
-            'exploration_prompt' =>
-            $exploration ? $exploration->exploration_prompt : null,
-
-            'materials' =>
-            $exploration ? ($exploration->materials ?? []) : [],
-
-            'exploration_mode' =>
-            $exploration ? $exploration->exploration_mode : null,
-
-            'case_studies' =>
-            $exploration ? ($exploration->case_studies ?? []) : [],
-
-            'missions' =>
-            $exploration ? ($exploration->missions ?? []) : [],
+            'code_language' => optional($exploration)->code_language,
+            'exploration_prompt' => optional($exploration)->exploration_prompt,
+            'materials' => optional($exploration)->materials ?? [],
+            'exploration_mode' => optional($exploration)->exploration_mode,
+            'case_studies' => optional($exploration)->case_studies ?? [],
+            'missions' => optional($exploration)->missions ?? [],
         ];
     }
 
@@ -711,8 +699,8 @@ class LearningController extends Controller
         }
 
         return [
-            'instruction_text' => $step->review ? $step->review->instruction_text : null,
-            'review_items' => $step->review ? ($step->review->review_items ?? []) : [],
+            'instruction_text' => optional($step->review)->instruction_text,
+            'review_items' => optional($step->review)->review_items ?? [],
             'practice_items' => $practiceItems,
         ];
     }
@@ -720,7 +708,7 @@ class LearningController extends Controller
     private function formatReflectionStep(?MeetingStepReflection $reflection): array
     {
         return [
-            'reflection_question' => $reflection ? $reflection->reflection_question : null,
+            'reflection_question' => optional($reflection)->reflection_question,
         ];
     }
 
