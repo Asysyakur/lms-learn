@@ -548,7 +548,7 @@ export default function StepForm({
         // Handle file uploads for exploration materials
         if (data.step_type === "exploration" && data.materials) {
             const formData = new FormData();
-            
+
             // Add all form fields except files first
             const materialsWithoutFiles = data.materials.map((material) => ({
                 ...material,
@@ -559,32 +559,62 @@ export default function StepForm({
             }));
 
             submitData = {
-                ...data,
-                materials: materialsWithoutFiles,
                 ...submitData,
+                materials: materialsWithoutFiles,
             };
 
             // Append simple text fields directly (not JSON stringified)
-            const textFields = ['meeting_id', 'step_number', 'step_type', 'title', 'description', 'instruction_text', 'exploration_mode', 'code_language', 'exploration_prompt', 'resource_type', 'resource_url', 'reflection_question'];
+            const textFields = [
+                "meeting_id",
+                "step_number",
+                "step_type",
+                "title",
+                "description",
+                "instruction_text",
+                "exploration_mode",
+                "code_language",
+                "exploration_prompt",
+                "resource_type",
+                "resource_url",
+                "reflection_question",
+            ];
             textFields.forEach((field) => {
-                if (submitData[field] !== undefined && submitData[field] !== null) {
+                if (
+                    submitData[field] !== undefined &&
+                    submitData[field] !== null
+                ) {
                     formData.append(field, String(submitData[field]));
                 }
             });
 
             // Append complex objects as JSON
-            if (submitData.materials) formData.append("materials", JSON.stringify(submitData.materials));
-            if (submitData.case_studies) formData.append("case_studies", JSON.stringify(submitData.case_studies));
-            if (submitData.missions) formData.append("missions", JSON.stringify(submitData.missions));
+            if (submitData.materials)
+                formData.append(
+                    "materials",
+                    JSON.stringify(submitData.materials),
+                );
+            if (submitData.case_studies)
+                formData.append(
+                    "case_studies",
+                    JSON.stringify(submitData.case_studies),
+                );
+            if (submitData.missions)
+                formData.append(
+                    "missions",
+                    JSON.stringify(submitData.missions),
+                );
 
             // Append files from materials
             data.materials.forEach((material, materialIdx) => {
                 if (material.blocks) {
                     material.blocks.forEach((block, blockIdx) => {
-                        if (block.image_file && block.image_file instanceof File) {
+                        if (
+                            block.image_file &&
+                            block.image_file instanceof File
+                        ) {
                             formData.append(
                                 `materials.${materialIdx}.blocks.${blockIdx}.image_file`,
-                                block.image_file
+                                block.image_file,
                             );
                         }
                     });
@@ -612,11 +642,15 @@ export default function StepForm({
             if (isEdit) {
                 formData.append("_method", "put");
                 try {
-                    await window.axios.post(`/admin/steps/${step.id}`, formData, {
-                        headers: {
-                            "Content-Type": "multipart/form-data",
+                    await window.axios.post(
+                        `/admin/steps/${step.id}`,
+                        formData,
+                        {
+                            headers: {
+                                "Content-Type": "multipart/form-data",
+                            },
                         },
-                    });
+                    );
 
                     window.location.href = route("admin.meetings.steps", {
                         meeting: data.meeting_id,
@@ -1211,7 +1245,9 @@ export default function StepForm({
                                                         <div className="mb-2 flex items-start justify-between gap-3">
                                                             {block.url && (
                                                                 <img
-                                                                    src={block.url}
+                                                                    src={
+                                                                        block.url
+                                                                    }
                                                                     alt={
                                                                         block.alt ||
                                                                         "Pratinjau gambar"
@@ -1489,7 +1525,7 @@ export default function StepForm({
                                     <input
                                         className="w-full rounded-lg border-slate-300"
                                         placeholder="Judul Studi Kasus"
-                                        value={study.title}
+                                        value={study.title || ""}
                                         onChange={(e) => {
                                             const updated = [
                                                 ...data.case_studies,
@@ -1522,28 +1558,11 @@ export default function StepForm({
                                         ))}
                                     </select>
 
-                                    <div className="grid gap-4 md:grid-cols-2">
+                                    {data.exploration_mode === "coding" ? (
                                         <div className="space-y-2">
-                                            <input
-                                                className="w-full rounded-lg border-slate-300"
-                                                placeholder="Label Kiri"
-                                                value={study.left_title}
-                                                onChange={(e) => {
-                                                    const updated = [
-                                                        ...data.case_studies,
-                                                    ];
-                                                    updated[sidx].left_title =
-                                                        e.target.value;
-                                                    setData(
-                                                        "case_studies",
-                                                        updated,
-                                                    );
-                                                }}
-                                            />
-
                                             <textarea
                                                 className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
-                                                placeholder="Code kiri..."
+                                                placeholder="Code..."
                                                 value={study.left_code}
                                                 onChange={(e) => {
                                                     const updated = [
@@ -1558,48 +1577,100 @@ export default function StepForm({
                                                 }}
                                             />
                                         </div>
+                                    ) : (
+                                        <div className="grid gap-4 md:grid-cols-2">
+                                            <div className="space-y-2">
+                                                <input
+                                                    className="w-full rounded-lg border-slate-300"
+                                                    placeholder="Label Kiri"
+                                                    value={
+                                                        study.left_title || ""
+                                                    }
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+                                                        updated[
+                                                            sidx
+                                                        ].left_title =
+                                                            e.target.value;
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
 
-                                        <div className="space-y-2">
-                                            <input
-                                                className="w-full rounded-lg border-slate-300"
-                                                placeholder="Label Kanan"
-                                                value={study.right_title}
-                                                onChange={(e) => {
-                                                    const updated = [
-                                                        ...data.case_studies,
-                                                    ];
-                                                    updated[sidx].right_title =
-                                                        e.target.value;
-                                                    setData(
-                                                        "case_studies",
-                                                        updated,
-                                                    );
-                                                }}
-                                            />
+                                                <textarea
+                                                    className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
+                                                    placeholder="Code kiri..."
+                                                    value={
+                                                        study.left_code || ""
+                                                    }
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+                                                        updated[
+                                                            sidx
+                                                        ].left_code =
+                                                            e.target.value;
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <input
+                                                    className="w-full rounded-lg border-slate-300"
+                                                    placeholder="Label Kanan"
+                                                    value={
+                                                        study.right_title || ""
+                                                    }
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+                                                        updated[
+                                                            sidx
+                                                        ].right_title =
+                                                            e.target.value;
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
 
-                                            <textarea
-                                                className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
-                                                placeholder="Code kanan..."
-                                                value={study.right_code}
-                                                onChange={(e) => {
-                                                    const updated = [
-                                                        ...data.case_studies,
-                                                    ];
-                                                    updated[sidx].right_code =
-                                                        e.target.value;
-                                                    setData(
-                                                        "case_studies",
-                                                        updated,
-                                                    );
-                                                }}
-                                            />
+                                                <textarea
+                                                    className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
+                                                    placeholder="Code kanan..."
+                                                    value={
+                                                        study.right_code || ""
+                                                    }
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+                                                        updated[
+                                                            sidx
+                                                        ].right_code =
+                                                            e.target.value;
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-
+                                    )}
                                     <textarea
                                         className="min-h-24 w-full rounded-lg border-slate-300"
                                         placeholder="Expected Output"
-                                        value={study.expected_output}
+                                        value={study.expected_output || ""}
                                         onChange={(e) => {
                                             const updated = [
                                                 ...data.case_studies,
@@ -1669,7 +1740,7 @@ export default function StepForm({
                                     <input
                                         className="w-full rounded-lg border-slate-300"
                                         placeholder="Judul Mission"
-                                        value={mission.title}
+                                        value={mission.title || ""}
                                         onChange={(e) => {
                                             const updated = [...data.missions];
                                             updated[midx].title =
@@ -1681,7 +1752,7 @@ export default function StepForm({
                                     <textarea
                                         className="min-h-20 w-full rounded-lg border-slate-300"
                                         placeholder="Deskripsi mission"
-                                        value={mission.description}
+                                        value={mission.description || ""}
                                         onChange={(e) => {
                                             const updated = [...data.missions];
                                             updated[midx].description =
@@ -1755,7 +1826,9 @@ export default function StepForm({
                                             <div className="flex items-start justify-between gap-3">
                                                 {mission.right_image && (
                                                     <img
-                                                        src={mission.right_image}
+                                                        src={
+                                                            mission.right_image
+                                                        }
                                                         alt="Gambar kanan"
                                                         className="h-52 w-full rounded-xl border border-slate-200 object-cover"
                                                     />
@@ -1811,7 +1884,7 @@ export default function StepForm({
                                                 <input
                                                     className="flex-1 rounded-lg border-slate-300"
                                                     placeholder={`Pertanyaan ${qidx + 1}`}
-                                                    value={q}
+                                                    value={q || ""}
                                                     onChange={(e) => {
                                                         const updated = [
                                                             ...data.missions,
@@ -1952,7 +2025,7 @@ export default function StepForm({
                                         </label>
                                         <textarea
                                             className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                            value={item.question}
+                                            value={item.question || ""}
                                             onChange={(e) => {
                                                 const next = [...practiceItems];
                                                 next[index].question =
@@ -1970,7 +2043,7 @@ export default function StepForm({
                                             className="mt-1 min-h-40 w-full rounded-lg border-slate-300 disabled:bg-slate-100"
                                             placeholder="Satu opsi per baris"
                                             disabled={item.mode === "essay"}
-                                            value={item.options}
+                                            value={item.options || ""}
                                             onChange={(e) => {
                                                 const next = [...practiceItems];
                                                 next[index].options =
@@ -2005,8 +2078,8 @@ export default function StepForm({
                         <div className="space-y-4">
                             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                                 Review akan mengikuti practice step sebelumnya.
-                                Tambahkan beberapa review untuk tiap soal latihan
-                                jika diperlukan.
+                                Tambahkan beberapa review untuk tiap soal
+                                latihan jika diperlukan.
                             </div>
 
                             {getReviewPracticeItems().length === 0 ? (
@@ -2015,149 +2088,176 @@ export default function StepForm({
                                     dijadikan acuan untuk review.
                                 </div>
                             ) : (
-                                getReviewPracticeItems().map(
-                                    (practiceItem) => {
-                                        const children = reviewItems.filter(
-                                            (item) =>
-                                                Number(
-                                                    item.practice_index ?? 0,
-                                                ) === practiceItem.practice_index,
-                                        );
+                                getReviewPracticeItems().map((practiceItem) => {
+                                    const children = reviewItems.filter(
+                                        (item) =>
+                                            Number(item.practice_index ?? 0) ===
+                                            practiceItem.practice_index,
+                                    );
 
-                                        return (
-                                            <div
-                                                key={practiceItem.practice_index}
-                                                className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-                                            >
-                                                <div className="mb-4 rounded-lg bg-slate-50 p-4">
-                                                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                                                        Latihan Soal {practiceItem.practice_index + 1}
+                                    return (
+                                        <div
+                                            key={practiceItem.practice_index}
+                                            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                                        >
+                                            <div className="mb-4 rounded-lg bg-slate-50 p-4">
+                                                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                                    Latihan Soal{" "}
+                                                    {practiceItem.practice_index +
+                                                        1}
+                                                </p>
+                                                <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                                    {practiceItem.question}
+                                                </p>
+                                            </div>
+
+                                            <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3">
+                                                <label className="block text-xs font-semibold text-slate-600">
+                                                    Judul Review Grup
+                                                </label>
+                                                <input
+                                                    className="mt-1 w-full rounded-lg border-slate-300"
+                                                    value={
+                                                        reviewGroupTitles[
+                                                            practiceItem
+                                                                .practice_index
+                                                        ] ||
+                                                        practiceItem.title ||
+                                                        `Essay ${practiceItem.practice_index + 1}`
+                                                    }
+                                                    onChange={(e) =>
+                                                        updateReviewGroupTitle(
+                                                            practiceItem.practice_index,
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    placeholder={`Contoh: Essay ${practiceItem.practice_index + 1}`}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {children.length === 0 ? (
+                                                    <p className="text-sm text-slate-500 italic">
+                                                        Belum ada review turunan
+                                                        untuk soal ini.
                                                     </p>
-                                                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                                        {practiceItem.question}
-                                                    </p>
-                                                </div>
-
-                                                <div className="mb-4 rounded-lg border border-slate-200 bg-white p-3">
-                                                    <label className="block text-xs font-semibold text-slate-600">
-                                                        Judul Review Grup
-                                                    </label>
-                                                    <input
-                                                        className="mt-1 w-full rounded-lg border-slate-300"
-                                                        value={
-                                                            reviewGroupTitles[
-                                                                practiceItem.practice_index
-                                                            ] ||
-                                                            practiceItem.title ||
-                                                            `Essay ${practiceItem.practice_index + 1}`
-                                                        }
-                                                        onChange={(e) =>
-                                                            updateReviewGroupTitle(
-                                                                practiceItem.practice_index,
-                                                                e.target.value,
-                                                            )
-                                                        }
-                                                        placeholder={`Contoh: Essay ${practiceItem.practice_index + 1}`}
-                                                    />
-                                                </div>
-
-                                                <div className="space-y-3">
-                                                    {children.length === 0 ? (
-                                                        <p className="text-sm text-slate-500 italic">
-                                                            Belum ada review
-                                                            turunan untuk soal
-                                                            ini.
-                                                        </p>
-                                                    ) : (
-                                                        children.map(
-                                                            (item, childIndex) => {
-                                                                const reviewItemIndex = reviewItems.findIndex(
-                                                                    (candidate) =>
-                                                                        candidate === item,
+                                                ) : (
+                                                    children.map(
+                                                        (item, childIndex) => {
+                                                            const reviewItemIndex =
+                                                                reviewItems.findIndex(
+                                                                    (
+                                                                        candidate,
+                                                                    ) =>
+                                                                        candidate ===
+                                                                        item,
                                                                 );
-                                                                const reviewGroupTitle =
+                                                            const reviewGroupTitle =
+                                                                reviewGroupTitles[
+                                                                    practiceItem
+                                                                        .practice_index
+                                                                ] ||
+                                                                practiceItem.title ||
+                                                                `Latihan Soal ${practiceItem.practice_index + 1}`;
+
+                                                            return (
+                                                                <div
+                                                                    key={`${practiceItem.practice_index}-${childIndex}`}
+                                                                    className="rounded-lg border border-slate-200 bg-slate-50 p-4"
+                                                                >
+                                                                    <div className="flex items-start justify-between gap-3">
+                                                                        <div className="flex-1 space-y-3">
+                                                                            <div>
+                                                                                <label className="block text-xs font-semibold text-slate-600">
+                                                                                    Pertanyaan
+                                                                                    Review
+                                                                                </label>
+                                                                                <textarea
+                                                                                    className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                                                                    value={
+                                                                                        item.question ||
+                                                                                        ""
+                                                                                    }
+                                                                                    onChange={(
+                                                                                        e,
+                                                                                    ) => {
+                                                                                        const updated =
+                                                                                            [
+                                                                                                ...reviewItems,
+                                                                                            ];
+                                                                                        updated[
+                                                                                            reviewItemIndex
+                                                                                        ] =
+                                                                                            {
+                                                                                                ...updated[
+                                                                                                    reviewItemIndex
+                                                                                                ],
+                                                                                                question:
+                                                                                                    e
+                                                                                                        .target
+                                                                                                        .value,
+                                                                                                title: reviewGroupTitle,
+                                                                                            };
+                                                                                        setReviewItems(
+                                                                                            updated,
+                                                                                        );
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                setReviewItems(
+                                                                                    reviewItems.filter(
+                                                                                        (
+                                                                                            _,
+                                                                                            reviewIndex,
+                                                                                        ) =>
+                                                                                            reviewIndex !==
+                                                                                            reviewItemIndex,
+                                                                                    ),
+                                                                                );
+                                                                            }}
+                                                                            className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-700"
+                                                                        >
+                                                                            Hapus
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        },
+                                                    )
+                                                )}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setReviewItems([
+                                                            ...reviewItems,
+                                                            {
+                                                                practice_index:
+                                                                    practiceItem.practice_index,
+                                                                title:
                                                                     reviewGroupTitles[
-                                                                        practiceItem.practice_index
+                                                                        practiceItem
+                                                                            .practice_index
                                                                     ] ||
                                                                     practiceItem.title ||
-                                                                    `Latihan Soal ${practiceItem.practice_index + 1}`;
-
-                                                                return (
-                                                                    <div
-                                                                        key={`${practiceItem.practice_index}-${childIndex}`}
-                                                                        className="rounded-lg border border-slate-200 bg-slate-50 p-4"
-                                                                    >
-                                                                        <div className="flex items-start justify-between gap-3">
-                                                                            <div className="flex-1 space-y-3">
-                                                                                <div>
-                                                                                    <label className="block text-xs font-semibold text-slate-600">
-                                                                                        Pertanyaan Review
-                                                                                    </label>
-                                                                                    <textarea
-                                                                                        className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                                                                        value={item.question}
-                                                                                        onChange={(e) => {
-                                                                                            const updated = [...reviewItems];
-                                                                                            updated[reviewItemIndex] = {
-                                                                                                ...updated[reviewItemIndex],
-                                                                                                        question: e.target.value,
-                                                                                                        title: reviewGroupTitle,
-                                                                                            };
-                                                                                            setReviewItems(updated);
-                                                                                        }}
-                                                                                    />
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    setReviewItems(
-                                                                                        reviewItems.filter(
-                                                                                            (_, reviewIndex) =>
-                                                                                                reviewIndex !==
-                                                                                                reviewItemIndex,
-                                                                                        ),
-                                                                                    );
-                                                                                }}
-                                                                                className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-700"
-                                                                            >
-                                                                                Hapus
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                );
+                                                                    `Essay ${practiceItem.practice_index + 1}`,
+                                                                question: "",
                                                             },
-                                                        )
-                                                    )}
-
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            setReviewItems([
-                                                                ...reviewItems,
-                                                                {
-                                                                    practice_index:
-                                                                        practiceItem.practice_index,
-                                                                    title:
-                                                                        reviewGroupTitles[
-                                                                            practiceItem.practice_index
-                                                                        ] ||
-                                                                        practiceItem.title ||
-                                                                        `Essay ${practiceItem.practice_index + 1}`,
-                                                                    question: "",
-                                                                },
-                                                            ])
-                                                        }
-                                                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                                                    >
-                                                        + Tambah Review
-                                                    </button>
-                                                </div>
+                                                        ])
+                                                    }
+                                                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                                                >
+                                                    + Tambah Review
+                                                </button>
                                             </div>
-                                        );
-                                    },
-                                )
+                                        </div>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
@@ -2170,7 +2270,7 @@ export default function StepForm({
                         </label>
                         <textarea
                             className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                            value={data.reflection_question}
+                            value={data.reflection_question || ""}
                             onChange={(e) =>
                                 setData("reflection_question", e.target.value)
                             }

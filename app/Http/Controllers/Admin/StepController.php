@@ -287,10 +287,10 @@ class StepController extends Controller
     private function extractMaterialFiles(Request $request): array
     {
         $materialFiles = [];
-        
+
         // Method 1: Try using allFiles() which includes all uploaded files
         $allFiles = $request->allFiles();
-        
+
         // Loop through all files and organize by material and block index
         foreach ($allFiles as $fileKey => $file) {
             // File keys will be like: materials.0.blocks.0.image_file or materials_0_blocks_0_image_file
@@ -299,20 +299,20 @@ class StepController extends Controller
                 '/materials\.(\d+)\.blocks\.(\d+)\.image_file/',  // dot notation
                 '/materials_(\d+)_blocks_(\d+)_image_file/',       // underscore notation
             ];
-            
+
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $fileKey, $matches)) {
                     if (count($matches) === 3) {
                         $materialIdx = (int)$matches[1];
                         $blockIdx = (int)$matches[2];
-                        
+
                         if (!isset($materialFiles[$materialIdx])) {
                             $materialFiles[$materialIdx] = [];
                         }
                         if (!isset($materialFiles[$materialIdx]['blocks'])) {
                             $materialFiles[$materialIdx]['blocks'] = [];
                         }
-                        
+
                         // Store the file
                         $materialFiles[$materialIdx]['blocks'][$blockIdx] = [
                             'image_file' => $file
@@ -322,7 +322,7 @@ class StepController extends Controller
                 }
             }
         }
-        
+
         return $materialFiles;
     }
 
@@ -670,6 +670,11 @@ class StepController extends Controller
                             'type' => 'Exploration',
                             'step_title' => $first->step ? $first->step->title : null,
                             'step_type' => $first->step ? $first->step->step_type : null,
+                            'coding_answers' =>
+                            collect($group)
+                                ->map(fn($item) => $item->exploration_payload['coding_answers'] ?? null)
+                                ->filter()
+                                ->first() ?? [],
                             'items' => $group
                                 ->map(fn($item) => $item->exploration_payload)
                                 ->values()
@@ -683,11 +688,11 @@ class StepController extends Controller
                     $payloadItems = collect($item->review_payload['items'] ?? []);
                     $practiceStep = $item->step
                         ? $practiceSteps
-                            ->filter(function ($candidate) use ($item) {
-                                return $candidate->step_number < $item->step->step_number;
-                            })
-                            ->sortByDesc('step_number')
-                            ->first()
+                        ->filter(function ($candidate) use ($item) {
+                            return $candidate->step_number < $item->step->step_number;
+                        })
+                        ->sortByDesc('step_number')
+                        ->first()
                         : null;
                     $practiceItems = ($practiceStep && $practiceStep->practices)
                         ? $practiceStep->practices->values()
@@ -717,25 +722,25 @@ class StepController extends Controller
                             ];
                         })
                         : $payloadItems
-                            ->groupBy(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0))
-                            ->map(function ($items, $practiceIndex) {
-                                $first = $items->first() ?? [];
+                        ->groupBy(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0))
+                        ->map(function ($items, $practiceIndex) {
+                            $first = $items->first() ?? [];
 
-                                return [
-                                    'practice_index' => $practiceIndex,
-                                    'practice_title' => $first['title'] ?? ('Latihan Soal ' . ($practiceIndex + 1)),
-                                    'practice_question' => $first['question'] ?? '-',
-                                    'practice_answer' => $first['student_answer'] ?? '-',
-                                    'items' => $items->map(function ($reviewItem, $reviewIndex) {
-                                        return [
-                                            'title' => $reviewItem['title'] ?? ('Review ' . ($reviewIndex + 1)),
-                                            'question' => $reviewItem['question'] ?? '-',
-                                            'review_answer' => $reviewItem['review_answer'] ?? '-',
-                                            'evidence' => $reviewItem['evidence'] ?? null,
-                                        ];
-                                    })->values()->toArray(),
-                                ];
-                            });
+                            return [
+                                'practice_index' => $practiceIndex,
+                                'practice_title' => $first['title'] ?? ('Latihan Soal ' . ($practiceIndex + 1)),
+                                'practice_question' => $first['question'] ?? '-',
+                                'practice_answer' => $first['student_answer'] ?? '-',
+                                'items' => $items->map(function ($reviewItem, $reviewIndex) {
+                                    return [
+                                        'title' => $reviewItem['title'] ?? ('Review ' . ($reviewIndex + 1)),
+                                        'question' => $reviewItem['question'] ?? '-',
+                                        'review_answer' => $reviewItem['review_answer'] ?? '-',
+                                        'evidence' => $reviewItem['evidence'] ?? null,
+                                    ];
+                                })->values()->toArray(),
+                            ];
+                        });
 
                     return [
                         'type' => 'Review',

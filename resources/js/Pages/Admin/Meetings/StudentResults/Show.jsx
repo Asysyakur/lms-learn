@@ -75,9 +75,26 @@ export default function Show({ meeting, student, responses = [] }) {
                                 </div>
 
                                 {response.type === "Exploration" &&
-                                Array.isArray(response.answer) ? (
+                                Array.isArray(response.items) ? (
                                     <div className="space-y-6">
-                                        {response.answer.map(
+                                        {response.coding_answers &&
+                                            Object.entries(
+                                                response.coding_answers,
+                                            ).map(([key, code], idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="rounded-xl border border-slate-200 bg-slate-900 p-4"
+                                                >
+                                                    <div className="mb-2 text-xs font-semibold text-slate-400">
+                                                        Coding Mandiri
+                                                    </div>
+
+                                                    <pre className="overflow-auto text-sm text-slate-100">
+                                                        <code>{code}</code>
+                                                    </pre>
+                                                </div>
+                                            ))}
+                                        {response.items.map(
                                             (mission, missionIndex) => (
                                                 <div
                                                     key={missionIndex}
@@ -136,78 +153,103 @@ export default function Show({ meeting, student, responses = [] }) {
                                 ) : response.type === "Review" &&
                                   Array.isArray(response.items) ? (
                                     <div className="space-y-6">
-                                        {response.items.map((group, groupIndex) => (
-                                            <div
-                                                key={group.practice_index ?? groupIndex}
-                                                className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                                            >
-                                                <div className="mb-4 rounded-xl border border-blue-100 bg-white p-4">
-                                                    <div className="text-sm font-semibold text-blue-700">
-                                                        {group.practice_title ||
-                                                            `Latihan Soal ${groupIndex + 1}`}
-                                                    </div>
-
-                                                    <div className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                                        {group.practice_question || "-"}
-                                                    </div>
-
-                                                    <div className="mt-4 rounded-lg bg-slate-50 p-3">
-                                                        <div className="mb-1 text-xs font-semibold text-slate-500">
-                                                            Jawaban Awal Siswa
+                                        {response.items.map(
+                                            (group, groupIndex) => (
+                                                <div
+                                                    key={
+                                                        group.practice_index ??
+                                                        groupIndex
+                                                    }
+                                                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
+                                                >
+                                                    <div className="mb-4 rounded-xl border border-blue-100 bg-white p-4">
+                                                        <div className="text-sm font-semibold text-blue-700">
+                                                            {group.practice_title ||
+                                                                `Latihan Soal ${groupIndex + 1}`}
                                                         </div>
 
-                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                            {group.practice_answer || "-"}
+                                                        <div className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                                            {group.practice_question ||
+                                                                "-"}
+                                                        </div>
+
+                                                        <div className="mt-4 rounded-lg bg-slate-50 p-3">
+                                                            <div className="mb-1 text-xs font-semibold text-slate-500">
+                                                                Jawaban Awal
+                                                                Siswa
+                                                            </div>
+
+                                                            <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                                {group.practice_answer ||
+                                                                    "-"}
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                </div>
 
-                                                <div className="space-y-4">
-                                                    {group.items?.map((item, itemIndex) => (
-                                                        <div
-                                                            key={itemIndex}
-                                                            className="rounded-xl border border-slate-200 bg-white p-4"
-                                                        >
-                                                            <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
-                                                                {item.question}
-                                                            </div>
-
-                                                            <div className="mb-4 rounded-xl bg-slate-50 p-4">
-                                                                <div className="mb-2 text-xs font-semibold text-slate-500">
-                                                                    Pembuktian & Argumen
-                                                                </div>
-
-                                                                <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                                    {item.review_answer || "-"}
-                                                                </div>
-                                                            </div>
-
-                                                            {item.evidence &&
-                                                                (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(
-                                                                    item.evidence,
-                                                                ) ? (
-                                                                    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                                                                        <img
-                                                                            src={item.evidence}
-                                                                            alt="Bukti"
-                                                                            className="max-h-[400px] w-full object-contain"
-                                                                        />
+                                                    <div className="space-y-4">
+                                                        {group.items?.map(
+                                                            (
+                                                                item,
+                                                                itemIndex,
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        itemIndex
+                                                                    }
+                                                                    className="rounded-xl border border-slate-200 bg-white p-4"
+                                                                >
+                                                                    <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
+                                                                        {
+                                                                            item.question
+                                                                        }
                                                                     </div>
-                                                                ) : (
-                                                                    <a
-                                                                        href={item.evidence}
-                                                                        target="_blank"
-                                                                        rel="noreferrer"
-                                                                        className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                                                                    >
-                                                                        Lihat bukti
-                                                                    </a>
-                                                                ))}
-                                                        </div>
-                                                    ))}
+
+                                                                    <div className="mb-4 rounded-xl bg-slate-50 p-4">
+                                                                        <div className="mb-2 text-xs font-semibold text-slate-500">
+                                                                            Pembuktian
+                                                                            &
+                                                                            Argumen
+                                                                        </div>
+
+                                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                                            {item.review_answer ||
+                                                                                "-"}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {item.evidence &&
+                                                                        (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(
+                                                                            item.evidence,
+                                                                        ) ? (
+                                                                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+                                                                                <img
+                                                                                    src={
+                                                                                        item.evidence
+                                                                                    }
+                                                                                    alt="Bukti"
+                                                                                    className="max-h-[400px] w-full object-contain"
+                                                                                />
+                                                                            </div>
+                                                                        ) : (
+                                                                            <a
+                                                                                href={
+                                                                                    item.evidence
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noreferrer"
+                                                                                className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                                                                            >
+                                                                                Lihat
+                                                                                bukti
+                                                                            </a>
+                                                                        ))}
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ),
+                                        )}
                                     </div>
                                 ) : response.items ? (
                                     <div className="space-y-4">

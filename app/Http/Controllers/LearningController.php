@@ -556,6 +556,8 @@ class LearningController extends Controller
                 'mission_index' => $response->mission_index,
                 'response_text' => $response->exploration_text,
                 'response_payload' => $response->exploration_payload,
+                'coding_answers' =>
+                $response->exploration_payload['coding_answers'] ?? [],
             ];
         }
 

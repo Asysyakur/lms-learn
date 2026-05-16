@@ -3,132 +3,167 @@ import { BeakerIcon, DocumentIcon } from "@heroicons/react/24/solid";
 import { Toast } from "@/Components/FlashToast";
 import { codeToHtml } from "shiki";
 
-export default function StepThreeExploration({
+function CaseStudyCard({
+    study,
+    codingAnswers,
+    setCodingAnswers,
     stepData,
-    onNext,
-    savedResponses,
-    nextLabel = "Lanjut",
+    savingMission,
+    setSavingMission,
+    setToastMessage,
+    setToastIsError,
 }) {
-    function CaseStudyCard({ study }) {
-        const [output, setOutput] = useState("");
-        const [loading, setLoading] = useState(false);
-        const [selectedLang, setSelectedLang] = useState(
-            study.language || "python",
-        );
-        const lineRef = useRef(null);
-        const rawCode = String(study.code || "");
-        const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
-        const lineHeight = 22; // px per line (approx)
+    const [output, setOutput] = useState("");
+    const [loading, setLoading] = useState(false);
+    const editableCode =
+        codingAnswers[study.id || study.number] ?? study.code ?? "";
+    const [selectedLang, setSelectedLang] = useState(
+        study.language || "python",
+    );
+    const lineRef = useRef(null);
+    const rawCode = String(
+        stepData.exploration_mode === "coding"
+            ? editableCode
+            : study.code || "",
+    );
+    const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
+    const lineHeight = 22; // px per line (approx)
 
-        const runCode = async () => {
-            setLoading(true);
-            setOutput("");
+    const runCode = async () => {
+        setLoading(true);
+        setOutput("");
 
-            try {
-                if (selectedLang === "python" || selectedLang === "php") {
-                    const response = await window.axios.post(
-                        route("code.run"),
-                        {
-                            language: selectedLang,
-                            code: study.code,
-                            inputs: [],
-                        },
+        try {
+            if (selectedLang === "python" || selectedLang === "php") {
+                const response = await window.axios.post(route("code.run"), {
+                    language: selectedLang,
+                    code:
+                        stepData.exploration_mode === "coding"
+                            ? editableCode
+                            : study.code,
+                    inputs: [],
+                });
+
+                setOutput(response.data.output || "Program selesai.");
+            } else if (selectedLang === "javascript") {
+                // Run in-browser for JS
+                const logs = [];
+                const originalLog = console.log;
+                const originalWarn = console.warn;
+                const originalError = console.error;
+
+                console.log = (...args) => logs.push(args.join(" "));
+                console.warn = (...args) => logs.push(args.join(" "));
+                console.error = (...args) => logs.push(args.join(" "));
+
+                try {
+                    const result = Function(
+                        '"use strict";\n' +
+                            (stepData.exploration_mode === "coding"
+                                ? editableCode
+                                : study.code),
+                    )();
+                    if (result !== undefined) logs.push(String(result));
+                    setOutput(
+                        logs.join("\n") || "Program berhasil dijalankan.",
                     );
-
-                    setOutput(response.data.output || "Program selesai.");
-                } else if (selectedLang === "javascript") {
-                    // Run in-browser for JS
-                    const logs = [];
-                    const originalLog = console.log;
-                    const originalWarn = console.warn;
-                    const originalError = console.error;
-
-                    console.log = (...args) => logs.push(args.join(" "));
-                    console.warn = (...args) => logs.push(args.join(" "));
-                    console.error = (...args) => logs.push(args.join(" "));
-
-                    try {
-                        const result = Function(
-                            '"use strict";\n' + study.code,
-                        )();
-                        if (result !== undefined) logs.push(String(result));
-                        setOutput(
-                            logs.join("\n") || "Program berhasil dijalankan.",
-                        );
-                    } catch (e) {
-                        setOutput(e.name + ": " + e.message);
-                    } finally {
-                        console.log = originalLog;
-                        console.warn = originalWarn;
-                        console.error = originalError;
-                    }
-                } else {
-                    setOutput("Bahasa ini belum didukung untuk dijalankan.");
+                } catch (e) {
+                    setOutput(e.name + ": " + e.message);
+                } finally {
+                    console.log = originalLog;
+                    console.warn = originalWarn;
+                    console.error = originalError;
                 }
-            } catch (error) {
-                setOutput(
-                    error.response?.data?.output ||
-                        error.response?.data?.message ||
-                        error.message ||
-                        "Terjadi kesalahan saat menjalankan program.",
-                );
-            } finally {
-                setLoading(false);
+            } else {
+                setOutput("Bahasa ini belum didukung untuk dijalankan.");
             }
-        };
-        return (
-            <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
-                        {study.number || 1}
-                    </div>
-
-                    <h3 className="text-lg font-bold text-slate-900">
-                        {study.title}
-                    </h3>
+        } catch (error) {
+            setOutput(
+                error.response?.data?.output ||
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Terjadi kesalahan saat menjalankan program.",
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+    return (
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+                    {study.number || 1}
                 </div>
 
-                <div className="overflow-hidden rounded-2xl bg-[#0B1120]">
-                    <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
-                        <div />
+                <h3 className="text-lg font-bold text-slate-900">
+                    {study.title}
+                </h3>
+            </div>
 
-                        <div className="flex items-center gap-2">
-                            <select
-                                value={selectedLang}
-                                onChange={(e) =>
-                                    setSelectedLang(e.target.value)
-                                }
-                                className="rounded-xl bg-[#1E293B] px-3 py-1 text-sm text-slate-200"
-                            >
-                                <option value="javascript">JavaScript</option>
-                                <option value="python">Python</option>
-                                <option value="php">PHP</option>
-                                <option value="html">HTML</option>
-                                <option value="css">CSS</option>
-                            </select>
-                        </div>
+            <div className="overflow-hidden rounded-2xl bg-[#0B1120]">
+                <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+                    <div />
+
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={selectedLang}
+                            onChange={(e) => setSelectedLang(e.target.value)}
+                            className="rounded-xl bg-[#1E293B] px-3 py-1 text-sm text-slate-200"
+                        >
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="php">PHP</option>
+                            <option value="html">HTML</option>
+                            <option value="css">CSS</option>
+                        </select>
                     </div>
+                </div>
 
-                    <div className="h-[32rem] overflow-auto">
-                        <div className="flex min-w-full font-mono text-sm">
-                            <div
-                                ref={lineRef}
-                                className="select-none bg-[#071623] px-4 py-3 text-slate-500"
-                            >
-                                {codeLines.map((_, i) => (
-                                    <div
-                                        key={i}
-                                        style={{
-                                            height: lineHeight,
-                                            lineHeight: `${lineHeight}px`,
-                                        }}
-                                        className="text-right pr-1"
-                                    >
-                                        {i + 1}
-                                    </div>
-                                ))}
-                            </div>
+                <div className="h-[32rem] overflow-auto">
+                    <div className="flex min-w-full font-mono text-sm">
+                        <div
+                            ref={lineRef}
+                            className="select-none bg-[#071623] px-4 py-3 text-slate-500"
+                        >
+                            {codeLines.map((_, i) => (
+                                <div
+                                    key={i}
+                                    style={{
+                                        height: lineHeight,
+                                        lineHeight: `${lineHeight}px`,
+                                    }}
+                                    className="text-right pr-1"
+                                >
+                                    {i + 1}
+                                </div>
+                            ))}
+                        </div>
 
+                        {stepData.exploration_mode === "coding" ? (
+                            <textarea
+                                value={editableCode}
+                                onChange={(e) =>
+                                    setCodingAnswers((prev) => ({
+                                        ...prev,
+                                        [study.id || study.number]:
+                                            e.target.value,
+                                    }))
+                                }
+                                spellCheck={false}
+                                className="
+            min-h-[32rem]
+            w-full
+            resize-none
+            border-0
+            bg-[#0B1120]
+            p-5
+            font-mono
+            text-sm
+            text-slate-200
+            outline-none
+        "
+                            />
+                        ) : (
                             <pre
                                 onScroll={(e) => {
                                     if (lineRef.current)
@@ -152,45 +187,111 @@ export default function StepThreeExploration({
                                     ))}
                                 </code>
                             </pre>
-                        </div>
+                        )}
                     </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={runCode}
-                            disabled={loading}
-                            className="course-step-primary-button"
-                        >
-                            {loading ? "Running..." : "▶ Run"}
-                        </button>
-
-                        <button
-                            className="course-step-secondary-button"
-                            onClick={() => setOutput("")}
-                        >
-                            Reset
-                        </button>
-                    </div>
-                </div>
-
-                <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div className="mb-2 font-semibold text-slate-700">
-                        Output Program
-                    </div>
-
-                    <pre className="whitespace-pre-wrap text-sm text-slate-700">
-                        {output ||
-                            "Output akan muncul di sini setelah menekan tombol Run."}
-                    </pre>
                 </div>
             </div>
-        );
-    }
+
+            <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={runCode}
+                        disabled={loading}
+                        className="course-step-primary-button"
+                    >
+                        {loading ? "Running..." : "▶ Run"}
+                    </button>
+
+                    <button
+                        className="course-step-secondary-button"
+                        onClick={() => setOutput("")}
+                    >
+                        Reset
+                    </button>
+
+                    {stepData.exploration_mode === "coding" && (
+                        <button
+                            type="button"
+                            onClick={async () => {
+                                try {
+                                    setSavingMission(true);
+
+                                    const payload = {
+                                        type: "coding",
+                                        coding_answers: codingAnswers,
+                                    };
+
+                                    await window.axios.post(
+                                        route("pertemuan.step.response", {
+                                            id: stepData.meeting_id,
+                                            step: stepData.step,
+                                        }),
+                                        {
+                                            response_text:
+                                                JSON.stringify(payload),
+
+                                            response_payload: payload,
+                                        },
+                                    );
+
+                                    setToastMessage(
+                                        "Coding berhasil disimpan.",
+                                    );
+
+                                    setToastIsError(false);
+
+                                    window.setTimeout(
+                                        () => setToastMessage(null),
+                                        3000,
+                                    );
+                                } catch (e) {
+                                    setToastMessage("Gagal menyimpan coding.");
+
+                                    setToastIsError(true);
+
+                                    window.setTimeout(
+                                        () => setToastMessage(null),
+                                        3000,
+                                    );
+                                } finally {
+                                    setSavingMission(false);
+                                }
+                            }}
+                            disabled={savingMission}
+                            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                        >
+                            {savingMission
+                                ? "Menyimpan..."
+                                : "💾 Simpan Coding"}
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-2 font-semibold text-slate-700">
+                    Output Program
+                </div>
+
+                <pre className="whitespace-pre-wrap text-sm text-slate-700">
+                    {output ||
+                        "Output akan muncul di sini setelah menekan tombol Run."}
+                </pre>
+            </div>
+        </div>
+    );
+}
+
+export default function StepThreeExploration({
+    stepData,
+    onNext,
+    savedResponses,
+    nextLabel = "Lanjut",
+}) {
     const materials =
         stepData?.materials || stepData?.exploration_materials || [];
     const [activeTab, setActiveTab] = useState("materials");
+    const [codingAnswers, setCodingAnswers] = useState({});
     const [activeMaterialIndex, setActiveMaterialIndex] = useState(0);
     const [activeMissionIndex, setActiveMissionIndex] = useState(0);
     const [missionAnswers, setMissionAnswers] = useState({});
@@ -212,6 +313,11 @@ export default function StepThreeExploration({
             });
         });
 
+        saved.exploration_responses.forEach((response) => {
+            if (response.response_payload?.coding_answers) {
+                setCodingAnswers(response.response_payload.coding_answers);
+            }
+        });
         setMissionAnswers(answers);
     }, [savedResponses, stepData.step]);
 
@@ -351,6 +457,8 @@ export default function StepThreeExploration({
             const payload = {
                 mission_index: missionIndex,
                 mission_title: mission.title,
+
+                coding_answers: codingAnswers,
 
                 items: mission.questions.map((question, qidx) => ({
                     question,
@@ -586,29 +694,68 @@ export default function StepThreeExploration({
                             {stepData.case_studies?.map((study, idx) => (
                                 <div
                                     key={idx}
-                                    className="grid gap-6 xl:grid-cols-2"
+                                    className={
+                                        stepData.exploration_mode === "coding"
+                                            ? "grid gap-6"
+                                            : "grid gap-6 xl:grid-cols-2"
+                                    }
                                 >
-                                    <CaseStudyCard
-                                        study={{
-                                            ...study,
-                                            title:
-                                                study.left_title ||
-                                                "Program Prosedural",
-                                            code: study.left_code,
-                                            number: 1,
-                                        }}
-                                    />
+                                    {stepData.exploration_mode === "coding" ? (
+                                        <CaseStudyCard
+                                            study={{
+                                                ...study,
+                                                title:
+                                                    study.title ||
+                                                    "Coding Mandiri",
+                                                code:
+                                                    study.left_code ||
+                                                    study.code ||
+                                                    "",
+                                                number: 1,
+                                            }}
+                                            codingAnswers={codingAnswers}
+                                            setCodingAnswers={setCodingAnswers}
+                                            stepData={stepData}
+                                            savingMission={savingMission}
+                                            setSavingMission={setSavingMission}
+                                            setToastMessage={setToastMessage}
+                                            setToastIsError={setToastIsError}
+                                        />
+                                    ) : (
+                                        <>
+                                            <CaseStudyCard
+                                                study={{
+                                                    ...study,
+                                                    title:
+                                                        study.left_title ||
+                                                        "Program Prosedural",
+                                                    code: study.left_code,
+                                                    number: 1,
+                                                }}
+                                                stepData={stepData}
+                                                savingMission={savingMission}
+                                                setSavingMission={setSavingMission}
+                                                setToastMessage={setToastMessage}
+                                                setToastIsError={setToastIsError}
+                                            />
 
-                                    <CaseStudyCard
-                                        study={{
-                                            ...study,
-                                            title:
-                                                study.right_title ||
-                                                "Program Berorientasi Objek (PBO)",
-                                            code: study.right_code,
-                                            number: 2,
-                                        }}
-                                    />
+                                            <CaseStudyCard
+                                                study={{
+                                                    ...study,
+                                                    title:
+                                                        study.right_title ||
+                                                        "Program Berorientasi Objek (PBO)",
+                                                    code: study.right_code,
+                                                    number: 2,
+                                                }}
+                                                stepData={stepData}
+                                                savingMission={savingMission}
+                                                setSavingMission={setSavingMission}
+                                                setToastMessage={setToastMessage}
+                                                setToastIsError={setToastIsError}
+                                            />
+                                        </>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -881,9 +1028,8 @@ export default function StepThreeExploration({
                 </div>
             )}
             {/* Shared toast for client-side messages */}
-            <
-                /* eslint-disable-next-line react/jsx-no-undef */
-                Toast
+            </* eslint-disable-next-line react/jsx-no-undef */
+            Toast
                 message={toastMessage}
                 isError={toastIsError}
             />
@@ -902,7 +1048,9 @@ function ExplorationToast({ phase, message, isError }) {
             <div
                 className={`${phaseClass} overflow-hidden rounded-2xl border px-4 py-3 shadow-lg backdrop-blur ${isError ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"}`}
             >
-                <div className={`toast-progress ${isError ? "toast-progress-error" : "toast-progress-success"}`} />
+                <div
+                    className={`toast-progress ${isError ? "toast-progress-error" : "toast-progress-success"}`}
+                />
                 <p className="text-sm font-semibold">{message}</p>
             </div>
         </div>
