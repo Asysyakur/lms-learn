@@ -16,7 +16,7 @@ function CaseStudyCard({
     const [output, setOutput] = useState("");
     const [loading, setLoading] = useState(false);
     const editableCode =
-        codingAnswers[study.id || study.number] ?? study.code ?? "";
+        codingAnswers?.[study.id || study.number] ?? study.code ?? "";
     const [selectedLang, setSelectedLang] = useState(
         study.language || "python",
     );
@@ -89,19 +89,19 @@ function CaseStudyCard({
         }
     };
     return (
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center gap-3">
+        <div className="w-full min-w-0 max-w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <div className="mb-4 flex min-w-0 items-start gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
                     {study.number || 1}
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="min-w-0 break-words text-base font-bold text-slate-900 sm:text-lg">
                     {study.title}
                 </h3>
             </div>
 
-            <div className="overflow-hidden rounded-2xl bg-[#0B1120]">
-                <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3">
+            <div className="w-full min-w-0 overflow-hidden rounded-2xl bg-[#0B1120]">
+                <div className="flex items-center justify-between gap-3 border-b border-slate-700 px-3 py-3 sm:px-4">
                     <div />
 
                     <div className="flex items-center gap-2">
@@ -119,11 +119,11 @@ function CaseStudyCard({
                     </div>
                 </div>
 
-                <div className="h-[32rem] overflow-auto">
-                    <div className="flex min-w-full font-mono text-sm">
+                <div className="h-[32rem] max-w-full overflow-auto">
+                    <div className="flex w-max min-w-full font-mono text-sm">
                         <div
                             ref={lineRef}
-                            className="select-none bg-[#071623] px-4 py-3 text-slate-500"
+                            className="shrink-0 select-none bg-[#071623] px-3 py-3 text-slate-500 sm:px-4"
                         >
                             {codeLines.map((_, i) => (
                                 <div
@@ -143,7 +143,7 @@ function CaseStudyCard({
                             <textarea
                                 value={editableCode}
                                 onChange={(e) =>
-                                    setCodingAnswers((prev) => ({
+                                    setCodingAnswers?.((prev) => ({
                                         ...prev,
                                         [study.id || study.number]:
                                             e.target.value,
@@ -153,6 +153,7 @@ function CaseStudyCard({
                                 className="
             min-h-[32rem]
             w-full
+            min-w-[36rem]
             resize-none
             border-0
             bg-[#0B1120]
@@ -170,7 +171,7 @@ function CaseStudyCard({
                                         lineRef.current.scrollTop =
                                             e.target.scrollTop;
                                 }}
-                                className="m-0 min-h-full bg-[#0B1120] px-5 py-4 text-slate-200"
+                                className="m-0 min-h-full min-w-max bg-[#0B1120] px-4 py-4 text-slate-200 sm:px-5"
                             >
                                 <code>
                                     {codeLines.map((line, idx) => (
@@ -193,7 +194,7 @@ function CaseStudyCard({
             </div>
 
             <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                     <button
                         onClick={runCode}
                         disabled={loading}
@@ -218,7 +219,7 @@ function CaseStudyCard({
 
                                     const payload = {
                                         type: "coding",
-                                        coding_answers: codingAnswers,
+                                        coding_answers: codingAnswers || {},
                                     };
 
                                     await window.axios.post(
@@ -273,7 +274,7 @@ function CaseStudyCard({
                     Output Program
                 </div>
 
-                <pre className="whitespace-pre-wrap text-sm text-slate-700">
+                <pre className="max-w-full whitespace-pre-wrap break-words text-sm text-slate-700">
                     {output ||
                         "Output akan muncul di sini setelah menekan tombol Run."}
                 </pre>
@@ -458,7 +459,7 @@ export default function StepThreeExploration({
                 mission_index: missionIndex,
                 mission_title: mission.title,
 
-                coding_answers: codingAnswers,
+                coding_answers: codingAnswers || {},
 
                 items: mission.questions.map((question, qidx) => ({
                     question,
@@ -564,7 +565,7 @@ export default function StepThreeExploration({
 
                 {activeTab === "materials" && (
                     <>
-                        <div className="rounded-lg border border-slate-200 bg-white overflow-auto space-y-6 p-4">
+                        <div className="rounded-lg border border-slate-200 bg-white space-y-6 p-3 sm:p-4 overflow-hidden">
                             {materials.map((m, idx) => (
                                 <div
                                     key={idx}
@@ -584,7 +585,7 @@ export default function StepThreeExploration({
                                                 <div key={bidx}>
                                                     {block.type === "text" && (
                                                         <div
-                                                            className="prose prose-sm max-w-none text-slate-700 [&_ul]:my-2 [&_ol]:my-2 [&_ul]:pl-6 [&_ol]:pl-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:my-1"
+                                                            className="prose prose-sm max-w-none sm:prose-base break-words overflow-hidden text-slate-700 [&_ul]:my-2 [&_ol]:my-2 [&_ul]:pl-6 [&_ol]:pl-6 [&_ul]:list-disc [&_ol]:list-decimal [&_li]:my-1"
                                                             style={{
                                                                 whiteSpace:
                                                                     "pre-wrap",
@@ -734,9 +735,15 @@ export default function StepThreeExploration({
                                                 }}
                                                 stepData={stepData}
                                                 savingMission={savingMission}
-                                                setSavingMission={setSavingMission}
-                                                setToastMessage={setToastMessage}
-                                                setToastIsError={setToastIsError}
+                                                setSavingMission={
+                                                    setSavingMission
+                                                }
+                                                setToastMessage={
+                                                    setToastMessage
+                                                }
+                                                setToastIsError={
+                                                    setToastIsError
+                                                }
                                             />
 
                                             <CaseStudyCard
@@ -750,9 +757,15 @@ export default function StepThreeExploration({
                                                 }}
                                                 stepData={stepData}
                                                 savingMission={savingMission}
-                                                setSavingMission={setSavingMission}
-                                                setToastMessage={setToastMessage}
-                                                setToastIsError={setToastIsError}
+                                                setSavingMission={
+                                                    setSavingMission
+                                                }
+                                                setToastMessage={
+                                                    setToastMessage
+                                                }
+                                                setToastIsError={
+                                                    setToastIsError
+                                                }
                                             />
                                         </>
                                     )}
@@ -787,23 +800,23 @@ export default function StepThreeExploration({
                                         .map((mission, midx) => (
                                             <div
                                                 key={midx}
-                                                className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-6"
+                                                className="w-full min-w-0 max-w-full space-y-6 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
                                             >
-                                                <div>
-                                                    <h4 className="text-2xl font-bold text-slate-900">
+                                                <div className="min-w-0">
+                                                    <h4 className="break-words text-xl font-bold text-slate-900 sm:text-2xl">
                                                         {mission.title}
                                                     </h4>
 
-                                                    <p className="mt-2 text-slate-600">
+                                                    <p className="mt-2 break-words text-sm text-slate-600 sm:text-base">
                                                         {mission.description}
                                                     </p>
                                                 </div>
 
-                                                <div className="grid items-stretch gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+                                                <div className="grid min-w-0 gap-6 2xl:grid-cols-[1.1fr_0.9fr]">
                                                     {/* KIRI - GAMBAR */}
-                                                    <div className="space-y-6">
+                                                    <div className="min-w-0 space-y-6">
                                                         {/* GAMBAR A */}
-                                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                                        <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
                                                             <div className="mb-3 flex items-center gap-2">
                                                                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
                                                                     A
@@ -813,19 +826,19 @@ export default function StepThreeExploration({
                                                                     Gambar A
                                                                 </div>
                                                             </div>
-                                                            <div className="mb-3 overflow-auto rounded-lg border border-slate-200 max-h-96 bg-white">
+                                                            <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
                                                                 <img
                                                                     src={
                                                                         mission.left_image
                                                                     }
                                                                     alt="Gambar A"
-                                                                    className="w-full h-auto object-contain rounded-2xl"
+                                                                    className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
                                                                 />
                                                             </div>
                                                         </div>
 
                                                         {/* GAMBAR B */}
-                                                        <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+                                                        <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
                                                             <div className="mb-3 flex items-center gap-2">
                                                                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
                                                                     B
@@ -835,22 +848,22 @@ export default function StepThreeExploration({
                                                                     Gambar B
                                                                 </div>
                                                             </div>
-                                                            <div className="mb-3 overflow-auto rounded-lg border border-slate-200 max-h-96 bg-white">
+                                                            <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
                                                                 <img
                                                                     src={
                                                                         mission.right_image
                                                                     }
                                                                     alt="Gambar B"
-                                                                    className="w-full h-auto object-contain rounded-2xl"
+                                                                    className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
                                                                 />
                                                             </div>
                                                         </div>
                                                     </div>
 
                                                     {/* KANAN - PERTANYAAN */}
-                                                    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+                                                    <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
                                                         <div className="mb-6">
-                                                            <h5 className="text-2xl font-bold text-slate-900">
+                                                            <h5 className="text-xl font-bold text-slate-900 sm:text-2xl">
                                                                 Jawab Pertanyaan
                                                             </h5>
 
@@ -864,8 +877,8 @@ export default function StepThreeExploration({
                                                             </p>
                                                         </div>
 
-                                                        <div className="h-[52rem] overflow-hidden">
-                                                            <div className="h-full space-y-5 overflow-y-auto">
+                                                        <div className="2xl:max-h-[52rem] 2xl:overflow-hidden">
+                                                            <div className="space-y-5 2xl:max-h-[48rem] 2xl:overflow-y-auto">
                                                                 {mission.questions?.map(
                                                                     (
                                                                         q,
@@ -875,15 +888,15 @@ export default function StepThreeExploration({
                                                                             key={
                                                                                 qidx
                                                                             }
-                                                                            className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                                                                            className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4"
                                                                         >
-                                                                            <label className="mb-3 flex items-start gap-3">
+                                                                            <label className="mb-3 flex min-w-0 items-start gap-3">
                                                                                 <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
                                                                                     {qidx +
                                                                                         1}
                                                                                 </div>
 
-                                                                                <span className="text-sm font-semibold text-slate-700">
+                                                                                <span className="min-w-0 break-words text-sm font-semibold text-slate-700">
                                                                                     {
                                                                                         q
                                                                                     }
@@ -912,7 +925,7 @@ export default function StepThreeExploration({
                                                                                         }),
                                                                                     )
                                                                                 }
-                                                                                className="min-h-32 w-full rounded-2xl border border-slate-300 bg-white focus:border-blue-500 focus:ring-blue-500"
+                                                                                className="min-h-[140px] w-full rounded-2xl border border-slate-300 bg-white p-3 text-sm text-slate-700 focus:border-blue-500 focus:ring-blue-500"
                                                                                 placeholder="Tulis jawabanmu di sini..."
                                                                             />
                                                                         </div>
@@ -936,14 +949,14 @@ export default function StepThreeExploration({
                                                 )
                                             }
                                             disabled={savingMission}
-                                            className="course-step-primary-button disabled:opacity-50"
+                                            className="course-step-primary-button w-full disabled:opacity-50 sm:w-auto"
                                         >
                                             {savingMission
                                                 ? "Menyimpan..."
                                                 : "Simpan Mission"}
                                         </button>
                                     </div>
-                                    <div className="flex items-center justify-between pt-6">
+                                    <div className="flex flex-col items-stretch gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
                                         {/* PREV */}
                                         <button
                                             type="button"
@@ -953,12 +966,12 @@ export default function StepThreeExploration({
                                                     Math.max(prev - 1, 0),
                                                 )
                                             }
-                                            className="course-step-secondary-button disabled:opacity-40"
+                                            className="course-step-secondary-button w-full disabled:opacity-40 sm:w-auto"
                                         >
                                             Sebelumnya
                                         </button>
 
-                                        <div className="text-sm font-medium text-slate-500">
+                                        <div className="text-center text-sm font-medium text-slate-500">
                                             Mission {activeMissionIndex + 1}{" "}
                                             dari {stepData.missions.length}
                                         </div>
@@ -973,14 +986,14 @@ export default function StepThreeExploration({
                                                         (prev) => prev + 1,
                                                     )
                                                 }
-                                                className="course-step-primary-button"
+                                                className="course-step-primary-button w-full sm:w-auto"
                                             >
                                                 Mission Berikutnya
                                             </button>
                                         ) : (
                                             <button
                                                 onClick={onNext}
-                                                className="course-step-primary-button"
+                                                className="course-step-primary-button w-full sm:w-auto"
                                             >
                                                 {nextLabel}
                                             </button>

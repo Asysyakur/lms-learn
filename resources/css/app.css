@@ -3,485 +3,577 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		--color-primary: 37 99 235;
-		--color-primary-hover: 29 78 216;
-		--color-accent: 250 204 21;
-		--color-accent-hover: 245 158 11;
-		--color-background: 245 247 251;
-		--color-cream: 251 243 220;
-		--color-surface: 255 255 255;
-		--color-surface-soft: 243 246 252;
-		--color-text: 15 23 42;
-		--color-muted: 100 116 139;
-		--color-border: 226 232 240;
-	}
+    :root {
+        --color-primary: 37 99 235;
+        --color-primary-hover: 29 78 216;
+        --color-accent: 250 204 21;
+        --color-accent-hover: 245 158 11;
+        --color-background: 245 247 251;
+        --color-cream: 251 243 220;
+        --color-surface: 255 255 255;
+        --color-surface-soft: 243 246 252;
+        --color-text: 15 23 42;
+        --color-muted: 100 116 139;
+        --color-border: 226 232 240;
+    }
 
-	body {
-		@apply bg-[rgb(var(--color-background))] text-slate-900;
-	}
+    body {
+        @apply bg-[rgb(var(--color-background))] text-slate-900;
+    }
 
-	@keyframes toast-enter {
-		0% {
-			opacity: 0;
-			transform: translateY(-10px) scale(0.98);
-		}
-		100% {
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
-	}
+    @keyframes toast-enter {
+        0% {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
 
-	@keyframes toast-exit {
-		0% {
-			opacity: 1;
-			transform: translateY(0) scale(1);
-		}
-		100% {
-			opacity: 0;
-			transform: translateY(-8px) scale(0.98);
-		}
-	}
+    @keyframes toast-exit {
+        0% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-8px) scale(0.98);
+        }
+    }
 
-	@keyframes toast-progress {
-		from {
-			transform: scaleX(0);
-		}
-		to {
-			transform: scaleX(1);
-		}
-	}
+    @keyframes toast-progress {
+        from {
+            transform: scaleX(0);
+        }
+        to {
+            transform: scaleX(1);
+        }
+    }
 }
 
 @layer components {
-	.app-surface {
-		@apply bg-[rgb(var(--color-surface))] shadow-sm ring-1 ring-[rgb(var(--color-border))];
-	}
-
-	.app-topbar {
-		@apply flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-4 py-3 sm:px-6 sm:py-4;
-	}
-
-	.app-content-shell {
-		@apply rounded-tr-2xl bg-[rgb(var(--color-cream))];
-	}
-
-	.app-card {
-		@apply rounded-2xl bg-[rgb(var(--color-surface))] p-5 shadow-lg ring-1 ring-[rgb(var(--color-border))];
-	}
-
-	.course-shell {
-		@apply min-h-screen bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)];
-	}
-
-	.course-detail-grid {
-		@apply grid gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)];
-	}
-
-	.course-detail-card {
-		@apply rounded-2xl w-full bg-white p-4 shadow-sm ring-1 ring-slate-200;
-	}
-
-	.course-detail-title {
-		@apply text-lg font-bold text-slate-900;
-	}
-
-	.course-detail-text {
-		@apply text-sm leading-6 text-slate-600;
-	}
-
-	.course-secondary-button {
-		@apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50;
-	}
-
-	.course-media-placeholder {
-		@apply flex min-h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center;
-	}
-
-	.course-exploration-box {
-		@apply rounded-2xl border border-dashed border-[rgb(var(--color-primary))]/30 bg-[rgb(239_246_255)] p-4;
-	}
-
-	.course-field-label {
-		@apply text-sm font-semibold text-slate-700;
-	}
-
-	.course-textarea {
-		@apply min-h-32 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(37_99_235_/_0.15)];
-	}
-
-	.course-tab {
-		@apply rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50;
-	}
-
-	.course-tab-active {
-		@apply border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))] text-white;
-	}
-
-	.course-option {
-		@apply flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700;
-	}
-
-	.course-review-box {
-		@apply rounded-2xl border border-slate-200 bg-slate-50 p-4;
-	}
-
-	.course-review-box-accent {
-		@apply bg-white;
-	}
-
-	.course-step-card-active {
-		@apply ring-2 ring-[rgb(var(--color-primary))];
-	}
-
-	.course-header {
-		@apply flex items-center justify-between gap-3 bg-[rgb(var(--color-primary))] px-4 py-3 text-white sm:px-6;
-	}
-
-	.course-header-brand {
-		@apply flex items-center gap-2 text-base font-black tracking-wide sm:text-lg;
-	}
-
-	.course-header-links {
-		@apply flex items-center gap-2 overflow-x-auto px-2 text-sm font-semibold sm:gap-4 sm:text-base;
-	}
-
-	.course-header-link {
-		@apply rounded-full px-3 py-1.5 text-white/90 transition hover:bg-white/15 hover:text-white;
-	}
-
-	.course-header-link-active {
-		@apply bg-white text-[rgb(var(--color-primary))];
-	}
-
-	.course-hero {
-		@apply grid gap-6 border-b border-[rgb(var(--color-border))] px-4 py-6 sm:px-6 md:grid-cols-[1.2fr_0.8fr] md:items-center;
-	}
-
-	.course-breadcrumb {
-		@apply mb-4 text-sm font-semibold text-[rgb(var(--color-primary))];
-	}
-
-	.course-title {
-		@apply text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl;
-	}
-
-	.course-description {
-		@apply mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base;
-	}
-
-	.course-progress-label {
-		@apply mt-5 text-sm font-semibold text-slate-700;
-	}
-
-	.course-progress-track {
-		@apply mt-2 h-3 overflow-hidden rounded-full bg-slate-200;
-	}
-
-	.course-progress-fill {
-		@apply h-full rounded-full bg-[rgb(var(--color-primary))];
-	}
-
-	.course-hero-art {
-		@apply flex justify-center md:justify-end;
-	}
-
-	.course-hero-badge {
-		@apply flex h-40 w-40 items-center justify-center rounded-full bg-[rgb(240_243_255)] text-7xl shadow-inner sm:h-48 sm:w-48 sm:text-8xl;
-	}
-
-	.course-step-list {
-		@apply w-full space-y-4 px-2 py-6 sm:px-4;
-	}
-
-	.course-step-card {
-		@apply flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[rgb(var(--color-border))] sm:flex-row sm:items-center sm:justify-between;
-	}
-
-	.course-step-left {
-		@apply flex items-start gap-4;
-	}
-
-	.course-step-icon {
-		@apply flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-accent))] text-2xl text-white shadow-sm;
-	}
-
-	.course-step-icon-blue {
-		@apply bg-[rgb(var(--color-primary))];
-	}
-
-	.course-step-title {
-		@apply text-base font-bold text-slate-900 sm:text-lg;
-	}
-
-	.course-step-desc {
-		@apply mt-1 text-sm text-slate-500;
-	}
-
-	.course-step-button {
-		@apply w-full sm:w-auto;
-	}
-
-	.course-step-primary-button {
-		@apply inline-flex items-center justify-center gap-2 rounded-xl bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-50;
-	}
-
-	.course-step-secondary-button {
-		@apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
-	}
-
-	.app-section-title {
-		@apply text-lg font-semibold text-[rgb(var(--color-text))];
-	}
-
-	.app-muted {
-		@apply text-sm text-[rgb(var(--color-muted))];
-	}
-
-	.btn-primary {
-		@apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-primary))] px-4 py-2 font-semibold text-white transition hover:bg-[rgb(var(--color-primary-hover))];
-	}
-
-	.btn-accent {
-		@apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-accent))] px-4 py-2 font-semibold text-slate-950 transition hover:bg-[rgb(var(--color-accent-hover))];
-	}
-
-	.btn-outline {
-		@apply inline-flex items-center justify-center rounded-lg border border-white/20 px-4 py-2 font-semibold text-white transition hover:bg-white hover:text-[rgb(var(--color-primary))];
-	}
-
-	.sidebar-shell {
-		@apply sticky top-0 flex h-screen w-64 flex-col overflow-y-auto bg-[rgb(var(--color-primary))] p-5 text-white shadow-xl;
-	}
-
-	.sidebar-column {
-		@apply hidden w-64 shrink-0 bg-[rgb(var(--color-primary))] shadow-xl md:block;
-	}
-
-	.mobile-navbar {
-		@apply sticky top-0 z-40 flex flex-col gap-3 border-b border-white/10 bg-[rgb(var(--color-primary))] px-3 py-3 text-white shadow-xl;
-	}
-
-	.mobile-navbar-row {
-		@apply flex items-center justify-between gap-3;
-	}
-
-	.mobile-navbar-brand {
-		@apply flex items-center gap-2 px-1 text-base font-black tracking-wide text-white;
-	}
-
-	.mobile-menu-button {
-		@apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20;
-	}
-
-	.mobile-nav-panel {
-		@apply grid gap-2 rounded-2xl border border-white/10 bg-white/10 p-2 shadow-lg;
-	}
-
-	.mobile-nav-link {
-		@apply inline-flex min-h-11 w-full items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-bold text-white transition hover:bg-white/20;
-	}
-
-	.mobile-nav-icon {
-		@apply h-4 w-4 shrink-0;
-	}
-
-	.mobile-nav-link-active {
-		@apply border-white bg-white text-[rgb(var(--color-primary))] shadow-sm;
-	}
-
-	.mobile-nav-logout {
-		@apply bg-white/15;
-	}
-
-	.mobile-nav-link-active-course {
-		@apply bg-white text-[rgb(var(--color-primary))];
-	}
-
-	.toast-enter {
-		animation: toast-enter 180ms ease-out;
-	}
-
-	.toast-exit {
-		animation: toast-exit 180ms ease-in forwards;
-	}
-
-	.toast-progress {
-		@apply mb-3 h-1 origin-left rounded-full;
-		animation: toast-progress 3s linear forwards;
-	}
-
-	.toast-progress-success {
-		@apply bg-emerald-500;
-	}
-
-	.toast-progress-error {
-		@apply bg-red-500;
-	}
-
-	.sidebar-link {
-		@apply flex items-center gap-3 rounded-lg px-4 py-3 text-lg font-semibold transition;
-	}
-
-	.sidebar-link:hover:not(.sidebar-link-active) {
-		background-color: rgb(255 255 255 / 0.1);
-	}
-
-	.sidebar-link-active {
-		background-color: rgb(18 84 199);
-		color: #ffffff;
-	}
-
-	.sidebar-link-active:hover {
-		background-color: rgb(18 84 199);
-		color: #ffffff;
-	}
-
-	.sidebar-profile-link {
-		@apply flex w-full items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-left text-white transition hover:bg-white/15;
-	}
-
-	.sidebar-back-link {
-		@apply mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20;
-	}
-
-	.course-sidebar-step {
-		@apply flex items-center gap-4 rounded-xl bg-white/10 px-4 py-4 text-left text-white transition hover:bg-white/15;
-	}
-
-	.course-sidebar-step-active {
-		@apply bg-white text-[rgb(var(--color-primary))] hover:bg-white hover:text-[rgb(var(--color-primary))];
-	}
-
-	.course-sidebar-step-icon {
-		@apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-white;
-	}
-
-	.course-sidebar-step-icon-active {
-		@apply bg-[rgb(var(--color-primary))] text-white;
-	}
-
-	.activity-content {
-		@apply space-y-5;
-	}
-
-	.activity-info {
-		@apply flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700;
-	}
-
-	.activity-info-icon {
-		@apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-blue-300 text-sm font-bold text-blue-600;
-	}
-
-	.activity-code-card {
-		@apply rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
-	}
-
-	.activity-card-heading {
-		@apply mb-4 flex items-center gap-3 text-base font-bold text-slate-900;
-	}
-
-	.activity-card-heading h3 {
-		@apply min-w-0 truncate;
-	}
-
-	.activity-number {
-		@apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-black text-[rgb(var(--color-primary))];
-	}
-
-	.activity-editor {
-		@apply overflow-hidden rounded-md bg-slate-950 shadow-inner ring-1 ring-slate-900;
-	}
-
-	.activity-editor-toolbar {
-		@apply flex min-h-10 items-center justify-between gap-3 border-b border-white/5 bg-slate-900 px-3 py-2;
-	}
-
-	.activity-language {
-		@apply relative;
-	}
-
-	.activity-language-trigger {
-		@apply inline-flex min-w-32 items-center justify-between gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-blue-400/60;
-	}
-
-	.activity-language-menu {
-		@apply absolute right-0 top-[calc(100%+0.5rem)] z-20 w-44 overflow-hidden rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-xl shadow-black/30;
-	}
-
-	.activity-language-option {
-		@apply flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm font-semibold text-slate-200 transition hover:bg-blue-600 hover:text-white;
-	}
-
-	.activity-language-option-active {
-		@apply bg-blue-600/20 text-blue-200;
-	}
-
-	.activity-language-check {
-		@apply h-2 w-2 rounded-full bg-blue-400;
-	}
-
-	.activity-editor-body {
-		@apply grid min-h-[19rem] grid-cols-[3rem_minmax(0,1fr)] bg-slate-950;
-	}
-
-	.activity-line-numbers {
-		@apply flex select-none flex-col border-r border-white/5 bg-black/15 px-3 py-3 text-right font-mono text-xs leading-6 text-slate-500;
-	}
-
-	.activity-code-input {
-		@apply h-full min-h-[19rem] resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 focus:ring-0;
-	}
-
-	.activity-card-actions {
-		@apply mt-3 flex items-center justify-between gap-3;
-	}
-
-	.activity-run-button {
-		@apply inline-flex min-w-24 items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
-	}
-
-	.activity-reset-button {
-		@apply inline-flex min-w-24 items-center justify-center rounded-md border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-[rgb(var(--color-primary))] shadow-sm transition hover:bg-slate-50;
-	}
-
-	.activity-output {
-		@apply mt-4 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
-	}
-
-	.activity-output-title {
-		@apply mb-3 flex items-center gap-2 text-sm font-bold text-slate-700;
-	}
-
-	.activity-output pre {
-		@apply min-h-24 whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs leading-5 text-slate-600;
-	}
-
-	.activity-preview {
-		@apply min-h-64 w-full rounded-md border border-slate-200 bg-white;
-	}
-
-	.activity-input-runner {
-		@apply grid gap-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3;
-	}
-
-	.activity-input-runner label {
-		@apply grid gap-2 text-xs font-semibold text-slate-700 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center;
-	}
-
-	.activity-input-runner input {
-		@apply rounded-md border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[rgb(var(--color-primary))] focus:ring-[rgb(37_99_235_/_0.18)];
-	}
-
-	.activity-note {
-		@apply flex max-w-5xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700;
-	}
-
-	.activity-note-icon {
-		@apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-300 text-sm font-black text-amber-500;
-	}
-
-	.activity-next-button {
-		@apply inline-flex items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
-	}
+    .app-surface {
+        @apply bg-[rgb(var(--color-surface))] shadow-sm ring-1 ring-[rgb(var(--color-border))];
+    }
+
+    .app-topbar {
+        @apply flex items-center justify-between border-b border-[rgb(var(--color-border))] bg-[rgb(var(--color-surface))] px-4 py-3 sm:px-6 sm:py-4;
+    }
+
+    .app-content-shell {
+        @apply rounded-tr-2xl bg-[rgb(var(--color-cream))];
+    }
+
+    .app-card {
+        @apply rounded-2xl bg-[rgb(var(--color-surface))] p-5 shadow-lg ring-1 ring-[rgb(var(--color-border))];
+    }
+
+    .course-shell {
+        @apply min-h-screen bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)];
+    }
+
+    .course-detail-grid {
+        @apply grid grid-cols-1 gap-4;
+    }
+
+    @media (min-width: 1024px) {
+        .course-detail-grid {
+            grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+        }
+    }
+
+    .course-detail-card {
+        @apply rounded-2xl w-full min-w-0 overflow-hidden bg-white p-3 sm:p-4 shadow-sm ring-1 ring-slate-200;
+    }
+
+    .course-detail-title {
+        @apply text-lg font-bold text-slate-900;
+    }
+
+    .course-detail-text {
+        @apply text-sm leading-6 text-slate-600;
+    }
+
+    .course-secondary-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50;
+    }
+
+    .course-media-placeholder {
+        @apply flex min-h-40 flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center;
+    }
+
+    .course-exploration-box {
+        @apply rounded-2xl border border-dashed border-[rgb(var(--color-primary))]/30 bg-[rgb(239_246_255)] p-4;
+    }
+
+    .course-field-label {
+        @apply text-sm font-semibold text-slate-700;
+    }
+
+    .course-textarea {
+        @apply min-h-32 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[rgb(var(--color-primary))] focus:ring-2 focus:ring-[rgb(37_99_235_/_0.15)];
+    }
+
+    .course-tab {
+        @apply rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50;
+    }
+
+    .course-tab-active {
+        @apply border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary))] text-white;
+    }
+
+    .course-option {
+        @apply flex items-start gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700;
+    }
+
+    .course-review-box {
+        @apply rounded-2xl border border-slate-200 bg-slate-50 p-4;
+    }
+
+    .course-review-box-accent {
+        @apply bg-white;
+    }
+
+    .course-step-card-active {
+        @apply ring-2 ring-[rgb(var(--color-primary))];
+    }
+
+    .course-header {
+        @apply flex items-center justify-between gap-3 bg-[rgb(var(--color-primary))] px-4 py-3 text-white sm:px-6;
+    }
+
+    .course-header-brand {
+        @apply flex items-center gap-2 text-base font-black tracking-wide sm:text-lg;
+    }
+
+    .course-header-links {
+        @apply flex items-center gap-2 overflow-x-auto px-2 text-sm font-semibold sm:gap-4 sm:text-base;
+    }
+
+    .course-header-link {
+        @apply rounded-full px-3 py-1.5 text-white/90 transition hover:bg-white/15 hover:text-white;
+    }
+
+    .course-header-link-active {
+        @apply bg-white text-[rgb(var(--color-primary))];
+    }
+
+    .course-hero {
+        @apply grid gap-6 border-b border-[rgb(var(--color-border))] px-4 py-6 sm:px-6 md:grid-cols-[1.2fr_0.8fr] md:items-center;
+    }
+
+    .course-breadcrumb {
+        @apply mb-4 text-sm font-semibold text-[rgb(var(--color-primary))];
+    }
+
+    .course-title {
+        @apply text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl;
+    }
+
+    .course-description {
+        @apply mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base;
+    }
+
+    .course-progress-label {
+        @apply mt-5 text-sm font-semibold text-slate-700;
+    }
+
+    .course-progress-track {
+        @apply mt-2 h-3 overflow-hidden rounded-full bg-slate-200;
+    }
+
+    .course-progress-fill {
+        @apply h-full rounded-full bg-[rgb(var(--color-primary))];
+    }
+
+    .course-hero-art {
+        @apply flex justify-center md:justify-end;
+    }
+
+    .course-hero-badge {
+        @apply flex h-40 w-40 items-center justify-center rounded-full bg-[rgb(240_243_255)] text-7xl shadow-inner sm:h-48 sm:w-48 sm:text-8xl;
+    }
+
+    .course-step-list {
+        @apply w-full space-y-4 px-2 py-6 sm:px-4;
+    }
+
+    .course-step-card {
+        @apply flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[rgb(var(--color-border))] sm:flex-row sm:items-center sm:justify-between;
+    }
+
+    .course-step-left {
+        @apply flex items-start gap-4;
+    }
+
+    .course-step-icon {
+        @apply flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[rgb(var(--color-accent))] text-2xl text-white shadow-sm;
+    }
+
+    .course-step-icon-blue {
+        @apply bg-[rgb(var(--color-primary))];
+    }
+
+    .course-step-title {
+        @apply text-base font-bold text-slate-900 sm:text-lg;
+    }
+
+    .course-step-desc {
+        @apply mt-1 text-sm text-slate-500;
+    }
+
+    .course-step-button {
+        @apply w-full sm:w-auto;
+    }
+
+    .course-step-primary-button {
+        @apply inline-flex items-center justify-center
+    rounded-2xl
+    px-5 py-3
+    font-semibold
+    text-white
+    bg-[rgb(var(--color-primary))]
+    shadow-lg shadow-blue-500/25
+    transition-all duration-200;
+    }
+
+    .course-step-primary-button:hover {
+        @apply brightness-110 -translate-y-[1px];
+    }
+
+    .course-step-primary-button:active {
+        transform: translateY(1px);
+
+        box-shadow:
+            0 6px 12px rgba(37, 99, 235, 0.2),
+            inset 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-step-secondary-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+
+    .app-section-title {
+        @apply text-lg font-semibold text-[rgb(var(--color-text))];
+    }
+
+    .app-muted {
+        @apply text-sm text-[rgb(var(--color-muted))];
+    }
+
+    .btn-primary {
+        @apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-primary))] px-4 py-2 font-semibold text-white transition hover:bg-[rgb(var(--color-primary-hover))];
+    }
+
+    .btn-accent {
+        @apply inline-flex items-center justify-center rounded-lg bg-[rgb(var(--color-accent))] px-4 py-2 font-semibold text-slate-950 transition hover:bg-[rgb(var(--color-accent-hover))];
+    }
+
+    .btn-outline {
+        @apply inline-flex items-center justify-center rounded-lg border border-white/20 px-4 py-2 font-semibold text-white transition hover:bg-white hover:text-[rgb(var(--color-primary))];
+    }
+
+    .sidebar-shell {
+        @apply sticky top-0 flex h-dvh w-64 flex-col overflow-y-auto bg-[rgb(var(--color-primary))] p-5 text-white shadow-xl;
+    }
+
+    .sidebar-column {
+        @apply hidden w-64 shrink-0 bg-[rgb(var(--color-primary))] shadow-xl md:block;
+    }
+
+    .mobile-navbar {
+        @apply sticky top-0 z-40 flex flex-col gap-3 border-b border-white/10 bg-[rgb(var(--color-primary))] px-3 py-3 text-white shadow-xl;
+    }
+
+    .mobile-navbar-row {
+        @apply flex items-center justify-between gap-3;
+    }
+
+    .mobile-navbar-brand {
+        @apply flex items-center gap-2 px-1 text-base font-black tracking-wide text-white;
+    }
+
+    .mobile-menu-button {
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20;
+    }
+
+    .mobile-nav-panel {
+        @apply grid gap-2 rounded-2xl border border-white/10 bg-white/10 p-2 shadow-lg;
+    }
+
+    .mobile-nav-link {
+        @apply inline-flex min-h-11 w-full items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-sm font-bold text-white transition hover:bg-white/20;
+    }
+
+    .mobile-nav-icon {
+        @apply h-4 w-4 shrink-0;
+    }
+
+    .mobile-nav-link-active {
+        @apply border-white bg-white text-[rgb(var(--color-primary))] shadow-sm;
+    }
+
+    .mobile-nav-logout {
+        @apply bg-white/15;
+    }
+
+    .mobile-nav-link-active-course {
+        @apply bg-white text-[rgb(var(--color-primary))];
+    }
+
+    .toast-enter {
+        animation: toast-enter 180ms ease-out;
+    }
+
+    .toast-exit {
+        animation: toast-exit 180ms ease-in forwards;
+    }
+
+    .toast-progress {
+        @apply mb-3 h-1 origin-left rounded-full;
+        animation: toast-progress 3s linear forwards;
+    }
+
+    .toast-progress-success {
+        @apply bg-emerald-500;
+    }
+
+    .toast-progress-error {
+        @apply bg-red-500;
+    }
+
+    .sidebar-link {
+        @apply flex items-center gap-3
+    rounded-2xl px-4 py-3
+    text-lg font-semibold
+    transition-all duration-200;
+
+        background: rgba(255, 255, 255, 0.08);
+
+        border: 1px solid rgba(255, 255, 255, 0.06);
+
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+
+        transform: translateY(0);
+    }
+
+    .sidebar-link:hover:not(.sidebar-link-active) {
+        background: rgba(255, 255, 255, 0.14);
+
+        transform: translateY(-1px);
+
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .sidebar-link-active {
+        background: white;
+        color: rgb(var(--color-primary));
+
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .sidebar-link-active:hover {
+        background: white;
+        color: rgb(var(--color-primary));
+    }
+
+    .sidebar-profile-link {
+        @apply flex w-full items-center gap-3 rounded-lg bg-white/10 px-3 py-3 text-left text-white transition hover:bg-white/15;
+    }
+
+    .sidebar-back-link {
+        @apply mb-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/20;
+    }
+
+    .course-sidebar-step {
+        @apply relative flex items-center gap-3
+    rounded-2xl
+    px-4 py-4
+    text-white
+    transition-all duration-200;
+
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .course-sidebar-step:hover:not(.course-sidebar-step-active) {
+        background: rgba(255, 255, 255, 0.16);
+
+        transform: translateY(-1px);
+
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .course-sidebar-step-active:hover {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 1),
+            rgba(255, 255, 255, 0.96)
+        );
+
+        color: rgb(var(--color-primary));
+    }
+
+    .course-sidebar-step-active {
+        background: linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.98),
+            rgba(255, 255, 255, 0.92)
+        );
+
+        color: rgb(var(--color-primary));
+
+        border: 1px solid rgba(255, 255, 255, 0.7);
+
+        box-shadow:
+            0 10px 25px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
+
+        transform: translateY(-1px);
+    }
+
+    .course-sidebar-step-active span:last-child {
+        color: rgb(37 99 235 / 0.7);
+    }
+
+    .course-sidebar-step-icon {
+        @apply flex h-9 w-9 shrink-0 items-center justify-center rounded-xl;
+
+        background: rgba(255, 255, 255, 0.12);
+
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .course-sidebar-step-icon-active {
+        background: rgb(var(--color-primary));
+        color: white;
+    }
+
+    .activity-content {
+        @apply space-y-5;
+    }
+
+    .activity-info {
+        @apply flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700;
+    }
+
+    .activity-info-icon {
+        @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-blue-300 text-sm font-bold text-blue-600;
+    }
+
+    .activity-code-card {
+        @apply rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
+    }
+
+    .activity-card-heading {
+        @apply mb-4 flex items-center gap-3 text-base font-bold text-slate-900;
+    }
+
+    .activity-card-heading h3 {
+        @apply min-w-0 truncate;
+    }
+
+    .activity-number {
+        @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-sm font-black text-[rgb(var(--color-primary))];
+    }
+
+    .activity-editor {
+        @apply overflow-hidden rounded-md bg-slate-950 shadow-inner ring-1 ring-slate-900;
+    }
+
+    .activity-editor-toolbar {
+        @apply flex min-h-10 items-center justify-between gap-3 border-b border-white/5 bg-slate-900 px-3 py-2;
+    }
+
+    .activity-language {
+        @apply relative;
+    }
+
+    .activity-language-trigger {
+        @apply inline-flex min-w-32 items-center justify-between gap-2 rounded-md bg-white/10 px-3 py-2 text-sm font-bold text-white shadow-sm ring-1 ring-white/10 transition hover:bg-white/15 focus:outline-none focus:ring-2 focus:ring-blue-400/60;
+    }
+
+    .activity-language-menu {
+        @apply absolute right-0 top-[calc(100%+0.5rem)] z-20 w-44 overflow-hidden rounded-lg border border-slate-700 bg-slate-900 py-1 shadow-xl shadow-black/30;
+    }
+
+    .activity-language-option {
+        @apply flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm font-semibold text-slate-200 transition hover:bg-blue-600 hover:text-white;
+    }
+
+    .activity-language-option-active {
+        @apply bg-blue-600/20 text-blue-200;
+    }
+
+    .activity-language-check {
+        @apply h-2 w-2 rounded-full bg-blue-400;
+    }
+
+    .activity-editor-body {
+        @apply grid min-h-[19rem] grid-cols-[3rem_minmax(0,1fr)] bg-slate-950;
+    }
+
+    .activity-line-numbers {
+        @apply flex select-none flex-col border-r border-white/5 bg-black/15 px-3 py-3 text-right font-mono text-xs leading-6 text-slate-500;
+    }
+
+    .activity-code-input {
+        @apply h-full min-h-[19rem] resize-none border-0 bg-transparent px-4 py-3 font-mono text-sm leading-6 text-slate-100 outline-none placeholder:text-slate-500 focus:ring-0;
+    }
+
+    .activity-card-actions {
+        @apply mt-3 flex items-center justify-between gap-3;
+    }
+
+    .activity-run-button {
+        @apply inline-flex min-w-24 items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
+    }
+
+    .activity-reset-button {
+        @apply inline-flex min-w-24 items-center justify-center rounded-md border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-[rgb(var(--color-primary))] shadow-sm transition hover:bg-slate-50;
+    }
+
+    .activity-output {
+        @apply mt-4 rounded-lg bg-white p-4 shadow-sm ring-1 ring-slate-200;
+    }
+
+    .activity-output-title {
+        @apply mb-3 flex items-center gap-2 text-sm font-bold text-slate-700;
+    }
+
+    .activity-output pre {
+        @apply min-h-24 whitespace-pre-wrap rounded-md border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs leading-5 text-slate-600;
+    }
+
+    .activity-preview {
+        @apply min-h-64 w-full rounded-md border border-slate-200 bg-white;
+    }
+
+    .activity-input-runner {
+        @apply grid gap-3 rounded-md border border-slate-200 bg-slate-50 px-4 py-3;
+    }
+
+    .activity-input-runner label {
+        @apply grid gap-2 text-xs font-semibold text-slate-700 sm:grid-cols-[minmax(0,1fr)_10rem] sm:items-center;
+    }
+
+    .activity-input-runner input {
+        @apply rounded-md border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-[rgb(var(--color-primary))] focus:ring-[rgb(37_99_235_/_0.18)];
+    }
+
+    .activity-note {
+        @apply flex max-w-5xl items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-slate-700;
+    }
+
+    .activity-note-icon {
+        @apply flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-amber-300 text-sm font-black text-amber-500;
+    }
+
+    .activity-next-button {
+        @apply inline-flex items-center justify-center gap-2 rounded-md bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))];
+    }
 }

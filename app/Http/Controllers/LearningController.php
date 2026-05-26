@@ -683,6 +683,14 @@ class LearningController extends Controller
                 ->sortByDesc('step_number')
                 ->first();
 
+            $explorationStep = collect($allSteps)
+                ->filter(function (MeetingStep $candidate) use ($step) {
+                    return $candidate->step_type === 'exploration'
+                        && $candidate->step_number < $step->step_number;
+                })
+                ->sortByDesc('step_number')
+                ->first();
+
             if ($practiceStep && $practiceStep->practices) {
                 $practiceItems = $practiceStep->practices
                     ->values()
@@ -704,6 +712,10 @@ class LearningController extends Controller
             'instruction_text' => optional($step->review)->instruction_text,
             'review_items' => optional($step->review)->review_items ?? [],
             'practice_items' => $practiceItems,
+            'case_studies' =>
+            optional($explorationStep?->exploration)->case_studies ?? [],
+            'exploration_mode' =>
+            optional($explorationStep?->exploration)->exploration_mode,
         ];
     }
 

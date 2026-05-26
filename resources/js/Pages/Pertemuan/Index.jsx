@@ -12,7 +12,6 @@ export default function Pertemuan({ id, meeting, steps = [], completedSteps = 0 
     <AppLayout
       title={meeting?.title || `Pertemuan ${id}`}
       showTitleBar={false}
-      showMobileNav={false}
     >
       <div className="course-shell">
         <div className="course-hero">

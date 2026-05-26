@@ -521,7 +521,6 @@ export default function StepPage({
         <AppLayout
             title={`Pertemuan ${id}`}
             showTitleBar={false}
-            showMobileNav={false}
             sidebarVariant="progress"
             sidebarProps={{
                 courseTitle: meeting?.title || `Pertemuan ${id}`,
