@@ -1698,10 +1698,12 @@ export default function StepForm({
                                             {
                                                 title: "",
                                                 description: "",
+                                                content_type: "image",
                                                 left_image: "",
                                                 right_image: "",
                                                 left_image_file: null,
                                                 right_image_file: null,
+                                                content: "",
                                                 questions: [""],
                                             },
                                         ]);
@@ -1761,119 +1763,274 @@ export default function StepForm({
                                         }}
                                     />
 
-                                    <div className="grid gap-4 md:grid-cols-2">
-                                        {/* GAMBAR KIRI */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-slate-700">
-                                                Gambar A
-                                            </label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-semibold text-slate-700">
+                                            Tipe Konten
+                                        </label>
 
-                                            <div className="flex items-start justify-between gap-3">
-                                                {mission.left_image && (
-                                                    <img
-                                                        src={mission.left_image}
-                                                        alt="Gambar kiri"
-                                                        className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                    />
-                                                )}
+                                        <select
+                                            className="w-full rounded-lg border-slate-300"
+                                            value={
+                                                mission.content_type || "image"
+                                            }
+                                            onChange={(e) => {
+                                                const updated = [
+                                                    ...data.missions,
+                                                ];
 
-                                                {(mission.left_image ||
-                                                    mission.left_image_file) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            clearMissionImage(
-                                                                midx,
-                                                                "left",
-                                                            )
-                                                        }
-                                                        className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
-                                                    >
-                                                        Hapus gambar
-                                                    </button>
-                                                )}
-                                            </div>
+                                                updated[midx].content_type =
+                                                    e.target.value;
 
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                className="w-full rounded-lg border-slate-300"
-                                                onChange={(e) => {
-                                                    const updated = [
-                                                        ...data.missions,
-                                                    ];
+                                                setData("missions", updated);
+                                            }}
+                                        >
+                                            <option value="image">
+                                                Compare Gambar
+                                            </option>
 
-                                                    updated[
-                                                        midx
-                                                    ].left_image_file =
-                                                        e.target.files?.[0] ??
-                                                        null;
-
-                                                    setData(
-                                                        "missions",
-                                                        updated,
-                                                    );
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* GAMBAR KANAN */}
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-slate-700">
-                                                Gambar B
-                                            </label>
-
-                                            <div className="flex items-start justify-between gap-3">
-                                                {mission.right_image && (
-                                                    <img
-                                                        src={
-                                                            mission.right_image
-                                                        }
-                                                        alt="Gambar kanan"
-                                                        className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                    />
-                                                )}
-
-                                                {(mission.right_image ||
-                                                    mission.right_image_file) && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            clearMissionImage(
-                                                                midx,
-                                                                "right",
-                                                            )
-                                                        }
-                                                        className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
-                                                    >
-                                                        Hapus gambar
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                className="w-full rounded-lg border-slate-300"
-                                                onChange={(e) => {
-                                                    const updated = [
-                                                        ...data.missions,
-                                                    ];
-
-                                                    updated[
-                                                        midx
-                                                    ].right_image_file =
-                                                        e.target.files?.[0] ??
-                                                        null;
-
-                                                    setData(
-                                                        "missions",
-                                                        updated,
-                                                    );
-                                                }}
-                                            />
-                                        </div>
+                                            <option value="text">
+                                                HTML / Rich Text
+                                            </option>
+                                        </select>
                                     </div>
+
+                                    {mission.content_type === "image" ? (
+                                        <div className="grid gap-4 md:grid-cols-2">
+                                            {/* GAMBAR KIRI */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-semibold text-slate-700">
+                                                    Gambar A
+                                                </label>
+
+                                                <div className="flex items-start justify-between gap-3">
+                                                    {mission.left_image && (
+                                                        <img
+                                                            src={
+                                                                mission.left_image
+                                                            }
+                                                            alt="Gambar kiri"
+                                                            className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                        />
+                                                    )}
+
+                                                    {(mission.left_image ||
+                                                        mission.left_image_file) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                clearMissionImage(
+                                                                    midx,
+                                                                    "left",
+                                                                )
+                                                            }
+                                                            className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                        >
+                                                            Hapus gambar
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="w-full rounded-lg border-slate-300"
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[
+                                                            midx
+                                                        ].left_image_file =
+                                                            e.target
+                                                                .files?.[0] ??
+                                                            null;
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+
+                                            {/* GAMBAR KANAN */}
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-semibold text-slate-700">
+                                                    Gambar B
+                                                </label>
+
+                                                <div className="flex items-start justify-between gap-3">
+                                                    {mission.right_image && (
+                                                        <img
+                                                            src={
+                                                                mission.right_image
+                                                            }
+                                                            alt="Gambar kanan"
+                                                            className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                        />
+                                                    )}
+
+                                                    {(mission.right_image ||
+                                                        mission.right_image_file) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                clearMissionImage(
+                                                                    midx,
+                                                                    "right",
+                                                                )
+                                                            }
+                                                            className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                        >
+                                                            Hapus gambar
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="w-full rounded-lg border-slate-300"
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[
+                                                            midx
+                                                        ].right_image_file =
+                                                            e.target
+                                                                .files?.[0] ??
+                                                            null;
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {/* TOOLBAR */}
+                                            <div className="flex gap-2 mb-2 text-xs">
+                                                <button
+                                                    type="button"
+                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
+                                                    onClick={() => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[midx].content +=
+                                                            "<b>bold text</b>";
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                >
+                                                    B
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
+                                                    onClick={() => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[midx].content +=
+                                                            "<i>italic text</i>";
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                >
+                                                    I
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                    onClick={() => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[midx].content +=
+                                                            "<ul><li>List item</li></ul>";
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                >
+                                                    • List
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                    onClick={() => {
+                                                        const updated = [
+                                                            ...data.missions,
+                                                        ];
+
+                                                        updated[midx].content +=
+                                                            "<ol><li>List item</li></ol>";
+
+                                                        setData(
+                                                            "missions",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                >
+                                                    1. List
+                                                </button>
+                                            </div>
+
+                                            <textarea
+                                                className="min-h-48 w-full rounded-lg border-slate-300"
+                                                placeholder="HTML atau plain text..."
+                                                value={mission.content || ""}
+                                                onChange={(e) => {
+                                                    const updated = [
+                                                        ...data.missions,
+                                                    ];
+
+                                                    updated[midx].content =
+                                                        e.target.value;
+
+                                                    setData(
+                                                        "missions",
+                                                        updated,
+                                                    );
+                                                }}
+                                            />
+
+                                            <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                                <p className="mb-2 text-xs text-slate-500">
+                                                    Preview
+                                                </p>
+
+                                                <div
+                                                    dangerouslySetInnerHTML={{
+                                                        __html:
+                                                            mission.content ||
+                                                            "",
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     <div className="space-y-2">
                                         {mission.questions.map((q, qidx) => (

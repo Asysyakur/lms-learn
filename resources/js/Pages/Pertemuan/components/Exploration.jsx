@@ -813,52 +813,73 @@ export default function StepThreeExploration({
                                                 </div>
 
                                                 <div className="grid min-w-0 gap-6 2xl:grid-cols-[1.1fr_0.9fr]">
-                                                    {/* KIRI - GAMBAR */}
-                                                    <div className="min-w-0 space-y-6">
-                                                        {/* GAMBAR A */}
-                                                        <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
-                                                            <div className="mb-3 flex items-center gap-2">
-                                                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
-                                                                    A
+                                                    {(mission.content_type ||
+                                                        "image") === "image" ? (
+                                                        <div className="min-w-0 space-y-6">
+                                                            {/* GAMBAR A */}
+                                                            <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
+                                                                <div className="mb-3 flex items-center gap-2">
+                                                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
+                                                                        A
+                                                                    </div>
+
+                                                                    <div className="text-sm font-semibold text-slate-700">
+                                                                        Gambar A
+                                                                    </div>
                                                                 </div>
 
-                                                                <div className="text-sm font-semibold text-slate-700">
-                                                                    Gambar A
+                                                                <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
+                                                                    <img
+                                                                        src={
+                                                                            mission.left_image
+                                                                        }
+                                                                        alt="Gambar A"
+                                                                        className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
+                                                                    />
                                                                 </div>
                                                             </div>
-                                                            <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
-                                                                <img
-                                                                    src={
-                                                                        mission.left_image
-                                                                    }
-                                                                    alt="Gambar A"
-                                                                    className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
-                                                                />
+
+                                                            {/* GAMBAR B */}
+                                                            <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
+                                                                <div className="mb-3 flex items-center gap-2">
+                                                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
+                                                                        B
+                                                                    </div>
+
+                                                                    <div className="text-sm font-semibold text-slate-700">
+                                                                        Gambar B
+                                                                    </div>
+                                                                </div>
+
+                                                                <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
+                                                                    <img
+                                                                        src={
+                                                                            mission.right_image
+                                                                        }
+                                                                        alt="Gambar B"
+                                                                        className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </div>
-
-                                                        {/* GAMBAR B */}
-                                                        <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
-                                                            <div className="mb-3 flex items-center gap-2">
-                                                                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
-                                                                    B
-                                                                </div>
-
-                                                                <div className="text-sm font-semibold text-slate-700">
-                                                                    Gambar B
-                                                                </div>
-                                                            </div>
-                                                            <div className="mb-3 max-h-96 overflow-auto rounded-lg border border-slate-200 bg-white">
-                                                                <img
-                                                                    src={
-                                                                        mission.right_image
-                                                                    }
-                                                                    alt="Gambar B"
-                                                                    className="h-auto max-h-[420px] w-full rounded-2xl object-contain"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                    ) : (
+                                                        <div
+                                                            className="
+                rounded-3xl
+                border
+                border-slate-200
+                bg-white
+                p-6
+                prose
+                max-w-none
+            "
+                                                            dangerouslySetInnerHTML={{
+                                                                __html:
+                                                                    mission.content ||
+                                                                    "",
+                                                            }}
+                                                        />
+                                                    )}
 
                                                     {/* KANAN - PERTANYAAN */}
                                                     <div className="min-w-0 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">

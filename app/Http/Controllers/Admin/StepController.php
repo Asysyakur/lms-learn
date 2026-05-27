@@ -769,6 +769,12 @@ class StepController extends Controller
         return collect($missions)
             ->map(function ($mission, $index) use ($files, $existingMissions) {
 
+                $mission['content_type'] =
+                    $mission['content_type'] ?? 'image';
+
+                $mission['content'] =
+                    $mission['content'] ?? '';
+
                 $leftFile =
                     data_get($files, $index . '.left_image_file');
 
@@ -778,6 +784,17 @@ class StepController extends Controller
                 $existingMission = $existingMissions[$index] ?? [];
                 $currentLeftUrl = $existingMission['left_image'] ?? ($mission['left_image'] ?? null);
                 $currentRightUrl = $existingMission['right_image'] ?? ($mission['right_image'] ?? null);
+
+                if (($mission['content_type'] ?? 'image') === 'text') {
+
+                    $mission['left_image'] = null;
+                    $mission['right_image'] = null;
+
+                    unset($mission['left_image_file']);
+                    unset($mission['right_image_file']);
+
+                    return $mission;
+                }
 
                 // upload gambar kiri
                 if ($leftFile) {
