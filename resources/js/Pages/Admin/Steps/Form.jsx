@@ -103,15 +103,24 @@ export default function StepForm({
                   mode: item.assessment_mode || "quiz",
                   question: item.assessment_question || "",
                   options: Array.isArray(item.assessment_options)
-                      ? item.assessment_options.join("\n")
-                      : "",
+                      ? item.assessment_options
+                      : typeof item.assessment_options === "string"
+                        ? item.assessment_options
+                              .split(",")
+                              .map((o) => o.trim())
+                              .filter(Boolean)
+                        : [""],
+                  correct_answer: item.assessment_correct_answer ?? 0,
+                  explanation: item.assessment_explanation || "",
               }))
             : [
                   {
                       id: "practice-1",
                       mode: "quiz",
                       question: "",
-                      options: "",
+                      options: [""],
+                      correct_answer: 0,
+                      explanation: "",
                   },
               ],
     );
@@ -153,8 +162,8 @@ export default function StepForm({
             assessment_options: Array.isArray(
                 step?.practice?.assessment_options,
             )
-                ? step.practice.assessment_options.join("\n")
-                : "",
+                ? step.practice.assessment_options
+                : [""],
             review_items: Array.isArray(step?.review?.review_items)
                 ? step.review.review_items
                 : [],
@@ -508,7 +517,9 @@ export default function StepForm({
                     id: item.id || `practice-${index + 1}`,
                     mode: item.mode || "quiz",
                     question: item.question || "",
-                    options: item.options || "",
+                    options: item.options || [],
+                    correct_answer: item.correct_answer ?? 0,
+                    explanation: item.explanation || "",
                 }))
                 .filter((item) => item.question.trim() !== "");
             const firstItem = cleanedPracticeItems[0] || practiceItems[0];
@@ -2120,7 +2131,9 @@ export default function StepForm({
                                             id: `practice-${Date.now()}`,
                                             mode: "quiz",
                                             question: "",
-                                            options: "",
+                                            options: [""],
+                                            correct_answer: 0,
+                                            explanation: "",
                                         },
                                     ])
                                 }
@@ -2191,25 +2204,226 @@ export default function StepForm({
                                             }}
                                         />
                                     </div>
+                                    {item.mode === "quiz" && (
+                                        <div className="mt-4 space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <label className="block text-sm font-semibold text-slate-700">
+                                                    Pilihan Jawaban
+                                                </label>
 
-                                    <div>
+                                                <button
+                                                    type="button"
+                                                    className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
+                                                    onClick={() => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].options.push("");
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    + Tambah Pilihan
+                                                </button>
+                                            </div>
+
+                                            {item.options.map(
+                                                (option, optIdx) => (
+                                                    <div
+                                                        key={optIdx}
+                                                        className={`flex items-center gap-3 rounded-xl border p-3 ${
+                                                            item.correct_answer ===
+                                                            optIdx
+                                                                ? "border-emerald-400 bg-emerald-50"
+                                                                : "border-slate-200 bg-white"
+                                                        }`}
+                                                    >
+                                                        <input
+                                                            type="radio"
+                                                            name={`correct-${index}`}
+                                                            checked={
+                                                                item.correct_answer ===
+                                                                optIdx
+                                                            }
+                                                            onChange={() => {
+                                                                const next = [
+                                                                    ...practiceItems,
+                                                                ];
+                                                                next[
+                                                                    index
+                                                                ].correct_answer =
+                                                                    optIdx;
+                                                                setPracticeItems(
+                                                                    next,
+                                                                );
+                                                            }}
+                                                        />
+
+                                                        <input
+                                                            className="flex-1 rounded-lg border-slate-300"
+                                                            placeholder={`Pilihan ${optIdx + 1}`}
+                                                            value={option}
+                                                            onChange={(e) => {
+                                                                const next = [
+                                                                    ...practiceItems,
+                                                                ];
+                                                                next[
+                                                                    index
+                                                                ].options[
+                                                                    optIdx
+                                                                ] =
+                                                                    e.target.value;
+                                                                setPracticeItems(
+                                                                    next,
+                                                                );
+                                                            }}
+                                                        />
+
+                                                        {item.options.length >
+                                                            1 && (
+                                                            <button
+                                                                type="button"
+                                                                className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
+                                                                onClick={() => {
+                                                                    const next =
+                                                                        [
+                                                                            ...practiceItems,
+                                                                        ];
+
+                                                                    next[
+                                                                        index
+                                                                    ].options.splice(
+                                                                        optIdx,
+                                                                        1,
+                                                                    );
+
+                                                                    if (
+                                                                        next[
+                                                                            index
+                                                                        ]
+                                                                            .correct_answer >=
+                                                                        next[
+                                                                            index
+                                                                        ]
+                                                                            .options
+                                                                            .length
+                                                                    ) {
+                                                                        next[
+                                                                            index
+                                                                        ].correct_answer =
+                                                                            0;
+                                                                    }
+
+                                                                    setPracticeItems(
+                                                                        next,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                Hapus
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ),
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                {item.mode === "quiz" && (
+                                    <div className="mt-4">
                                         <label className="block text-sm font-semibold text-slate-700">
-                                            Opsi Jawaban
+                                            Penjelasan / Pembahasan
                                         </label>
+
+                                        {/* TOOLBAR */}
+                                        <div className="mb-2 mt-2 flex gap-2 text-xs">
+                                            <button
+                                                type="button"
+                                                className="rounded bg-slate-200 px-2 py-1 font-bold"
+                                                onClick={() => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].explanation +=
+                                                        "<b>bold text</b>";
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                B
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="rounded bg-slate-200 px-2 py-1 italic"
+                                                onClick={() => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].explanation +=
+                                                        "<i>italic text</i>";
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                I
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="rounded bg-slate-200 px-2 py-1"
+                                                onClick={() => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].explanation +=
+                                                        "<ul><li>Point penting</li></ul>";
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                • List
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="rounded bg-slate-200 px-2 py-1"
+                                                onClick={() => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].explanation +=
+                                                        "<div class='rounded-xl bg-yellow-100 p-3 text-yellow-900'>Highlight penting</div>";
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                Box
+                                            </button>
+                                        </div>
                                         <textarea
-                                            className="mt-1 min-h-40 w-full rounded-lg border-slate-300 disabled:bg-slate-100"
-                                            placeholder="Satu opsi per baris"
-                                            disabled={item.mode === "essay"}
-                                            value={item.options || ""}
+                                            className="min-h-32 w-full rounded-lg border-slate-300"
+                                            placeholder="Tulis pembahasan jawaban di sini..."
+                                            value={item.explanation || ""}
                                             onChange={(e) => {
                                                 const next = [...practiceItems];
-                                                next[index].options =
+                                                next[index].explanation =
                                                     e.target.value;
                                                 setPracticeItems(next);
                                             }}
                                         />
+
+                                        {/* PREVIEW */}
+                                        <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+                                            <p className="mb-2 text-xs text-slate-500">
+                                                Preview
+                                            </p>
+
+                                            <div
+                                                dangerouslySetInnerHTML={{
+                                                    __html:
+                                                        item.explanation || "",
+                                                }}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
+                                )}
                             </div>
                         ))}
                     </div>
