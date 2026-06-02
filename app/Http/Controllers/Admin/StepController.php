@@ -257,7 +257,7 @@ class StepController extends Controller
                         'assessment_question' => $item['question'],
                         'assessment_options' => $item['options'],
                         'assessment_explanation' => $item['explanation'],
-                        'assessment_correct_answer' => $item['correct_answer'] ?? 0,
+                        'assessment_correct_answer' => (int) ($item['correct_answer'] ?? 0),
                     ]);
                 }
 
@@ -410,7 +410,7 @@ class StepController extends Controller
                     'mode' => $mode,
                     'question' => trim($item['question']),
                     'options' => $mode === 'quiz' ? $this->normalizeOptions($item['options'] ?? null) : [],
-                    'correct_answer' => $item['correct_answer'] ?? 0,
+                    'correct_answer' => (int) ($item['correct_answer'] ?? 0),
                     'explanation' => $item['explanation'] ?? '',
                     'order' => $index + 1,
                 ];

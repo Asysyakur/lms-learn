@@ -17,6 +17,8 @@ class MeetingStepPractice extends Model
         'assessment_question',
         'assessment_options',
         'assessment_items',
+        'assessment_explanation',
+        'assessment_correct_answer',
     ];
 
     protected function casts(): array
@@ -24,6 +26,7 @@ class MeetingStepPractice extends Model
         return [
             'assessment_options' => 'array',
             'assessment_items' => 'array',
+            'assessment_correct_answer' => 'array',
         ];
     }
 

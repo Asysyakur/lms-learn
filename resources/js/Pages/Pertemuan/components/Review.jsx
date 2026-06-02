@@ -234,8 +234,19 @@ function groupReviewItems(stepData, reviewItems) {
     const indices = practiceItems.length
         ? practiceItems.map((item, index) => ({
               practice_index: Number(item.practice_index ?? index),
+
               title: item.title || `Latihan Soal ${index + 1}`,
+
               question: item.question || "",
+
+              // TAMBAHAN
+              options: item.options || [],
+
+              // TAMBAHAN
+              correct_answer: item.correct_answer ?? null,
+
+              // TAMBAHAN
+              explanation: item.explanation || "",
           }))
         : Array.from(
               new Set(
@@ -249,6 +260,9 @@ function groupReviewItems(stepData, reviewItems) {
 
     return indices.map((practice) => ({
         ...practice,
+        correct_answer: practice.correct_answer ?? null,
+        options: practice.options ?? [],
+        explanation: practice.explanation ?? "",
         items: reviewItems
             .map((item, flatIndex) => ({ ...item, flatIndex }))
             .filter(
@@ -506,14 +520,55 @@ export default function StepFiveReview({
                                     {group.question || ""}
                                 </p>
 
-                                <div className="mt-4 rounded-lg border border-slate-200 bg-white p-3">
-                                    <p className="text-xs font-semibold text-slate-500">
-                                        Jawaban Siswa
-                                    </p>
+                                <div className="mt-4 space-y-3">
+                                    {/* JAWABAN SISWA */}
+                                    <div className="rounded-lg border border-slate-200 bg-white p-3">
+                                        <p className="text-xs font-semibold text-slate-500">
+                                            Jawaban Siswa
+                                        </p>
 
-                                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">
-                                        {group.items[0]?.student_answer || "-"}
-                                    </p>
+                                        <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">
+                                            {Array.isArray(group.options)
+                                                ? (group.options[
+                                                      group.items[0]
+                                                          ?.student_answer
+                                                  ] ??
+                                                  group.items[0]
+                                                      ?.student_answer ??
+                                                  "-")
+                                                : (group.items[0]
+                                                      ?.student_answer ?? "-")}
+                                        </p>
+                                    </div>
+
+                                    {/* JAWABAN BENAR */}
+                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                                        <p className="text-xs font-semibold text-emerald-700">
+                                            Jawaban Benar
+                                        </p>
+
+                                        <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900">
+                                            {Array.isArray(group.options)
+                                                ? group.options[
+                                                      group.correct_answer
+                                                  ]
+                                                : "-"}
+                                        </p>
+                                    </div>
+
+                                    {/* PEMBAHASAN */}
+                                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                        <p className="text-xs font-semibold text-blue-700">
+                                            Pembahasan
+                                        </p>
+
+                                        <div
+                                            className="prose prose-sm mt-2 max-w-none text-slate-800"
+                                            dangerouslySetInnerHTML={{
+                                                __html: group.explanation || "",
+                                            }}
+                                        />
+                                    </div>
                                 </div>
                             </div>
 

@@ -650,6 +650,10 @@ class LearningController extends Controller
                         'question' => $item['question'] ?? $practice->assessment_question,
 
                         'options' => $item['options'] ?? $practice->assessment_options ?? [],
+
+                        'correct_answer' => $item['correct_answer'] ?? null,
+
+                        'explanation' => $item['explanation'] ?? '',
                     ];
                 });
             }
@@ -662,6 +666,10 @@ class LearningController extends Controller
                 'question' => $practice->assessment_question,
 
                 'options' => $practice->assessment_options ?: [],
+
+                'correct_answer' => $practice->assessment_correct_answer ?? null,
+
+                'explanation' => $practice->assessment_explanation ?? '',
             ]];
         })->values()->toArray();
 
@@ -692,15 +700,33 @@ class LearningController extends Controller
                 ->first();
 
             if ($practiceStep && $practiceStep->practices) {
+
                 $practiceItems = $practiceStep->practices
                     ->values()
                     ->map(function ($practice, $index) {
+
                         return [
                             'practice_index' => $index,
-                            'title' => $practice->assessment_mode === 'essay'
+
+                            'title' =>
+                            $practice->assessment_mode === 'essay'
                                 ? 'Essay'
                                 : 'Latihan Soal ' . ($index + 1),
-                            'question' => $practice->assessment_question,
+
+                            'question' =>
+                            $practice->assessment_question,
+
+                            // TAMBAHAN
+                            'options' =>
+                            $practice->assessment_options ?? [],
+
+                            // TAMBAHAN
+                            'correct_answer' =>
+                            $practice->assessment_correct_answer,
+
+                            // TAMBAHAN
+                            'explanation' =>
+                            $practice->assessment_explanation,
                         ];
                     })
                     ->values()
