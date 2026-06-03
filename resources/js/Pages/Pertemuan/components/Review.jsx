@@ -572,7 +572,7 @@ export default function StepFiveReview({
                                 </div>
                             </div>
 
-                            <div className="mt-5 space-y-4">
+                            {/* <div className="mt-5 space-y-4">
                                 {group.items.map((item) => (
                                     <div
                                         key={item.flatIndex}
@@ -685,7 +685,7 @@ export default function StepFiveReview({
                                         </div>
                                     </div>
                                 ))}
-                            </div>
+                            </div> */}
                         </div>
                     ))}
                 </div>

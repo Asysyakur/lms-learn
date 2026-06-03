@@ -948,9 +948,24 @@ export default function StepForm({
                     <div className="space-y-4">
                         <div className="flex flex-col gap-4">
                             <div>
+                                <label className="block text-sm font-semibold text-slate-700">
+                                    Prompt Eksplorasi
+                                </label>
+                                <textarea
+                                    className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                    value={data.exploration_prompt}
+                                    onChange={(e) =>
+                                        setData(
+                                            "exploration_prompt",
+                                            e.target.value,
+                                        )
+                                    }
+                                />
+                            </div>
+                            <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">
-                                        Mode Eksplorasi
+                                        Mode Studi Kasus
                                     </label>
 
                                     <select
@@ -974,21 +989,6 @@ export default function StepForm({
                                         </option>
                                     </select>
                                 </div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    Prompt Eksplorasi
-                                </label>
-                                <textarea
-                                    className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                    value={data.exploration_prompt}
-                                    onChange={(e) =>
-                                        setData(
-                                            "exploration_prompt",
-                                            e.target.value,
-                                        )
-                                    }
-                                />
-                            </div>
-                            <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">
                                         Judul Studi Kasus
