@@ -17,6 +17,7 @@ class MeetingStepPracticeResponse extends Model
         'practice_text',
         'practice_payload',
         'practiced_at',
+        'is_locked',
     ];
 
     protected function casts(): array

@@ -1,4 +1,6 @@
-import { ArrowRightIcon, ClipboardDocumentCheckIcon } from "@heroicons/react/24/solid";
+import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { useEffect, useState } from "react";
+import { usePage } from "@inertiajs/react";
 
 export default function StepFourPractice({
     stepData,
@@ -12,6 +14,13 @@ export default function StepFourPractice({
     onNext,
     nextLabel = "Lanjut",
 }) {
+    const [isSaved, setIsSaved] = useState(stepData?.is_answer_locked || false);
+    const { flash } = usePage().props;
+
+    useEffect(() => {
+        setIsSaved(stepData?.is_answer_locked || false);
+    }, [stepData?.is_answer_locked]);
+
     const practiceItems =
         Array.isArray(stepData?.assessment_items) &&
         stepData.assessment_items.length > 0
@@ -50,6 +59,14 @@ export default function StepFourPractice({
         return item.mode === "essay" ? essayAnswer : quizAnswer;
     };
 
+    const handleSaveAndNext = async () => {
+        await onSave?.();
+
+        setIsSaved(true);
+
+        onNext?.();
+    };
+
     return (
         <div className="course-detail-grid">
             <div className="course-detail-card space-y-4">
@@ -81,6 +98,7 @@ export default function StepFourPractice({
 
                             {item.mode === "essay" ? (
                                 <textarea
+                                    disabled={isSaved}
                                     className="course-textarea mt-3"
                                     placeholder="Tulis jawaban essay di sini..."
                                     value={getAnswer(item) || ""}
@@ -100,6 +118,7 @@ export default function StepFourPractice({
                                         >
                                             <input
                                                 type="radio"
+                                                disabled={isSaved}
                                                 name={`quiz-answer-${item.id || index}`}
                                                 value={option}
                                                 checked={
@@ -122,8 +141,11 @@ export default function StepFourPractice({
                 </div>
 
                 <button
-                    className="course-step-primary-button w-full sm:w-auto"
-                    onClick={() => onSave()}
+                    disabled={isSaved}
+                    className={`course-step-primary-button ${
+                        isSaved ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
+                    onClick={handleSaveAndNext}
                 >
                     Simpan Latihan Soal
                 </button>
@@ -166,6 +188,7 @@ export default function StepFourPractice({
                     </div>
                 )}
             </div>
+            {flash.error && <div className="text-red-500">{flash.error}</div>}
         </div>
     );
 }

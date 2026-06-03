@@ -746,14 +746,14 @@ export default function StepFiveReview({
                 </div>
             )}
             <div className="flex justify-end gap-3">
-                <button
+                {/* <button
                     onClick={submitReview}
                     disabled={isSubmitting}
                     className="course-step-primary-button"
                     type="button"
                 >
                     {isSubmitting ? "Menyimpan..." : "Simpan Jawaban"}
-                </button>
+                </button> */}
 
                 <button
                     onClick={onNext}

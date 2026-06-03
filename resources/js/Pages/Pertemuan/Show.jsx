@@ -113,7 +113,8 @@ export default function StepPage({
         "quiz";
     const savedPracticeAnswer = extractPracticeAnswer(savedPracticeResponse);
     const practiceItems =
-        currentStep?.step_type === "review" && currentStep?.practice_items?.length
+        currentStep?.step_type === "review" &&
+        currentStep?.practice_items?.length
             ? currentStep.practice_items.map((item, index) => ({
                   practice_index: Number(item.practice_index ?? index),
                   title: item.title || `Latihan Soal ${index + 1}`,
@@ -170,7 +171,6 @@ export default function StepPage({
     const [assessmentSaved, setAssessmentSaved] = useState(savedPracticeAnswer);
     const [assessmentAnswers, setAssessmentAnswers] =
         useState(savedPracticeAnswers);
-
 
     const [reflectionDraft, setReflectionDraft] = useState(
         savedReflectionResponse,
@@ -452,7 +452,11 @@ export default function StepPage({
             case "practice":
                 return (
                     <StepFourPractice
-                        stepData={currentStep}
+                        stepData={{
+                            ...stepData,
+                            is_answer_locked:
+                                savedResponses?.[4]?.is_answer_locked || false,
+                        }}
                         quizAnswer={quizAnswer}
                         setQuizAnswer={setQuizAnswer}
                         essayAnswer={essayAnswer}
@@ -476,9 +480,8 @@ export default function StepPage({
                             practice_index: item.practice_index ?? index,
                             question: item.question,
                             answer:
-                                savedPracticeResponse?.response_payload?.items?.[
-                                    index
-                                ]?.answer || "",
+                                savedPracticeResponse?.response_payload
+                                    ?.items?.[index]?.answer || "",
                         }))}
                         nextLabel={nextStepTitle()}
                         onNext={goNext}

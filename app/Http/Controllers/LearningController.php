@@ -366,6 +366,18 @@ class LearningController extends Controller
                 })
                 ->implode("\n");
 
+            $existingPractice = MeetingStepPracticeResponse::query()
+                ->where('meeting_step_id', $meetingStep->id)
+                ->where('user_id', $userId)
+                ->first();
+
+            if ($existingPractice && $existingPractice->is_locked) {
+                return back()->with(
+                    'error',
+                    'Jawaban sudah dikunci.'
+                );
+            }
+
             MeetingStepPracticeResponse::query()->updateOrCreate(
                 [
                     'meeting_step_id' => $meetingStep->id,
@@ -373,11 +385,9 @@ class LearningController extends Controller
                 ],
                 [
                     'meeting_id' => $meeting->id,
-
                     'practice_text' => $practiceText,
-
                     'practice_payload' => $payload,
-
+                    'is_locked' => true,
                     'practiced_at' => now(),
                 ]
             );
@@ -518,6 +528,7 @@ class LearningController extends Controller
         // Map observation responses
         foreach ($observationResponses as $response) {
             $stepNumber = $response->meetingStep->step_number;
+
             $responses[$stepNumber] = [
                 'response_text' => $response->observation_text,
                 'response_payload' => $response->observation_payload,
@@ -564,9 +575,11 @@ class LearningController extends Controller
         // Map practice responses
         foreach ($practiceResponses as $response) {
             $stepNumber = $response->meetingStep->step_number;
+
             $responses[$stepNumber] = [
                 'response_text' => $response->practice_text,
                 'response_payload' => $response->practice_payload,
+                'is_answer_locked' => $response->is_locked,
             ];
         }
 
