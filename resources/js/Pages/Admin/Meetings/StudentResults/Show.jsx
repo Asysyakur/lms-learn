@@ -1,5 +1,5 @@
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Link } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 
 export default function Show({ meeting, student, responses = [] }) {
     return (
@@ -246,6 +246,56 @@ export default function Show({ meeting, student, responses = [] }) {
                                                                 </div>
                                                             ),
                                                         )}
+                                                    </div>
+                                                </div>
+                                            ),
+                                        )}
+                                    </div>
+                                ) : response.type === "Practice" &&
+                                  response.items ? (
+                                    <div className="space-y-4">
+                                        <div className="flex justify-end">
+                                            <button
+                                                onClick={() =>
+                                                    router.post(
+                                                        route(
+                                                            "admin.practice.unlock",
+                                                            {
+                                                                response:
+                                                                    response.response_id,
+                                                            },
+                                                        ),
+                                                    )
+                                                }
+                                                className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white"
+                                            >
+                                                Buka Lock Jawaban
+                                            </button>
+                                        </div>
+
+                                        {response.items.map(
+                                            (item, itemIndex) => (
+                                                <div
+                                                    key={itemIndex}
+                                                    className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                                                >
+                                                    <div className="mb-2 text-sm font-semibold text-blue-700">
+                                                        Pertanyaan{" "}
+                                                        {itemIndex + 1}
+                                                    </div>
+
+                                                    <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
+                                                        {item.question}
+                                                    </div>
+
+                                                    <div className="rounded-lg bg-white p-3">
+                                                        <div className="mb-1 text-xs font-semibold text-slate-500">
+                                                            Jawaban Siswa
+                                                        </div>
+
+                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                            {item.answer || "-"}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             ),

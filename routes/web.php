@@ -101,6 +101,11 @@ Route::middleware(['auth', 'admin'])
         Route::put('steps/{step}', [StepController::class, 'update'])
             ->name('steps.update');
 
+        Route::post(
+            'practice/{response}/unlock',
+            [StepController::class, 'unlockPractice']
+        )->name('practice.unlock');
+
         Route::delete('steps/{step}', [StepController::class, 'destroy'])
             ->name('steps.destroy');
     });

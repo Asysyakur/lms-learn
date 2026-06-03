@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
+use App\Models\MeetingStepPracticeResponse;
 
 class StepController extends Controller
 {
@@ -617,6 +618,7 @@ class StepController extends Controller
                     });
 
                     return [
+                        'response_id' => $item->id, // TAMBAHAN
                         'type' => 'Practice',
                         'step_title' => $item->step ? $item->step->title : null,
                         'step_type' => $item->step ? $item->step->step_type : null,
@@ -845,5 +847,19 @@ class StepController extends Controller
             })
             ->values()
             ->toArray();
+    }
+
+    public function unlockPractice($responseId)
+    {
+        $response = MeetingStepPracticeResponse::findOrFail($responseId);
+
+        $response->update([
+            'is_locked' => false,
+        ]);
+
+        return back()->with(
+            'success',
+            'Jawaban berhasil dibuka.'
+        );
     }
 }

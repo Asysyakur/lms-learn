@@ -221,6 +221,37 @@ class LearningController extends Controller
         $completedSteps = $this->completedStepCount($meeting);
         $savedResponses = $this->savedResponsesForMeeting($meeting);
 
+        if ($step == 5) {
+
+            $practiceStep = $meeting->steps
+                ->where('step_type', 'practice')
+                ->first();
+
+            if ($practiceStep) {
+
+                $practiceResponse = MeetingStepPracticeResponse::query()
+                    ->where('meeting_step_id', $practiceStep->id)
+                    ->where('user_id', Auth::id())
+                    ->first();
+
+                if (
+                    !$practiceResponse ||
+                    !$practiceResponse->is_locked
+                ) {
+
+                    return redirect()
+                        ->route('pertemuan.step', [
+                            'id' => $meeting->id,
+                            'step' => 4,
+                        ])
+                        ->with(
+                            'error',
+                            'Selesaikan latihan soal terlebih dahulu.'
+                        );
+                }
+            }
+        }
+
         return Inertia::render('Pertemuan/Show', [
             'id' => $meeting->id,
             'meeting' => [

@@ -67,6 +67,12 @@ export default function StepFourPractice({
         onNext?.();
     };
 
+    const isAllAnswered = practiceItems.every((item) => {
+        const answer = getAnswer(item);
+
+        return answer !== undefined && answer !== null && answer !== "";
+    });
+
     return (
         <div className="course-detail-grid">
             <div className="course-detail-card space-y-4">
@@ -141,9 +147,11 @@ export default function StepFourPractice({
                 </div>
 
                 <button
-                    disabled={isSaved}
+                    disabled={!isAllAnswered || isSaved}
                     className={`course-step-primary-button ${
-                        isSaved ? "opacity-50 cursor-not-allowed" : ""
+                        !isAllAnswered || isSaved
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                     }`}
                     onClick={handleSaveAndNext}
                 >
@@ -179,8 +187,13 @@ export default function StepFourPractice({
                     <div className="flex justify-end pt-3">
                         <button
                             type="button"
+                            disabled={!isAllAnswered || isSaved}
                             onClick={() => onSave?.(onNext)}
-                            className="course-step-primary-button"
+                            className={`course-step-primary-button ${
+                                !isAllAnswered || isSaved
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
+                            }`}
                         >
                             {nextLabel}
                             <ArrowRightIcon className="h-4 w-4" />
