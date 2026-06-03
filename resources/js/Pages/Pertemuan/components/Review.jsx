@@ -284,7 +284,6 @@ export default function StepFiveReview({
     const [answers, setAnswers] = useState([]);
     const codingAnswers = stepData?.coding_answers || {};
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [activeTab, setActiveTab] = useState("analysis");
     const [currentStudyIndex, setCurrentStudyIndex] = useState(0);
     useEffect(() => {
         const savedItems = savedResponse?.response_payload?.items ?? [];
@@ -409,225 +408,75 @@ export default function StepFiveReview({
                 <h2 className="text-xl font-bold text-slate-900">
                     Aktivitas 5: Pembuktian
                 </h2>
-
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                    Kembangkan jawaban latihan soal sebelumnya dengan
-                    menambahkan argumen, hasil pengamatan, serta bukti
-                    pendukung.
-                </p>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-                <button
-                    onClick={() => setActiveTab("analysis")}
-                    className={`rounded-2xl px-5 py-2 text-sm font-semibold transition ${
-                        activeTab === "analysis"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
-                    }`}
-                >
-                    Analisis Program
-                </button>
+            <div className="space-y-5">
+                {groupedItems.map((group) => (
+                    <div
+                        key={group.practice_index}
+                        className="rounded-2xl border border-slate-200 bg-white p-5"
+                    >
+                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <h3 className="text-lg font-bold text-slate-900">
+                                {group.title ||
+                                    `Latihan Soal ${group.practice_index + 1}`}
+                            </h3>
 
-                <button
-                    onClick={() => setActiveTab("essay")}
-                    className={`rounded-2xl px-5 py-2 text-sm font-semibold transition ${
-                        activeTab === "essay"
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
-                    }`}
-                >
-                    Pembuktian Essay
-                </button>
-            </div>
-            {activeTab === "analysis" && (
-                <div className="rounded-2xl border border-slate-200 bg-white p-5">
-                    <h2 className="text-2xl font-bold text-slate-900">
-                        Analisis Program
-                    </h2>
+                            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                                {group.question || ""}
+                            </p>
 
-                    <p className="mt-2 text-sm text-slate-600">
-                        Jalankan kembali program untuk melakukan pembuktian.
-                    </p>
+                            <div className="mt-4 space-y-3">
+                                {/* JAWABAN SISWA */}
+                                <div className="rounded-lg border border-slate-200 bg-white p-3">
+                                    <p className="text-xs font-semibold text-slate-500">
+                                        Jawaban Siswa
+                                    </p>
 
-                    <div className="mt-6">
-                        {currentStudy && (
-                            <>
-                                {/* HEADER */}
-                                <div className="mb-5 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-slate-500">
-                                            Studi Kasus {currentStudyIndex + 1}{" "}
-                                            dari {studies.length}
-                                        </p>
-
-                                        <h3 className="text-xl font-bold text-slate-900">
-                                            {currentStudy.title ||
-                                                `Studi Kasus ${currentStudyIndex + 1}`}
-                                        </h3>
-                                    </div>
-
-                                    <div className="flex gap-2">
-                                        <button
-                                            disabled={currentStudyIndex === 0}
-                                            onClick={() =>
-                                                setCurrentStudyIndex(
-                                                    (prev) => prev - 1,
-                                                )
-                                            }
-                                            className="course-step-secondary-button disabled:opacity-40"
-                                        >
-                                            ← Prev
-                                        </button>
-
-                                        <button
-                                            disabled={
-                                                currentStudyIndex ===
-                                                studies.length - 1
-                                            }
-                                            onClick={() =>
-                                                setCurrentStudyIndex(
-                                                    (prev) => prev + 1,
-                                                )
-                                            }
-                                            className="course-step-primary-button disabled:opacity-40"
-                                        >
-                                            Next →
-                                        </button>
-                                    </div>
+                                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">
+                                        {Array.isArray(group.options)
+                                            ? (group.options[
+                                                  group.items[0]?.student_answer
+                                              ] ??
+                                              group.items[0]?.student_answer ??
+                                              "-")
+                                            : (group.items[0]?.student_answer ??
+                                              "-")}
+                                    </p>
                                 </div>
 
-                                {/* CONTENT */}
-                                {currentStudy.type === "analysis" ? (
-                                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-                                        <ReadonlyCaseStudyCard
-                                            study={{
-                                                ...currentStudy,
-                                                title:
-                                                    currentStudy.left_title ||
-                                                    "Program Prosedural",
-                                                code:
-                                                    currentStudy.left_code ||
-                                                    "",
-                                                number: 1,
-                                                type: "analysis",
-                                                language:
-                                                    currentStudy.language ||
-                                                    "python",
-                                            }}
-                                            stepData={stepData}
-                                        />
+                                {/* JAWABAN BENAR */}
+                                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                                    <p className="text-xs font-semibold text-emerald-700">
+                                        Jawaban Benar
+                                    </p>
 
-                                        <ReadonlyCaseStudyCard
-                                            study={{
-                                                ...currentStudy,
-                                                title:
-                                                    currentStudy.right_title ||
-                                                    "Program Berorientasi Objek",
-                                                code:
-                                                    currentStudy.right_code ||
-                                                    "",
-                                                number: 2,
-                                                type: "analysis",
-                                                language:
-                                                    currentStudy.language ||
-                                                    "python",
-                                            }}
-                                            stepData={stepData}
-                                        />
-                                    </div>
-                                ) : (
-                                    <ReadonlyCaseStudyCard
-                                        studyIndex={codingStudyIndex}
-                                        study={{
-                                            ...currentStudy,
-                                            title: "Coding Siswa",
+                                    <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900">
+                                        {Array.isArray(group.options)
+                                            ? group.options[
+                                                  group.correct_answer
+                                              ]
+                                            : "-"}
+                                    </p>
+                                </div>
 
-                                            number: currentStudyIndex + 1,
-                                            type: "coding",
-                                            language:
-                                                currentStudy.language ||
-                                                "python",
+                                {/* PEMBAHASAN */}
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+                                    <p className="text-xs font-semibold text-blue-700">
+                                        Pembahasan
+                                    </p>
+
+                                    <div
+                                        className="prose prose-sm mt-2 max-w-none text-slate-800"
+                                        dangerouslySetInnerHTML={{
+                                            __html: group.explanation || "",
                                         }}
-                                        codingAnswers={codingAnswers}
-                                        stepData={stepData}
                                     />
-                                )}
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
-            {activeTab === "essay" && (
-                <div className="space-y-5">
-                    {groupedItems.map((group) => (
-                        <div
-                            key={group.practice_index}
-                            className="rounded-2xl border border-slate-200 bg-white p-5"
-                        >
-                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                <h3 className="text-lg font-bold text-slate-900">
-                                    {group.title ||
-                                        `Latihan Soal ${group.practice_index + 1}`}
-                                </h3>
-
-                                <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                    {group.question || ""}
-                                </p>
-
-                                <div className="mt-4 space-y-3">
-                                    {/* JAWABAN SISWA */}
-                                    <div className="rounded-lg border border-slate-200 bg-white p-3">
-                                        <p className="text-xs font-semibold text-slate-500">
-                                            Jawaban Siswa
-                                        </p>
-
-                                        <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">
-                                            {Array.isArray(group.options)
-                                                ? (group.options[
-                                                      group.items[0]
-                                                          ?.student_answer
-                                                  ] ??
-                                                  group.items[0]
-                                                      ?.student_answer ??
-                                                  "-")
-                                                : (group.items[0]
-                                                      ?.student_answer ?? "-")}
-                                        </p>
-                                    </div>
-
-                                    {/* JAWABAN BENAR */}
-                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                                        <p className="text-xs font-semibold text-emerald-700">
-                                            Jawaban Benar
-                                        </p>
-
-                                        <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900">
-                                            {Array.isArray(group.options)
-                                                ? group.options[
-                                                      group.correct_answer
-                                                  ]
-                                                : "-"}
-                                        </p>
-                                    </div>
-
-                                    {/* PEMBAHASAN */}
-                                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                                        <p className="text-xs font-semibold text-blue-700">
-                                            Pembahasan
-                                        </p>
-
-                                        <div
-                                            className="prose prose-sm mt-2 max-w-none text-slate-800"
-                                            dangerouslySetInnerHTML={{
-                                                __html: group.explanation || "",
-                                            }}
-                                        />
-                                    </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* <div className="mt-5 space-y-4">
+                        {/* <div className="mt-5 space-y-4">
                                 {group.items.map((item) => (
                                     <div
                                         key={item.flatIndex}
@@ -741,10 +590,10 @@ export default function StepFiveReview({
                                     </div>
                                 ))}
                             </div> */}
-                        </div>
-                    ))}
-                </div>
-            )}
+                    </div>
+                ))}
+            </div>
+            
             <div className="flex justify-end gap-3">
                 {/* <button
                     onClick={submitReview}

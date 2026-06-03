@@ -526,12 +526,12 @@ export default function StepThreeExploration({
                     {[
                         {
                             key: "missions",
-                            label: "Mission",
+                            label: "Misi",
                         },
 
                         {
                             key: "case-studies",
-                            label: "Studi Kasus",
+                            label: "Codelab",
                         },
 
                         {
