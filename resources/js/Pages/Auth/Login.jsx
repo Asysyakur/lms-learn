@@ -31,61 +31,64 @@ export default function Login({ status, canResetPassword }) {
 
             <div className="min-h-screen bg-[rgb(var(--color-background))] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
                 <div className="mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-6xl overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-200/70 ring-1 ring-[rgb(var(--color-border))] lg:grid-cols-[0.95fr_1.05fr]">
-                    <section className="relative hidden bg-[rgb(var(--color-primary))] p-10 text-white lg:flex lg:flex-col lg:justify-between">
-                        <Link
-                            href="/"
-                            className="inline-flex w-fit items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 font-black tracking-wide text-white ring-1 ring-white/15 transition hover:bg-white/15"
+                    <section className="relative hidden bg-[rgb(var(--color-primary))] p-10 text-white lg:flex lg:flex-col lg:justify-center">
+                        <div
+                            className="inline-flex w-fit flex-col items-start rounded-3xlpx-6 py-5 text-white"
                         >
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl text-[rgb(var(--color-primary))]">
-                                O
-                            </span>
-                            OOPCODE
-                        </Link>
+                            <h1 className="text-4xl font-black tracking-tight">
+                                OOP CODE
+                            </h1>
+
+                            <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.35em] text-yellow-200">
+                                Interactive Learning
+                            </p>
+                        </div>
 
                         <div className="space-y-8">
                             <div>
-                                <p className="text-sm font-bold uppercase tracking-[0.24em] text-yellow-200">
-                                    Interactive Learning
-                                </p>
-                                <h1 className="mt-4 max-w-md text-5xl font-black leading-tight">
-                                    Masuk dan lanjutkan progres belajarmu.
+                                <h1 className="mt-4 max-w-md text-4xl font-black leading-tight">
+                                    Media pembelajaran interaktif untuk memahami
+                                    Pemrograman Berorientasi Objek.
                                 </h1>
                                 <p className="mt-5 max-w-sm text-base leading-7 text-blue-100">
-                                    Materi, latihan, dan kuis OOP tersusun dalam
-                                    alur belajar yang mudah diikuti.
+                                    Belajar PBO secara bertahap melalui materi,
+                                    studi kasus, latihan, kuis, hingga
+                                    menyimpulkan hasil belajar.
                                 </p>
                             </div>
 
-                            <div className="grid gap-3">
+                            <div className="space-y-4">
                                 {[
-                                    "Pantau progres tiap pertemuan",
-                                    "Kerjakan latihan langsung di kelas",
-                                    "Review hasil belajar dengan cepat",
+                                    {
+                                        title: "Materi Bertahap",
+                                        desc: "Pelajari konsep PBO setiap pertemuan.",
+                                    },
+                                    {
+                                        title: "Studi Kasus Nyata",
+                                        desc: "Belajar konsep melalui contoh program.",
+                                    },
+                                    {
+                                        title: "Progres Belajar",
+                                        desc: "Review hasil belajar siswa.",
+                                    },
                                 ].map((item) => (
                                     <div
-                                        key={item}
-                                        className="flex items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm font-semibold text-white ring-1 ring-white/10"
+                                        key={item.title}
+                                        className="flex items-start gap-4 rounded-3xl bg-white/10 px-5 py-4 backdrop-blur-sm ring-1 ring-white/10"
                                     >
-                                        <span className="h-2.5 w-2.5 rounded-full bg-[rgb(var(--color-accent))]" />
-                                        {item}
+                                        <div className="mt-2 h-3 w-3 rounded-full bg-yellow-300 shadow-lg shadow-yellow-300/50" />
+
+                                        <div>
+                                            <h3 className="text-base font-bold text-white">
+                                                {item.title}
+                                            </h3>
+
+                                            <p className="mt-1 text-sm text-blue-100">
+                                                {item.desc}
+                                            </p>
+                                        </div>
                                     </div>
                                 ))}
-                            </div>
-                        </div>
-
-                        <div className="rounded-3xl bg-white/10 p-5 ring-1 ring-white/15">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgb(var(--color-accent))] text-slate-950">
-                                    <BookOpenIcon className="h-6 w-6" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-white">
-                                        Object Oriented Programming
-                                    </p>
-                                    <p className="mt-1 text-sm text-blue-100">
-                                        Belajar konsep sampai praktik.
-                                    </p>
-                                </div>
                             </div>
                         </div>
                     </section>
@@ -142,10 +145,7 @@ export default function Login({ status, canResetPassword }) {
                                             autoComplete="username"
                                             isFocused={true}
                                             onChange={(e) =>
-                                                setData(
-                                                    "email",
-                                                    e.target.value,
-                                                )
+                                                setData("email", e.target.value)
                                             }
                                             placeholder="nama@email.com"
                                         />

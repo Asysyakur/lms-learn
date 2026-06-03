@@ -623,11 +623,23 @@ class LearningController extends Controller
     {
         return [
             'code_language' => optional($exploration)->code_language,
-            'exploration_prompt' => optional($exploration)->exploration_prompt,
-            'materials' => optional($exploration)->materials ?? [],
-            'exploration_mode' => optional($exploration)->exploration_mode,
-            'case_studies' => optional($exploration)->case_studies ?? [],
-            'missions' => optional($exploration)->missions ?? [],
+
+            'exploration_prompt' =>
+            optional($exploration)->exploration_prompt,
+            'case_study_title' =>
+            optional($exploration)->case_study_title,
+            'case_study_description' =>
+            optional($exploration)->case_study_description,
+            'case_study_alert' =>
+            optional($exploration)->case_study_alert,
+            'materials' =>
+            optional($exploration)->materials ?? [],
+            'exploration_mode' =>
+            optional($exploration)->exploration_mode,
+            'case_studies' =>
+            optional($exploration)->case_studies ?? [],
+            'missions' =>
+            optional($exploration)->missions ?? [],
         ];
     }
 

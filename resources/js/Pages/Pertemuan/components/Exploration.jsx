@@ -676,23 +676,23 @@ export default function StepThreeExploration({
                         <div className="flex items-center justify-between">
                             <div>
                                 <h2 className="text-3xl font-bold text-slate-900">
-                                    Aktivitas Eksplorasi
+                                    {stepData.case_studies?.meta?.title ||
+                                        "Aktivitas Eksplorasi"}
                                 </h2>
-
                                 <p className="mt-2 text-slate-600">
-                                    Jalankan kedua program di bawah ini lalu
-                                    analisis output-nya.
+                                    {stepData.case_studies?.meta?.description}
                                 </p>
                             </div>
                         </div>
 
-                        <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-700">
-                            Jalankan masing-masing program dengan menekan tombol
-                            Run dan perhatikan hasil output pada bagian bawah.
-                        </div>
+                        {stepData.case_studies?.meta?.alert && (
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-700">
+                                {stepData.case_studies?.meta?.alert}
+                            </div>
+                        )}
 
                         <div className="space-y-8">
-                            {stepData.case_studies?.map((study, idx) => (
+                            {stepData.case_studies?.items?.map((study, idx) => (
                                 <div
                                     key={idx}
                                     className={
@@ -772,12 +772,6 @@ export default function StepThreeExploration({
                                 </div>
                             ))}
                         </div>
-
-                        <div className="rounded-2xl border border-yellow-200 bg-yellow-50 px-5 py-4 text-sm text-yellow-700">
-                            Setelah menjalankan program dan menganalisis
-                            hasilnya, lanjutkan ke bagian mission.
-                        </div>
-
                         <button
                             className="course-step-primary-button"
                             onClick={() => setActiveTab("missions")}
@@ -863,22 +857,34 @@ export default function StepThreeExploration({
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div
-                                                            className="
-                rounded-3xl
-                border
-                border-slate-200
-                bg-white
-                p-6
-                prose
-                max-w-none
-            "
-                                                            dangerouslySetInnerHTML={{
-                                                                __html:
-                                                                    mission.content ||
-                                                                    "",
-                                                            }}
-                                                        />
+                                                        <div className="2xl:max-h-[52rem] overflow-hidden">
+                                                            <div
+                                                                className="
+    h-full
+    max-h-[48rem]
+    overflow-y-auto
+    overflow-x-auto
+    rounded-3xl
+    border
+    border-slate-200
+    bg-white
+    p-6
+    prose
+    prose-slate
+    max-w-none
+    [&_img]:max-w-full
+    [&_table]:block
+    [&_table]:overflow-x-auto
+    [&_pre]:overflow-x-auto
+    [&_code]:break-words
+    "
+                                                                dangerouslySetInnerHTML={{
+                                                                    __html:
+                                                                        mission.content ||
+                                                                        "",
+                                                                }}
+                                                            />
+                                                        </div>
                                                     )}
 
                                                     {/* KANAN - PERTANYAAN */}
@@ -890,16 +896,13 @@ export default function StepThreeExploration({
 
                                                             <p className="mt-2 text-sm text-slate-600">
                                                                 Jawablah
-                                                                berdasarkan
-                                                                hasil
-                                                                pengamatanmu
-                                                                terhadap kedua
-                                                                gambar.
+                                                                pertanyaan
+                                                                dibawah ini!
                                                             </p>
                                                         </div>
 
                                                         <div className="2xl:max-h-[52rem] 2xl:overflow-hidden">
-                                                            <div className="space-y-5 2xl:max-h-[48rem] 2xl:overflow-y-auto">
+                                                            <div className="space-y-5 2xl:max-h-[40rem] 2xl:overflow-y-auto">
                                                                 {mission.questions?.map(
                                                                     (
                                                                         q,

@@ -20,10 +20,6 @@ export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" 
           {resourceLabel}
         </div>
 
-        <p className="course-detail-text">
-          {instructionText}
-        </p>
-
         <ResourcePreview url={resourceUrl} resourceType={stepData?.resource_type} />
       </div>
 

@@ -53,12 +53,12 @@ export default function StepFourPractice({
     return (
         <div className="course-detail-grid">
             <div className="course-detail-card space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                {/* <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
                     <ClipboardDocumentCheckIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
                     Latihan soal
-                </div>
+                </div> */}
 
-                <div className="space-y-5">
+                <div className="space-y-5 max-h-[620px] overflow-auto">
                     {practiceItems.map((item, index) => (
                         <div
                             key={item.id || index}

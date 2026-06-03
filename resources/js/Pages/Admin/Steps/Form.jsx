@@ -152,7 +152,14 @@ export default function StepForm({
             code_language: step?.exploration?.code_language ?? "javascript",
             exploration_prompt: step?.exploration?.exploration_prompt ?? "",
             exploration_mode: step?.exploration?.exploration_mode ?? "analysis",
-            case_studies: step?.exploration?.case_studies ?? [],
+            case_study_title:
+                step?.exploration?.case_studies?.meta?.title ??
+                "Aktivitas Eksplorasi",
+            case_study_description:
+                step?.exploration?.case_studies?.meta?.description ?? "",
+            case_study_alert:
+                step?.exploration?.case_studies?.meta?.alert ?? "",
+            case_studies: step?.exploration?.case_studies?.items ?? [],
             missions: step?.exploration?.missions ?? [],
             materials: Array.isArray(step?.exploration?.materials)
                 ? step.exploration.materials
@@ -604,11 +611,20 @@ export default function StepForm({
                     "materials",
                     JSON.stringify(submitData.materials),
                 );
-            if (submitData.case_studies)
-                formData.append(
-                    "case_studies",
-                    JSON.stringify(submitData.case_studies),
-                );
+            const formattedCaseStudies = {
+                meta: {
+                    title: submitData.case_study_title || "",
+                    description: submitData.case_study_description || "",
+                    alert: submitData.case_study_alert || "",
+                },
+
+                items: submitData.case_studies || [],
+            };
+
+            formData.append(
+                "case_studies",
+                JSON.stringify(formattedCaseStudies),
+            );
             if (submitData.missions)
                 formData.append(
                     "missions",
@@ -971,6 +987,58 @@ export default function StepForm({
                                         )
                                     }
                                 />
+                            </div>
+                            <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700">
+                                        Judul Studi Kasus
+                                    </label>
+
+                                    <input
+                                        className="mt-1 w-full rounded-lg border-slate-300"
+                                        value={data.case_study_title}
+                                        onChange={(e) =>
+                                            setData(
+                                                "case_study_title",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700">
+                                        Deskripsi Studi Kasus
+                                    </label>
+
+                                    <textarea
+                                        className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                        value={data.case_study_description}
+                                        onChange={(e) =>
+                                            setData(
+                                                "case_study_description",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700">
+                                        Alert / Petunjuk
+                                    </label>
+
+                                    <textarea
+                                        className="mt-1 min-h-20 w-full rounded-lg border-slate-300"
+                                        value={data.case_study_alert}
+                                        onChange={(e) =>
+                                            setData(
+                                                "case_study_alert",
+                                                e.target.value,
+                                            )
+                                        }
+                                    />
+                                </div>
                             </div>
                         </div>
 

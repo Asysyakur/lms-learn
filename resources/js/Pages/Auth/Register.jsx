@@ -1,28 +1,28 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import TextInput from '@/Components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+import InputError from "@/Components/InputError";
+import InputLabel from "@/Components/InputLabel";
+import TextInput from "@/Components/TextInput";
+import { Head, Link, useForm } from "@inertiajs/react";
 import {
     ArrowRightIcon,
     EnvelopeIcon,
     LockClosedIcon,
     SparklesIcon,
     UserIcon,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
+        name: "",
+        email: "",
+        password: "",
+        password_confirmation: "",
     });
 
     const submit = (e) => {
         e.preventDefault();
 
-        post(route('register'), {
-            onFinish: () => reset('password', 'password_confirmation'),
+        post(route("register"), {
+            onFinish: () => reset("password", "password_confirmation"),
         });
     };
 
@@ -77,13 +77,9 @@ export default function Register() {
                                             autoComplete="name"
                                             isFocused={true}
                                             onChange={(e) =>
-                                                setData(
-                                                    'name',
-                                                    e.target.value,
-                                                )
+                                                setData("name", e.target.value)
                                             }
                                             placeholder="Nama lengkap"
-                                            required
                                         />
                                     </div>
 
@@ -110,13 +106,9 @@ export default function Register() {
                                             className="block min-h-12 w-full rounded-2xl border-slate-200 bg-slate-50 pl-12 pr-4 text-sm font-semibold text-slate-800 transition placeholder:font-medium placeholder:text-slate-400 focus:border-[rgb(var(--color-primary))] focus:bg-white focus:ring-[rgb(37_99_235_/_0.18)]"
                                             autoComplete="username"
                                             onChange={(e) =>
-                                                setData(
-                                                    'email',
-                                                    e.target.value,
-                                                )
+                                                setData("email", e.target.value)
                                             }
                                             placeholder="nama@email.com"
-                                            required
                                         />
                                     </div>
 
@@ -144,12 +136,11 @@ export default function Register() {
                                             autoComplete="new-password"
                                             onChange={(e) =>
                                                 setData(
-                                                    'password',
+                                                    "password",
                                                     e.target.value,
                                                 )
                                             }
                                             placeholder="Minimal 8 karakter"
-                                            required
                                         />
                                     </div>
 
@@ -177,12 +168,11 @@ export default function Register() {
                                             autoComplete="new-password"
                                             onChange={(e) =>
                                                 setData(
-                                                    'password_confirmation',
+                                                    "password_confirmation",
                                                     e.target.value,
                                                 )
                                             }
                                             placeholder="Ulangi password"
-                                            required
                                         />
                                     </div>
 
@@ -197,14 +187,14 @@ export default function Register() {
                                     disabled={processing}
                                     className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-blue-500/25 transition hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-70"
                                 >
-                                    {processing ? 'Memproses...' : 'Daftar'}
+                                    {processing ? "Memproses..." : "Daftar"}
                                     <ArrowRightIcon className="h-4 w-4" />
                                 </button>
 
                                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-semibold text-slate-600">
-                                    Sudah punya akun?{' '}
+                                    Sudah punya akun?{" "}
                                     <Link
-                                        href={route('login')}
+                                        href={route("login")}
                                         className="font-black text-[rgb(var(--color-primary))] transition hover:text-[rgb(var(--color-primary-hover))]"
                                     >
                                         Login
@@ -237,7 +227,7 @@ export default function Register() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
-                                {['Materi', 'Latihan', 'Kuis'].map((item) => (
+                                {["Materi", "Latihan", "Kuis"].map((item) => (
                                     <div
                                         key={item}
                                         className="rounded-2xl bg-white/10 px-4 py-5 text-center ring-1 ring-white/10"

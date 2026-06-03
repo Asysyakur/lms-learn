@@ -37,7 +37,7 @@ class AuthenticatedSessionController extends Controller
 
         // Redirect admins to the admin dashboard, regular users to the learning homepage.
         $default = $user && isset($user->role) && $user->role === 'admin'
-            ? route('admin.dashboard')
+            ? route('admin.meetings.index')
             : route('beranda');
 
         // Respect an "intended" URL only when it's appropriate for the user.

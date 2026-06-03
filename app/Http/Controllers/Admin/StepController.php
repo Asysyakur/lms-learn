@@ -220,6 +220,16 @@ class StepController extends Controller
                     'code_language' =>
                     $request->code_language,
 
+                    'case_study_title' =>
+                    $request->case_study_title,
+
+                    'case_study_description' =>
+                    $request->case_study_description,
+
+                    'case_study_alert' =>
+                    $request->case_study_alert,
+
+
                     'exploration_prompt' =>
                     $request->exploration_prompt,
 

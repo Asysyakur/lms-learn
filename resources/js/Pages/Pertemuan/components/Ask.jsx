@@ -48,14 +48,7 @@ export default function StepTwoAsk({
     return (
         <div className="course-detail-grid">
             <div className="course-detail-card space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <ChatBubbleLeftRightIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
-                    {questions.length > 1
-                        ? "Jawab Pertanyaan-Pertanyaan"
-                        : "Tulis Pertanyaanmu"}
-                </div>
-
-                {/* Show intro text if old single question format */}
+                                {/* Show intro text if old single question format */}
                 {!questions.length && (
                     <p className="course-detail-text">
                         {stepData?.question_prompt ||

@@ -10,10 +10,10 @@ export default function StepSixReflection({
   return (
     <div className="course-detail-grid">
       <div className="course-detail-card space-y-4">
-        <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+        {/* <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
           <QuestionMarkCircleIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
           Pertanyaan refleksi
-        </div>
+        </div> */}
 
         <p className="course-detail-text font-semibold text-slate-900">
           {stepData?.reflection_question || "Apa hal paling penting yang kamu pelajari pada pertemuan ini?"}

@@ -18,7 +18,6 @@ export default function AdminSidebar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const menu = [
-        { name: "Dasbor", href: "/admin", icon: HomeIcon },
         { name: "Pertemuan", href: "/admin/meetings", icon: BookOpenIcon },
         {
             name: "Kuis",

@@ -70,7 +70,11 @@ Route::middleware(['auth', 'admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
-        Route::get('/', fn() => Inertia::render('Admin/Dashboard'))->name('dashboard');
+        // Route::get('/', fn() => Inertia::render('Admin/Dashboard'))->name('dashboard');
+
+        Route::get('/', function () {
+            return redirect()->route('admin.meetings.index');
+        });
 
         Route::resource('meetings', MeetingController::class)->except(['show']);
         Route::resource('quiz-sets', QuizSetController::class)->except(['show']);

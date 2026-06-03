@@ -161,7 +161,7 @@
     }
 
     .course-hero {
-        @apply grid gap-6 border-b border-[rgb(var(--color-border))] px-4 py-6 sm:px-6 md:grid-cols-[1.2fr_0.8fr] md:items-center;
+        @apply border-b border-[rgb(var(--color-border))] px-4 py-6 sm:px-6;
     }
 
     .course-breadcrumb {
@@ -173,7 +173,7 @@
     }
 
     .course-description {
-        @apply mt-3 max-w-xl text-sm leading-6 text-slate-600 sm:text-base;
+        @apply mt-3 w-full text-sm leading-7 text-slate-600 sm:text-base;
     }
 
     .course-progress-label {
