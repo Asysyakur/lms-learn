@@ -22,9 +22,7 @@ function CaseStudyCard({
     );
     const lineRef = useRef(null);
     const rawCode = String(
-        stepData.exploration_mode === "coding"
-            ? editableCode
-            : study.code || "",
+        study.type === "coding" ? editableCode : study.code || "",
     );
     const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
     const lineHeight = 22; // px per line (approx)
@@ -37,10 +35,7 @@ function CaseStudyCard({
             if (selectedLang === "python" || selectedLang === "php") {
                 const response = await window.axios.post(route("code.run"), {
                     language: selectedLang,
-                    code:
-                        stepData.exploration_mode === "coding"
-                            ? editableCode
-                            : study.code,
+                    code: study.type === "coding" ? editableCode : study.code,
                     inputs: [],
                 });
 
@@ -59,7 +54,7 @@ function CaseStudyCard({
                 try {
                     const result = Function(
                         '"use strict";\n' +
-                            (stepData.exploration_mode === "coding"
+                            (study.type === "coding"
                                 ? editableCode
                                 : study.code),
                     )();
@@ -120,7 +115,7 @@ function CaseStudyCard({
                 </div>
 
                 <div className="h-[32rem] max-w-full overflow-auto">
-                    <div className="flex w-max min-w-full font-mono text-sm">
+                    <div className="flex h-full min-w-full font-mono text-sm">
                         <div
                             ref={lineRef}
                             className="shrink-0 select-none bg-[#071623] px-3 py-3 text-slate-500 sm:px-4"
@@ -139,29 +134,54 @@ function CaseStudyCard({
                             ))}
                         </div>
 
-                        {stepData.exploration_mode === "coding" ? (
+                        {study.type === "coding" ? (
                             <textarea
                                 value={editableCode}
                                 onChange={(e) =>
-                                    setCodingAnswers?.((prev) => ({
+                                    setCodingAnswers((prev) => ({
                                         ...prev,
                                         [study.id || study.number]:
                                             e.target.value,
                                     }))
                                 }
                                 spellCheck={false}
+                                autoComplete="off"
+                                autoCorrect="off"
+                                autoCapitalize="off"
+                                style={{
+                                    backgroundColor: "#0B1120",
+                                    color: "white",
+                                    lineHeight: "22px",
+                                    tabSize: 4,
+                                }}
                                 className="
+            h-full
             min-h-[32rem]
             w-full
-            min-w-[36rem]
+            min-w-[700px]
+
             resize-none
             border-0
-            bg-[#0B1120]
-            p-5
+
+            px-5
+            py-4
+
             font-mono
             text-sm
-            text-slate-200
+            leading-[22px]
+
+            text-white
+            caret-white
+
             outline-none
+            focus:outline-none
+            focus:ring-0
+
+            overflow-auto
+            whitespace-pre
+
+            relative
+            z-10
         "
                             />
                         ) : (
@@ -210,7 +230,7 @@ function CaseStudyCard({
                         Reset
                     </button>
 
-                    {stepData.exploration_mode === "coding" && (
+                    {study.type === "coding" && (
                         <button
                             type="button"
                             onClick={async () => {
@@ -291,10 +311,11 @@ export default function StepThreeExploration({
 }) {
     const materials =
         stepData?.materials || stepData?.exploration_materials || [];
-    const [activeTab, setActiveTab] = useState("materials");
+    const [activeTab, setActiveTab] = useState("missions");
     const [codingAnswers, setCodingAnswers] = useState({});
     const [activeMaterialIndex, setActiveMaterialIndex] = useState(0);
     const [activeMissionIndex, setActiveMissionIndex] = useState(0);
+    const [activeCaseStudyIndex, setActiveCaseStudyIndex] = useState(0);
     const [missionAnswers, setMissionAnswers] = useState({});
     const [savingMission, setSavingMission] = useState(false);
     const materialRefs = useRef([]);
@@ -504,8 +525,8 @@ export default function StepThreeExploration({
                 <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
                     {[
                         {
-                            key: "materials",
-                            label: "Materi",
+                            key: "missions",
+                            label: "Mission",
                         },
 
                         {
@@ -514,8 +535,8 @@ export default function StepThreeExploration({
                         },
 
                         {
-                            key: "missions",
-                            label: "Mission",
+                            key: "materials",
+                            label: "Materi",
                         },
                     ].map((tab) => (
                         <button
@@ -692,47 +713,39 @@ export default function StepThreeExploration({
                         )}
 
                         <div className="space-y-8">
-                            {stepData.case_studies?.items?.map((study, idx) => (
-                                <div
-                                    key={idx}
-                                    className={
-                                        stepData.exploration_mode === "coding"
-                                            ? "grid gap-6"
-                                            : "grid gap-6 xl:grid-cols-2"
-                                    }
-                                >
-                                    {stepData.exploration_mode === "coding" ? (
-                                        <CaseStudyCard
-                                            study={{
-                                                ...study,
-                                                title:
-                                                    study.title ||
-                                                    "Coding Mandiri",
-                                                code:
-                                                    study.left_code ||
-                                                    study.code ||
-                                                    "",
-                                                number: 1,
-                                            }}
-                                            codingAnswers={codingAnswers}
-                                            setCodingAnswers={setCodingAnswers}
-                                            stepData={stepData}
-                                            savingMission={savingMission}
-                                            setSavingMission={setSavingMission}
-                                            setToastMessage={setToastMessage}
-                                            setToastIsError={setToastIsError}
-                                        />
-                                    ) : (
-                                        <>
+                            {stepData.case_studies?.items
+                                ?.slice(
+                                    activeCaseStudyIndex,
+                                    activeCaseStudyIndex + 1,
+                                )
+                                .map((study, idx) => (
+                                    <div
+                                        key={activeCaseStudyIndex}
+                                        className={
+                                            study.type === "coding"
+                                                ? "grid gap-6"
+                                                : "grid gap-6 xl:grid-cols-2"
+                                        }
+                                    >
+                                        {study.type === "coding" ? (
                                             <CaseStudyCard
                                                 study={{
                                                     ...study,
                                                     title:
-                                                        study.left_title ||
-                                                        "Program Prosedural",
-                                                    code: study.left_code,
-                                                    number: 1,
+                                                        study.title ||
+                                                        "Coding Mandiri",
+                                                    code:
+                                                        study.left_code ||
+                                                        study.code ||
+                                                        "",
+                                                    number:
+                                                        activeCaseStudyIndex +
+                                                        1,
                                                 }}
+                                                codingAnswers={codingAnswers}
+                                                setCodingAnswers={
+                                                    setCodingAnswers
+                                                }
                                                 stepData={stepData}
                                                 savingMission={savingMission}
                                                 setSavingMission={
@@ -745,38 +758,111 @@ export default function StepThreeExploration({
                                                     setToastIsError
                                                 }
                                             />
+                                        ) : (
+                                            <>
+                                                <CaseStudyCard
+                                                    study={{
+                                                        ...study,
+                                                        title:
+                                                            study.left_title ||
+                                                            "Program Prosedural",
+                                                        code: study.left_code,
+                                                        number: 1,
+                                                    }}
+                                                    stepData={stepData}
+                                                    savingMission={
+                                                        savingMission
+                                                    }
+                                                    setSavingMission={
+                                                        setSavingMission
+                                                    }
+                                                    setToastMessage={
+                                                        setToastMessage
+                                                    }
+                                                    setToastIsError={
+                                                        setToastIsError
+                                                    }
+                                                />
 
-                                            <CaseStudyCard
-                                                study={{
-                                                    ...study,
-                                                    title:
-                                                        study.right_title ||
-                                                        "Program Berorientasi Objek (PBO)",
-                                                    code: study.right_code,
-                                                    number: 2,
-                                                }}
-                                                stepData={stepData}
-                                                savingMission={savingMission}
-                                                setSavingMission={
-                                                    setSavingMission
-                                                }
-                                                setToastMessage={
-                                                    setToastMessage
-                                                }
-                                                setToastIsError={
-                                                    setToastIsError
-                                                }
-                                            />
-                                        </>
-                                    )}
+                                                <CaseStudyCard
+                                                    study={{
+                                                        ...study,
+                                                        title:
+                                                            study.right_title ||
+                                                            "Program PBO",
+                                                        code: study.right_code,
+                                                        number: 2,
+                                                    }}
+                                                    stepData={stepData}
+                                                    savingMission={
+                                                        savingMission
+                                                    }
+                                                    setSavingMission={
+                                                        setSavingMission
+                                                    }
+                                                    setToastMessage={
+                                                        setToastMessage
+                                                    }
+                                                    setToastIsError={
+                                                        setToastIsError
+                                                    }
+                                                />
+                                            </>
+                                        )}
+                                    </div>
+                                ))}
+
+                            {/* NAVIGATION */}
+                            <div className="flex flex-col items-stretch gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                                <button
+                                    type="button"
+                                    disabled={activeCaseStudyIndex === 0}
+                                    onClick={() =>
+                                        setActiveCaseStudyIndex((prev) =>
+                                            Math.max(prev - 1, 0),
+                                        )
+                                    }
+                                    className="course-step-secondary-button w-full disabled:opacity-40 sm:w-auto"
+                                >
+                                    Sebelumnya
+                                </button>
+
+                                <div className="text-center text-sm font-medium text-slate-500">
+                                    Studi Kasus {activeCaseStudyIndex + 1} dari{" "}
+                                    {stepData.case_studies?.items?.length || 0}
                                 </div>
-                            ))}
+
+                                {activeCaseStudyIndex <
+                                (stepData.case_studies?.items?.length || 0) -
+                                    1 ? (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setActiveCaseStudyIndex(
+                                                (prev) => prev + 1,
+                                            )
+                                        }
+                                        className="course-step-primary-button w-full sm:w-auto"
+                                    >
+                                        Berikutnya
+                                    </button>
+                                ) : (
+                                    <button
+                                        className="course-step-primary-button w-full sm:w-auto"
+                                        onClick={() =>
+                                            setActiveTab("materials")
+                                        }
+                                    >
+                                        Lanjut ke Materi
+                                    </button>
+                                )}
+                            </div>
                         </div>
                         <button
                             className="course-step-primary-button"
-                            onClick={() => setActiveTab("missions")}
+                            onClick={() => setActiveTab("materials")}
                         >
-                            Lanjut ke Mission
+                            Lanjut ke Materi
                         </button>
                     </div>
                 )}
@@ -1016,7 +1102,9 @@ export default function StepThreeExploration({
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={onNext}
+                                                onClick={() =>
+                                                    setActiveTab("case-studies")
+                                                }
                                                 className="course-step-primary-button w-full sm:w-auto"
                                             >
                                                 {nextLabel}
@@ -1056,20 +1144,16 @@ export default function StepThreeExploration({
                     )}
                     <div className="flex justify-end pt-6">
                         <button
-                            onClick={() => setActiveTab("case-studies")}
+                            onClick={onNext}
                             className="course-step-primary-button"
                         >
-                            Lanjut ke Studi Kasus
+                            Selesai Explorasi
                         </button>
                     </div>
                 </div>
             )}
             {/* Shared toast for client-side messages */}
-            </* eslint-disable-next-line react/jsx-no-undef */
-            Toast
-                message={toastMessage}
-                isError={toastIsError}
-            />
+            <Toast message={toastMessage} isError={toastIsError} />
         </div>
     );
 }

@@ -634,8 +634,6 @@ class LearningController extends Controller
             optional($exploration)->case_study_alert,
             'materials' =>
             optional($exploration)->materials ?? [],
-            'exploration_mode' =>
-            optional($exploration)->exploration_mode,
             'case_studies' =>
             optional($exploration)->case_studies ?? [],
             'missions' =>
@@ -746,14 +744,32 @@ class LearningController extends Controller
             }
         }
 
+        $explorationResponses =
+            MeetingStepExplorationResponse::query()
+            ->where('meeting_step_id', $explorationStep?->id)
+            ->where('user_id', Auth::id())
+            ->get();
+
+        $codingAnswers =
+            $explorationResponses
+            ->pluck('exploration_payload')
+            ->map(fn($payload) => $payload['coding_answers'] ?? [])
+            ->collapse()
+            ->toArray();
+
         return [
             'instruction_text' => optional($step->review)->instruction_text,
-            'review_items' => optional($step->review)->review_items ?? [],
+
+            'review_items' =>
+            optional($step->review)->review_items ?? [],
+
             'practice_items' => $practiceItems,
+
             'case_studies' =>
             optional($explorationStep?->exploration)->case_studies ?? [],
-            'exploration_mode' =>
-            optional($explorationStep?->exploration)->exploration_mode,
+
+            // TAMBAHAN
+            'coding_answers' => $codingAnswers,
         ];
     }
 

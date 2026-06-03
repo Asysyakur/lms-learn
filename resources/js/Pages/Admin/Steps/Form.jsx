@@ -151,7 +151,6 @@ export default function StepForm({
             questions: [],
             code_language: step?.exploration?.code_language ?? "javascript",
             exploration_prompt: step?.exploration?.exploration_prompt ?? "",
-            exploration_mode: step?.exploration?.exploration_mode ?? "analysis",
             case_study_title:
                 step?.exploration?.case_studies?.meta?.title ??
                 "Aktivitas Eksplorasi",
@@ -589,7 +588,6 @@ export default function StepForm({
                 "title",
                 "description",
                 "instruction_text",
-                "exploration_mode",
                 "code_language",
                 "exploration_prompt",
                 "resource_type",
@@ -963,32 +961,6 @@ export default function StepForm({
                                 />
                             </div>
                             <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700">
-                                        Mode Studi Kasus
-                                    </label>
-
-                                    <select
-                                        className="mt-1 w-full rounded-lg border-slate-300"
-                                        value={
-                                            data.exploration_mode || "analysis"
-                                        }
-                                        onChange={(e) =>
-                                            setData(
-                                                "exploration_mode",
-                                                e.target.value,
-                                            )
-                                        }
-                                    >
-                                        <option value="analysis">
-                                            Analisis Code Guru
-                                        </option>
-
-                                        <option value="coding">
-                                            Coding Mandiri
-                                        </option>
-                                    </select>
-                                </div>
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">
                                         Judul Studi Kasus
@@ -1557,12 +1529,14 @@ export default function StepForm({
                                         setData("case_studies", [
                                             ...(data.case_studies || []),
                                             {
+                                                type: "analysis",
                                                 title: "",
                                                 language: "javascript",
                                                 left_title: "Code A",
                                                 right_title: "Code B",
                                                 left_code: "",
                                                 right_code: "",
+                                                starter_code: "",
                                                 expected_output: "",
                                             },
                                         ]);
@@ -1615,6 +1589,38 @@ export default function StepForm({
                                         }}
                                     />
 
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                            Tipe Studi Kasus
+                                        </label>
+
+                                        <select
+                                            className="w-full rounded-lg border-slate-300"
+                                            value={study.type || "analysis"}
+                                            onChange={(e) => {
+                                                const updated = [
+                                                    ...data.case_studies,
+                                                ];
+
+                                                updated[sidx].type =
+                                                    e.target.value;
+
+                                                setData(
+                                                    "case_studies",
+                                                    updated,
+                                                );
+                                            }}
+                                        >
+                                            <option value="analysis">
+                                                Analisis Code
+                                            </option>
+
+                                            <option value="coding">
+                                                Coding Mandiri
+                                            </option>
+                                        </select>
+                                    </div>
+
                                     <select
                                         className="w-full rounded-lg border-slate-300"
                                         value={study.language}
@@ -1637,7 +1643,7 @@ export default function StepForm({
                                         ))}
                                     </select>
 
-                                    {data.exploration_mode === "coding" ? (
+                                    {study.type === "coding" ? (
                                         <div className="space-y-2">
                                             <textarea
                                                 className="min-h-52 w-full rounded-lg border-slate-300 font-mono"

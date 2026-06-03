@@ -5,19 +5,19 @@ import {
 } from "@heroicons/react/24/solid";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-function ReadonlyCaseStudyCard({ study, codingAnswers, stepData }) {
+function ReadonlyCaseStudyCard({ study, codingAnswers, stepData, studyIndex }) {
+    const editableCode = Array.isArray(codingAnswers)
+        ? (codingAnswers[studyIndex] ?? study.code ?? "")
+        : (study.code ?? "");
     const [output, setOutput] = useState("");
     const [loading, setLoading] = useState(false);
-    const editableCode =
-        codingAnswers?.[study.id || study.number] ?? study.code ?? "";
+
     const [selectedLang, setSelectedLang] = useState(
         study.language || "python",
     );
     const lineRef = useRef(null);
     const rawCode = String(
-        stepData?.exploration_mode === "coding"
-            ? editableCode
-            : study.code || "",
+        study.type === "coding" ? editableCode : study.code || "",
     );
     const codeLines = rawCode.replace(/\r/g, "").trimEnd().split("\n");
     const lineHeight = 22; // px per line (approx)
@@ -30,10 +30,7 @@ function ReadonlyCaseStudyCard({ study, codingAnswers, stepData }) {
             if (selectedLang === "python" || selectedLang === "php") {
                 const response = await window.axios.post(route("code.run"), {
                     language: selectedLang,
-                    code:
-                        stepData?.exploration_mode === "coding"
-                            ? editableCode
-                            : study.code,
+                    code: study.type === "coding" ? editableCode : study.code,
                     inputs: [],
                 });
 
@@ -52,7 +49,7 @@ function ReadonlyCaseStudyCard({ study, codingAnswers, stepData }) {
                 try {
                     const result = Function(
                         '"use strict";\n' +
-                            (stepData?.exploration_mode === "coding"
+                            (study.type === "coding"
                                 ? editableCode
                                 : study.code),
                     )();
@@ -81,6 +78,7 @@ function ReadonlyCaseStudyCard({ study, codingAnswers, stepData }) {
             setLoading(false);
         }
     };
+
     return (
         <div className="w-full min-w-0 max-w-full rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <div className="mb-4 flex min-w-0 items-start gap-3">
@@ -284,9 +282,10 @@ export default function StepFiveReview({
     nextLabel = "Lanjut",
 }) {
     const [answers, setAnswers] = useState([]);
-    const codingAnswers = savedExplorationResponses?.[0]?.coding_answers || {};
+    const codingAnswers = stepData?.coding_answers || {};
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [activeTab, setActiveTab] = useState("analysis");
+    const [currentStudyIndex, setCurrentStudyIndex] = useState(0);
     useEffect(() => {
         const savedItems = savedResponse?.response_payload?.items ?? [];
 
@@ -297,6 +296,14 @@ export default function StepFiveReview({
         () => groupReviewItems(stepData, answers),
         [stepData, answers],
     );
+
+    const studies = stepData?.case_studies?.items || [];
+    const currentStudy = studies[currentStudyIndex];
+
+    const codingStudyIndex =
+        studies
+            .slice(0, currentStudyIndex + 1)
+            .filter((study) => study.type === "coding").length - 1;
 
     const handleAnswerChange = (index, field, value) => {
         const updated = [...answers];
@@ -393,6 +400,9 @@ export default function StepFiveReview({
         }
     };
 
+    console.log("codingAnswers", codingAnswers);
+    console.log("currentStudy", currentStudy);
+
     return (
         <div className="space-y-6">
             <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
@@ -440,66 +450,111 @@ export default function StepFiveReview({
                         Jalankan kembali program untuk melakukan pembuktian.
                     </p>
 
-                    <div className="mt-6 space-y-6">
-                        {stepData?.exploration_mode === "analysis"
-                            ? stepData?.case_studies?.map((study, idx) => (
-                                  <div
-                                      key={idx}
-                                      className="grid grid-cols-1 gap-6 xl:grid-cols-2"
-                                  >
-                                      {/* LEFT */}
-                                      <ReadonlyCaseStudyCard
-                                          study={{
-                                              title:
-                                                  study.left_title ||
-                                                  "Program Prosedural",
+                    <div className="mt-6">
+                        {currentStudy && (
+                            <>
+                                {/* HEADER */}
+                                <div className="mb-5 flex items-center justify-between">
+                                    <div>
+                                        <p className="text-sm text-slate-500">
+                                            Studi Kasus {currentStudyIndex + 1}{" "}
+                                            dari {studies.length}
+                                        </p>
 
-                                              code: study.left_code || "",
+                                        <h3 className="text-xl font-bold text-slate-900">
+                                            {currentStudy.title ||
+                                                `Studi Kasus ${currentStudyIndex + 1}`}
+                                        </h3>
+                                    </div>
 
-                                              number: 1,
+                                    <div className="flex gap-2">
+                                        <button
+                                            disabled={currentStudyIndex === 0}
+                                            onClick={() =>
+                                                setCurrentStudyIndex(
+                                                    (prev) => prev - 1,
+                                                )
+                                            }
+                                            className="course-step-secondary-button disabled:opacity-40"
+                                        >
+                                            ← Prev
+                                        </button>
 
-                                              language:
-                                                  study.language || "python",
-                                          }}
-                                          stepData={stepData}
-                                      />
+                                        <button
+                                            disabled={
+                                                currentStudyIndex ===
+                                                studies.length - 1
+                                            }
+                                            onClick={() =>
+                                                setCurrentStudyIndex(
+                                                    (prev) => prev + 1,
+                                                )
+                                            }
+                                            className="course-step-primary-button disabled:opacity-40"
+                                        >
+                                            Next →
+                                        </button>
+                                    </div>
+                                </div>
 
-                                      {/* RIGHT */}
-                                      <ReadonlyCaseStudyCard
-                                          study={{
-                                              title:
-                                                  study.right_title ||
-                                                  "Program Berorientasi Objek",
+                                {/* CONTENT */}
+                                {currentStudy.type === "analysis" ? (
+                                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                                        <ReadonlyCaseStudyCard
+                                            study={{
+                                                ...currentStudy,
+                                                title:
+                                                    currentStudy.left_title ||
+                                                    "Program Prosedural",
+                                                code:
+                                                    currentStudy.left_code ||
+                                                    "",
+                                                number: 1,
+                                                type: "analysis",
+                                                language:
+                                                    currentStudy.language ||
+                                                    "python",
+                                            }}
+                                            stepData={stepData}
+                                        />
 
-                                              code: study.right_code || "",
+                                        <ReadonlyCaseStudyCard
+                                            study={{
+                                                ...currentStudy,
+                                                title:
+                                                    currentStudy.right_title ||
+                                                    "Program Berorientasi Objek",
+                                                code:
+                                                    currentStudy.right_code ||
+                                                    "",
+                                                number: 2,
+                                                type: "analysis",
+                                                language:
+                                                    currentStudy.language ||
+                                                    "python",
+                                            }}
+                                            stepData={stepData}
+                                        />
+                                    </div>
+                                ) : (
+                                    <ReadonlyCaseStudyCard
+                                        studyIndex={codingStudyIndex}
+                                        study={{
+                                            ...currentStudy,
+                                            title: "Coding Siswa",
 
-                                              number: 2,
-
-                                              language:
-                                                  study.language || "python",
-                                          }}
-                                          stepData={stepData}
-                                      />
-                                  </div>
-                              ))
-                            : stepData?.case_studies?.map((study, idx) => (
-                                  <ReadonlyCaseStudyCard
-                                      key={idx}
-                                      study={{
-                                          title: "Coding Siswa",
-
-                                          code:
-                                              codingAnswers[
-                                                  study.id || study.number
-                                              ] || "",
-
-                                          number: idx + 1,
-
-                                          language: study.language || "python",
-                                      }}
-                                      stepData={stepData}
-                                  />
-                              ))}
+                                            number: currentStudyIndex + 1,
+                                            type: "coding",
+                                            language:
+                                                currentStudy.language ||
+                                                "python",
+                                        }}
+                                        codingAnswers={codingAnswers}
+                                        stepData={stepData}
+                                    />
+                                )}
+                            </>
+                        )}
                     </div>
                 </div>
             )}

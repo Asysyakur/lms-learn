@@ -214,9 +214,6 @@ class StepController extends Controller
 
                 $explorationData = [
 
-                    'exploration_mode' =>
-                    $request->exploration_mode,
-
                     'code_language' =>
                     $request->code_language,
 
