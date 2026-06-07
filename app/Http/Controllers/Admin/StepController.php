@@ -602,20 +602,38 @@ class StepController extends Controller
             )
             ->merge(
                 $student->practiceResponses->map(function ($item) {
-                    $questions = $item->step ? $item->step->practices : collect();
-                    $payloadItems = $item->practice_payload['items'] ?? [];
+                    $questions = $item->step ? $item->step->practices->values() : collect();
+                    $payloadItems = collect($item->practice_payload['items'] ?? [])
+                        ->values();
 
-                    $formattedItems = $questions->map(function ($practice, $index) use ($payloadItems) {
-                        $matchedAnswer = collect($payloadItems)
-                            ->first(fn($payloadItem, $payloadIndex) => $payloadIndex === $index);
+                    $formattedItems = $payloadItems->isNotEmpty()
+                        ? $payloadItems->map(function ($payloadItem, $index) use ($questions) {
+                            $matchedQuestion = $questions->first(function ($practice, $practiceIndex) use ($payloadItem, $index) {
+                                return (string) $practice->id === (string) ($payloadItem['id'] ?? '')
+                                    || $practiceIndex === $index;
+                            });
 
-                        return [
-                            'question' => $practice->assessment_question,
-                            'mode' => $practice->assessment_mode,
-                            'options' => $practice->assessment_options,
-                            'answer' => $matchedAnswer['answer'] ?? '-',
-                        ];
-                    });
+                            return [
+                                'question' => optional($matchedQuestion)->assessment_question
+                                    ?? $payloadItem['question']
+                                    ?? '-',
+                                'mode' => optional($matchedQuestion)->assessment_mode
+                                    ?? $payloadItem['mode']
+                                    ?? 'quiz',
+                                'options' => optional($matchedQuestion)->assessment_options
+                                    ?? $payloadItem['options']
+                                    ?? [],
+                                'answer' => $payloadItem['answer'] ?? '-',
+                            ];
+                        })
+                        : $questions->map(function ($practice, $index) {
+                            return [
+                                'question' => $practice->assessment_question,
+                                'mode' => $practice->assessment_mode,
+                                'options' => $practice->assessment_options,
+                                'answer' => '-',
+                            ];
+                        });
 
                     return [
                         'response_id' => $item->id, // TAMBAHAN
@@ -698,7 +716,15 @@ class StepController extends Controller
             )
             ->merge(
                 $student->reviewResponses->map(function ($item) use ($practiceSteps) {
-                    $payloadItems = collect($item->review_payload['items'] ?? []);
+                    $payloadItems = collect($item->review_payload['items'] ?? [])
+                        ->values()
+                        ->map(function ($reviewItem, $reviewIndex) {
+                            $reviewItem['practice_index'] = (int) (
+                                $reviewItem['practice_index'] ?? $reviewIndex
+                            );
+
+                            return $reviewItem;
+                        });
                     $practiceStep = $item->step
                         ? $practiceSteps
                         ->filter(function ($candidate) use ($item) {
@@ -714,7 +740,7 @@ class StepController extends Controller
                     $groups = $practiceItems->isNotEmpty()
                         ? $practiceItems->map(function ($practice, $index) use ($payloadItems) {
                             $items = $payloadItems
-                                ->filter(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0) === $index)
+                                ->filter(fn($reviewItem) => (int) $reviewItem['practice_index'] === $index)
                                 ->values();
 
                             return [
@@ -735,7 +761,7 @@ class StepController extends Controller
                             ];
                         })
                         : $payloadItems
-                        ->groupBy(fn($reviewItem) => (int) ($reviewItem['practice_index'] ?? 0))
+                        ->groupBy(fn($reviewItem) => (int) $reviewItem['practice_index'])
                         ->map(function ($items, $practiceIndex) {
                             $first = $items->first() ?? [];
 

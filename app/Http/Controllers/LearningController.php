@@ -427,6 +427,9 @@ class LearningController extends Controller
             $items = collect($payload['items'] ?? [])
                 ->values()
                 ->map(function ($item, $index) use ($request) {
+
+                    $itemId = $item['id'] ?? $index;
+
                     $evidenceFile = $request->file("response_payload.items.$index.evidence");
                     $evidence = $item['evidence'] ?? null;
 
@@ -436,6 +439,7 @@ class LearningController extends Controller
                     }
 
                     return [
+
                         'practice_index' => (int) ($item['practice_index'] ?? $index),
                         'title' => $item['title'] ?? '',
                         'question' => $item['question'] ?? '',
@@ -617,10 +621,15 @@ class LearningController extends Controller
         // Map review responses
         foreach ($reviewResponses as $response) {
             $stepNumber = $response->meetingStep->step_number;
-            $responses[$stepNumber] = [
-                'response_text' => $response->review_text,
-                'response_payload' => $response->review_payload,
-            ];
+            if (!isset($responses[$stepNumber])) {
+                $responses[$stepNumber] = [];
+            }
+
+            $responses[$stepNumber]['response_text'] =
+                $response->review_text;
+
+            $responses[$stepNumber]['response_payload'] =
+                $response->review_payload;
         }
 
         // Map reflection responses
@@ -755,33 +764,56 @@ class LearningController extends Controller
 
             if ($practiceStep && $practiceStep->practices) {
 
-                $practiceItems = $practiceStep->practices
-                    ->values()
-                    ->map(function ($practice, $index) {
+                $practiceItems = collect($practiceStep->practices)
+                    ->flatMap(function ($practice, $practiceIndex) {
 
-                        return [
-                            'practice_index' => $index,
+                        $items = is_array($practice->assessment_items)
+                            ? $practice->assessment_items
+                            : [];
+
+                        if (count($items)) {
+                            return collect($items)->map(function ($item, $itemIndex) use ($practiceIndex) {
+
+                                $globalIndex = ($practiceIndex + $itemIndex);
+
+                                return [
+                                    'id' => $item['id'] ?? ('practice-' . $practiceIndex . '-' . $itemIndex),
+
+                                    'practice_index' => $globalIndex,
+
+                                    'title' => ($item['mode'] ?? 'essay') === 'essay'
+                                        ? 'Essay'
+                                        : 'Latihan Soal ' . ($globalIndex + 1),
+
+                                    'question' => $item['question'] ?? '',
+
+                                    'options' => $item['options'] ?? [],
+
+                                    'correct_answer' => $item['correct_answer'] ?? null,
+
+                                    'explanation' => $item['explanation'] ?? '',
+                                ];
+                            });
+                        }
+
+                        return [[
+                            'id' => 'practice-' . ($practiceIndex + 1),
+
+                            'practice_index' => $practiceIndex,
 
                             'title' =>
                             $practice->assessment_mode === 'essay'
                                 ? 'Essay'
-                                : 'Latihan Soal ' . ($index + 1),
+                                : 'Latihan Soal ' . ($practiceIndex + 1),
 
-                            'question' =>
-                            $practice->assessment_question,
+                            'question' => $practice->assessment_question,
 
-                            // TAMBAHAN
-                            'options' =>
-                            $practice->assessment_options ?? [],
+                            'options' => $practice->assessment_options ?? [],
 
-                            // TAMBAHAN
-                            'correct_answer' =>
-                            $practice->assessment_correct_answer,
+                            'correct_answer' => $practice->assessment_correct_answer,
 
-                            // TAMBAHAN
-                            'explanation' =>
-                            $practice->assessment_explanation,
-                        ];
+                            'explanation' => $practice->assessment_explanation,
+                        ]];
                     })
                     ->values()
                     ->all();

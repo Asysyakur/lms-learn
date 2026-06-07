@@ -33,6 +33,12 @@ function extractPracticeAnswer(response) {
     return response?.response_text || "";
 }
 
+function normalizeText(value) {
+    return String(value ?? "")
+        .trim()
+        .replace(/\s+/g, " ");
+}
+
 export default function StepPage({
     id,
     meeting,
@@ -123,13 +129,15 @@ export default function StepPage({
             : currentStep?.assessment_items?.length
               ? currentStep.assessment_items
               : [
-                    {
+                {
                         id: "practice-1",
                         mode: currentStep?.assessment_mode || "quiz",
                         question: currentStep?.assessment_question || "",
                         options: currentStep?.assessment_options || [],
-                    },
-                ];
+                },
+            ];
+    const savedPracticeItems =
+        savedPracticeResponse?.response_payload?.items || [];
     const savedPracticeAnswers = savedPracticeResponse?.response_payload?.items
         ? savedPracticeResponse.response_payload.items.reduce((acc, item) => {
               acc[item.id] = item.answer || "";
@@ -476,13 +484,35 @@ export default function StepPage({
                         stepNumber={currentStep.step}
                         stepData={currentStep}
                         savedResponse={savedCurrentResponse}
-                        practiceResponses={practiceItems.map((item, index) => ({
-                            practice_index: item.practice_index ?? index,
-                            question: item.question,
-                            answer:
-                                savedPracticeResponse?.response_payload
-                                    ?.items?.[index]?.answer || "",
-                        }))}
+                        practiceResponses={practiceItems.map((item, index) => {
+                            const normalizedQuestion = normalizeText(
+                                item.question,
+                            );
+                            const matched =
+                                savedPracticeItems.find((savedItem, savedIndex) => {
+                                    const savedQuestion = normalizeText(
+                                        savedItem.question,
+                                    );
+                                    const savedPracticeIndex = Number(
+                                        savedItem.practice_index ?? savedIndex,
+                                    );
+
+                                    return (
+                                        savedItem.id === item.id ||
+                                        savedPracticeIndex === index ||
+                                        savedQuestion === normalizedQuestion
+                                    );
+                                }) || savedPracticeItems[index];
+
+                            return {
+                                practice_index: item.practice_index ?? index,
+                                question: item.question,
+                                answer:
+                                    matched?.answer ??
+                                    matched?.student_answer ??
+                                    "",
+                            };
+                        })}
                         nextLabel={nextStepTitle()}
                         onNext={goNext}
                     />
