@@ -85,17 +85,19 @@ class QuizQuestionController extends Controller
     private function normalizeOptions($options): array
     {
         if (is_array($options)) {
-            return array_values(array_filter($options));
+            return $options;
         }
 
-        if (! is_string($options)) {
+        if (!is_string($options)) {
             return [];
         }
 
-        return collect(preg_split('/\r\n|\r|\n/', $options))
-            ->map(fn ($option) => trim($option))
-            ->filter()
-            ->values()
-            ->all();
+        $decoded = json_decode($options, true);
+
+        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+            return $decoded;
+        }
+
+        return [];
     }
 }

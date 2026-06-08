@@ -84,6 +84,34 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
         );
     };
 
+    function cleanHtml(html) {
+        if (!html) return "";
+
+        let cleaned = html;
+
+        // kalau string json
+        try {
+            cleaned = JSON.parse(cleaned);
+        } catch (e) {}
+
+        // hapus quote pembungkus
+        if (
+            typeof cleaned === "string" &&
+            cleaned.startsWith('"') &&
+            cleaned.endsWith('"')
+        ) {
+            cleaned = cleaned.slice(1, -1);
+        }
+
+        // unescape
+        cleaned = cleaned
+            .replace(/\\"/g, '"')
+            .replace(/\\n/g, "\n")
+            .replace(/\\\\/g, "\\");
+
+        return cleaned;
+    }
+
     return (
         <AppLayout title={quizSet.title} showTitleBar={false}>
             <div className="mx-auto min-h-screen overflow-y-auto bg-white/90 p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
@@ -103,7 +131,9 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                         </p>
                     </div>
 
-                    <div className={`inline-flex max-w-full items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm ${submitted ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-600"}`}>
+                    <div
+                        className={`inline-flex max-w-full items-center gap-2 self-start rounded-full border px-3 py-1.5 text-sm font-semibold shadow-sm ${submitted ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-red-200 bg-red-50 text-red-600"}`}
+                    >
                         {submitted ? (
                             <CheckCircleIcon className="h-5 w-5" />
                         ) : (
@@ -170,7 +200,27 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
 
                                 <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-visible pt-2 lg:overflow-hidden">
                                     <div className="rounded-2xl bg-slate-50 p-3 text-sm leading-6 text-slate-800 shadow-inner">
-                                        {currentQuestion.question_text}
+                                        <div
+                                            className="
+prose
+prose-sm
+max-w-none
+[&_pre]:bg-[#0B1120]
+[&_pre]:text-white
+[&_pre]:p-4
+[&_pre]:rounded-xl
+[&_pre]:overflow-x-auto
+[&_code]:font-mono
+[&_code]:text-sm
+[&_pre_code]:bg-transparent
+[&_pre_code]:text-inherit
+"
+                                            dangerouslySetInnerHTML={{
+                                                __html: cleanHtml(
+                                                    currentQuestion.question_text,
+                                                ),
+                                            }}
+                                        />
                                     </div>
 
                                     <div className="space-y-2 lg:overflow-y-auto">
@@ -212,9 +262,31 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                                                         <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-black text-slate-700">
                                                             {label}
                                                         </span>
-                                                        <span className="flex-1 leading-6">
-                                                            {option}
-                                                        </span>
+                                                        <div
+                                                            className="
+                                                                prose
+                                                                prose-sm
+                                                                max-w-none
+                                                                flex-1
+
+                                                                [&_pre]:bg-[#0B1120]
+                                                                [&_pre]:text-white
+                                                                [&_pre]:p-4
+                                                                [&_pre]:rounded-xl
+                                                                [&_pre]:overflow-x-auto
+
+                                                                [&_code]:font-mono
+                                                                [&_code]:text-sm
+
+                                                                [&_pre_code]:bg-transparent
+                                                                [&_pre_code]:text-inherit
+                                                                "
+                                                            dangerouslySetInnerHTML={{
+                                                                __html: cleanHtml(
+                                                                    option,
+                                                                ),
+                                                            }}
+                                                        />
                                                     </label>
                                                 );
                                             },
@@ -248,7 +320,6 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                                 </div>
                             </div>
                         ) : null}
-
                     </section>
 
                     <aside className="flex min-h-0 flex-col gap-3 overflow-visible rounded-[1.4rem] border border-slate-200 bg-white p-3 shadow-sm lg:overflow-hidden">
@@ -302,7 +373,8 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                                         Nilai kamu: {attempt.percentage}
                                     </p>
                                     <p className="mt-1 text-sm font-semibold text-slate-600">
-                                        Benar {attempt.score}/{attempt.total_questions} soal
+                                        Benar {attempt.score}/
+                                        {attempt.total_questions} soal
                                     </p>
                                 </div>
                                 <p className="mt-2 text-xs leading-5 text-slate-600">
@@ -323,9 +395,17 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                                 type="button"
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[rgb(var(--color-primary))] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-40"
                                 onClick={submitQuiz}
-                                disabled={submitted || processing || totalQuestions === 0}
+                                disabled={
+                                    submitted ||
+                                    processing ||
+                                    totalQuestions === 0
+                                }
                             >
-                                {processing ? "Menyimpan..." : submitted ? "Sudah Submit" : "Submit Jawaban"}
+                                {processing
+                                    ? "Menyimpan..."
+                                    : submitted
+                                      ? "Sudah Submit"
+                                      : "Submit Jawaban"}
                             </button>
                         </div>
                     </aside>

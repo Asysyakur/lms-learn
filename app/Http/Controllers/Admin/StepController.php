@@ -379,18 +379,24 @@ class StepController extends Controller
         return $missionFiles;
     }
 
-    private function normalizeOptions($options): ?array
+    private function normalizeOptions($options): array
     {
         if (is_array($options)) {
-            return array_values(array_filter($options));
+            return $options;
         }
 
-        if (! is_string($options) || trim($options) === '') {
-            return null;
+        if (!is_string($options)) {
+            return [];
         }
 
-        return collect(preg_split('/\r\n|\r|\n/', $options))
-            ->map(fn($option) => trim($option))
+        $decoded = json_decode($options, true);
+
+        if (!is_array($decoded)) {
+            return [];
+        }
+
+        return collect($decoded)
+            ->map(fn($item) => is_string($item) ? trim($item) : '')
             ->filter()
             ->values()
             ->all();
