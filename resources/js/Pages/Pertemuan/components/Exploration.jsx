@@ -3,6 +3,10 @@ import { BeakerIcon, DocumentIcon } from "@heroicons/react/24/solid";
 import { Toast } from "@/Components/FlashToast";
 import { codeToHtml } from "shiki";
 
+const getStudyKey = (study, index = 0) => {
+    return study.id ?? study.number ?? index;
+};
+
 function CaseStudyCard({
     study,
     codingAnswers,
@@ -16,7 +20,7 @@ function CaseStudyCard({
     const [output, setOutput] = useState("");
     const [loading, setLoading] = useState(false);
     const editableCode =
-        codingAnswers?.[study.id || study.number] ?? study.code ?? "";
+        codingAnswers?.[getStudyKey(study)] ?? study.code ?? "";
     const [selectedLang, setSelectedLang] = useState(
         study.language || "python",
     );
@@ -140,8 +144,7 @@ function CaseStudyCard({
                                 onChange={(e) =>
                                     setCodingAnswers((prev) => ({
                                         ...prev,
-                                        [study.id || study.number]:
-                                            e.target.value,
+                                        [getStudyKey(study)]: e.target.value,
                                     }))
                                 }
                                 spellCheck={false}
@@ -328,18 +331,26 @@ export default function StepThreeExploration({
         const answers = {};
 
         saved.exploration_responses.forEach((missionResponse) => {
-            const missionIndex = Number(missionResponse.mission_index);
+            const payload = missionResponse.response_payload || {};
 
-            missionResponse.response_payload?.items?.forEach((item, qidx) => {
-                answers[`${missionIndex}-${qidx}`] = item.answer || "";
-            });
-        });
+            // LOAD MISSION
+            if (payload.items) {
+                const missionIndex = Number(missionResponse.mission_index);
 
-        saved.exploration_responses.forEach((response) => {
-            if (response.response_payload?.coding_answers) {
-                setCodingAnswers(response.response_payload.coding_answers);
+                payload.items.forEach((item, qidx) => {
+                    answers[`${missionIndex}-${qidx}`] = item.answer || "";
+                });
+            }
+
+            // LOAD CODING
+            if (payload.coding_answers) {
+                setCodingAnswers((prev) => ({
+                    ...prev,
+                    ...payload.coding_answers,
+                }));
             }
         });
+
         setMissionAnswers(answers);
     }, [savedResponses, stepData.step]);
 
@@ -410,6 +421,16 @@ export default function StepThreeExploration({
 
         highlightAllCodes();
     }, [materials]);
+
+    const isMissionAnswered = (missionIndex) => {
+        const mission = stepData.missions?.[missionIndex];
+
+        if (!mission) return false;
+
+        return mission.questions.every((_, qidx) => {
+            return missionAnswers[`${missionIndex}-${qidx}`]?.trim();
+        });
+    };
 
     useEffect(() => {
         const updateActiveMaterial = () => {
@@ -738,9 +759,6 @@ export default function StepThreeExploration({
                                                         study.left_code ||
                                                         study.code ||
                                                         "",
-                                                    number:
-                                                        activeCaseStudyIndex +
-                                                        1,
                                                 }}
                                                 codingAnswers={codingAnswers}
                                                 setCodingAnswers={
@@ -1091,20 +1109,22 @@ export default function StepThreeExploration({
                                         stepData.missions.length - 1 ? (
                                             <button
                                                 type="button"
-                                                onClick={() =>
+                                                onClick={() => {
                                                     setActiveMissionIndex(
                                                         (prev) => prev + 1,
-                                                    )
-                                                }
+                                                    );
+                                                }}
                                                 className="course-step-primary-button w-full sm:w-auto"
                                             >
                                                 Mission Berikutnya
                                             </button>
                                         ) : (
                                             <button
-                                                onClick={() =>
-                                                    setActiveTab("case-studies")
-                                                }
+                                                onClick={() => {
+                                                    setActiveTab(
+                                                        "case-studies",
+                                                    );
+                                                }}
                                                 className="course-step-primary-button w-full sm:w-auto"
                                             >
                                                 {nextLabel}
@@ -1144,7 +1164,81 @@ export default function StepThreeExploration({
                     )}
                     <div className="flex justify-end pt-6">
                         <button
-                            onClick={onNext}
+                            onClick={() => {
+                                /*
+        |--------------------------------------------------------------------------
+        | VALIDASI SEMUA MISSION
+        |--------------------------------------------------------------------------
+        */
+
+                                const allMissionAnswered =
+                                    stepData.missions?.every(
+                                        (mission, missionIndex) => {
+                                            return mission.questions.every(
+                                                (_, qidx) => {
+                                                    return missionAnswers[
+                                                        `${missionIndex}-${qidx}`
+                                                    ]?.trim();
+                                                },
+                                            );
+                                        },
+                                    );
+
+                                /*
+        |--------------------------------------------------------------------------
+        | VALIDASI CODING
+        |--------------------------------------------------------------------------
+        */
+
+                                const codingStudies =
+                                    stepData.case_studies?.items?.filter(
+                                        (item) => item.type === "coding",
+                                    ) || [];
+
+                                const allCodingAnswered = codingStudies.every(
+                                    (study, index) => {
+                                        return codingAnswers[
+                                            getStudyKey(study, index)
+                                        ]?.trim();
+                                    },
+                                );
+
+                                /*
+        |--------------------------------------------------------------------------
+        | BLOCK NEXT STEP
+        |--------------------------------------------------------------------------
+        */
+
+                                if (!allMissionAnswered) {
+                                    setToastMessage(
+                                        "Semua mission harus diisi terlebih dahulu.",
+                                    );
+
+                                    setToastIsError(true);
+
+                                    setTimeout(() => {
+                                        setToastMessage(null);
+                                    }, 3000);
+
+                                    return;
+                                }
+
+                                if (!allCodingAnswered) {
+                                    setToastMessage(
+                                        "Semua coding harus diisi terlebih dahulu.",
+                                    );
+
+                                    setToastIsError(true);
+
+                                    setTimeout(() => {
+                                        setToastMessage(null);
+                                    }, 3000);
+
+                                    return;
+                                }
+
+                                onNext();
+                            }}
                             className="course-step-primary-button"
                         >
                             Selesai Explorasi

@@ -141,7 +141,11 @@ export default function Sidebar({
                                     {steps.map((item) => {
                                         const isActive =
                                             item.step === activeStep;
-                                        const isDone = item.step < activeStep;
+                                        const isDone =
+                                            completedSteps >= item.step;
+                                        const isUnlocked =
+                                            item.step === 1 ||
+                                            completedSteps >= item.step - 1;
                                         const StepIcon =
                                             item.icon ||
                                             stepIcons[item.step - 1] ||
@@ -160,6 +164,10 @@ export default function Sidebar({
                                                 className={`mobile-nav-link ${
                                                     isActive
                                                         ? "mobile-nav-link-active"
+                                                        : ""
+                                                } ${
+                                                    !isUnlocked
+                                                        ? "opacity-50 pointer-events-none"
                                                         : ""
                                                 }`}
                                             >
@@ -245,7 +253,10 @@ export default function Sidebar({
                                             const isActive =
                                                 item.step === activeStep;
                                             const isDone =
-                                                item.step < activeStep;
+                                                completedSteps >= item.step;
+                                            const isUnlocked =
+                                                item.step === 1 ||
+                                                completedSteps >= item.step - 1;
                                             const StepIcon =
                                                 item.icon ||
                                                 stepIcons[item.step - 1] ||
@@ -261,7 +272,15 @@ export default function Sidebar({
                                                             step: item.step,
                                                         },
                                                     )}
-                                                    className={`course-sidebar-step ${isActive ? "course-sidebar-step-active" : ""}`}
+                                                    className={`course-sidebar-step ${
+                                                        isActive
+                                                            ? "course-sidebar-step-active"
+                                                            : ""
+                                                    } ${
+                                                        !isUnlocked
+                                                            ? "opacity-50 pointer-events-none"
+                                                            : ""
+                                                    }`}
                                                 >
                                                     <span
                                                         className={`course-sidebar-step-icon ${isActive ? "course-sidebar-step-icon-active" : ""}`}
@@ -287,7 +306,9 @@ export default function Sidebar({
                                                                 ? "Selesai"
                                                                 : isActive
                                                                   ? "Sedang dibuka"
-                                                                  : "Belum dibuka"}
+                                                                  : isUnlocked
+                                                                    ? "Belum dibuka"
+                                                                    : "Terkunci"}
                                                         </span>
                                                     </span>
                                                 </Link>

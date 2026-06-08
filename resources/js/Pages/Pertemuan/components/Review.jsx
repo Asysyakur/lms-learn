@@ -1,7 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
 function getPracticeAnswerMap(practiceResponses) {
     const map = {};
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORMAT BARU
+    |--------------------------------------------------------------------------
+    */
+
+    if (practiceResponses?.response_payload?.items) {
+        practiceResponses.response_payload.items.forEach((item, index) => {
+            map[index] = item.answer ?? "";
+        });
+
+        return map;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FALLBACK FORMAT LAMA
+    |--------------------------------------------------------------------------
+    */
 
     (practiceResponses || []).forEach((item) => {
         map[item.practice_index] = item.answer ?? "";
@@ -167,9 +188,29 @@ export default function StepFiveReview({
 
             <div className="flex justify-end gap-3">
                 <button
-                    onClick={onNext}
-                    className="course-step-secondary-button"
                     type="button"
+                    className="course-step-secondary-button"
+                    onClick={async () => {
+                        try {
+                            await window.axios.post(
+                                route("pertemuan.step.response", {
+                                    id: stepData.meeting_id,
+                                    step: stepData.step,
+                                }),
+                                {
+                                    response_text: "review completed",
+
+                                    response_payload: {
+                                        items: answers,
+                                    },
+                                },
+                            );
+
+                            onNext();
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }}
                 >
                     {nextLabel}
                 </button>

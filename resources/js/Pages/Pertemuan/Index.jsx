@@ -49,39 +49,58 @@ export default function Pertemuan({
                 </div>
 
                 <div className="course-step-list">
-                    {meetingSteps.map((step) => (
-                        <div
-                            key={step.step || step.title}
-                            className="course-step-card"
-                        >
-                            <div className="course-step-left">
-                                <div
-                                    className={`course-step-icon ${step.accent ? "course-step-icon-blue" : ""}`}
-                                >
-                                    <step.icon className="h-6 w-6" />
-                                </div>
+                    {meetingSteps.map((step) => {
+                        const isUnlocked =
+                            step.step === 1 || completedSteps >= step.step - 1;
 
-                                <div>
-                                    <h3 className="course-step-title">
-                                        {step.step}. {step.title}
-                                    </h3>
-                                    <p className="course-step-desc">
-                                        {step.desc}
-                                    </p>
-                                </div>
-                            </div>
+                        const isCompleted = completedSteps >= step.step;
 
-                            <Link
-                                className="btn-primary course-step-button"
-                                href={route("pertemuan.step", {
-                                    id,
-                                    step: step.step,
-                                })}
+                        return (
+                            <div
+                                key={step.step || step.title}
+                                className="course-step-card"
                             >
-                                Mulai
-                            </Link>
-                        </div>
-                    ))}
+                                <div className="course-step-left">
+                                    <div
+                                        className={`course-step-icon ${step.accent ? "course-step-icon-blue" : ""}`}
+                                    >
+                                        <step.icon className="h-6 w-6" />
+                                    </div>
+
+                                    <div>
+                                        <h3 className="course-step-title">
+                                            {step.step}. {step.title}
+                                        </h3>
+                                        <p className="course-step-desc">
+                                            {step.desc}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <Link
+                                    className={`btn-primary course-step-button ${
+                                        !isUnlocked
+                                            ? "opacity-50 pointer-events-none"
+                                            : ""
+                                    }`}
+                                    href={
+                                        isUnlocked
+                                            ? route("pertemuan.step", {
+                                                  id,
+                                                  step: step.step,
+                                              })
+                                            : "#"
+                                    }
+                                >
+                                    {isCompleted
+                                        ? "Ulangi"
+                                        : isUnlocked
+                                          ? "Mulai"
+                                          : "Terkunci"}
+                                </Link>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
         </AppLayout>

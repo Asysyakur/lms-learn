@@ -218,6 +218,30 @@ class LearningController extends Controller
         })->values();
 
         $activeStep = $meeting->steps->firstWhere('step_number', $step);
+        $currentCompletion = MeetingStepCompletion::query()
+            ->where('meeting_id', $meeting->id)
+            ->where('user_id', Auth::id())
+            ->pluck('step_number')
+            ->toArray();
+
+        // CEK STEP SEBELUMNYA
+        if ($step > 1) {
+
+            $previousStep = $step - 1;
+
+            if (!in_array($previousStep, $currentCompletion)) {
+
+                return redirect()
+                    ->route('pertemuan.step', [
+                        'id' => $meeting->id,
+                        'step' => $previousStep,
+                    ])
+                    ->with(
+                        'error',
+                        'Selesaikan step sebelumnya terlebih dahulu.'
+                    );
+            }
+        }
         $completedSteps = $this->completedStepCount($meeting);
         $savedResponses = $this->savedResponsesForMeeting($meeting);
 
@@ -370,8 +394,9 @@ class LearningController extends Controller
                     'meeting_step_id' => $meetingStep->id,
                     'user_id' => $userId,
 
-                    'mission_index' =>
-                    $responsePayload['mission_index'] ?? 0,
+                    'mission_index' => ($responsePayload['type'] ?? null) === 'coding'
+                        ? -1
+                        : ($responsePayload['mission_index'] ?? 0),
                 ],
                 [
                     'meeting_id' => $meeting->id,
@@ -471,7 +496,15 @@ class LearningController extends Controller
             );
         }
 
-        $this->markStepCompleted($meeting->id, $step);
+        $isCompleted = $this->isStepCompleted(
+            $meetingStep,
+            $responsePayload,
+            $responseText
+        );
+
+        if ($isCompleted) {
+            $this->markStepCompleted($meeting->id, $step);
+        }
 
         return back();
     }
@@ -880,5 +913,113 @@ class LearningController extends Controller
             'percentage' => (float) $attempt->percentage,
             'submitted_at' => optional($attempt->submitted_at)->toISOString(),
         ];
+    }
+
+    private function isStepCompleted(
+        MeetingStep $meetingStep,
+        $responsePayload,
+        $responseText
+    ): bool {
+
+        switch ($meetingStep->step_type) {
+
+            case 'observe':
+                return true;
+
+            case 'ask':
+
+                $items = $responsePayload['items'] ?? [];
+
+                if (!count($items)) {
+                    return false;
+                }
+
+                foreach ($items as $item) {
+                    if (empty(trim($item['answer'] ?? ''))) {
+                        return false;
+                    }
+                }
+
+                return true;
+
+            case 'exploration':
+
+                $items =
+                    $responsePayload['items'] ?? [];
+
+                $codingAnswers =
+                    $responsePayload['coding_answers'] ?? [];
+
+                /*
+    |--------------------------------------------------------------------------
+    | VALIDASI MISSION
+    |--------------------------------------------------------------------------
+    */
+
+                if (
+                    isset($responsePayload['mission_title'])
+                ) {
+
+                    // mission wajib ada isi
+                    if (!count($items)) {
+                        return false;
+                    }
+
+                    foreach ($items as $item) {
+
+                        if (
+                            empty(trim($item['answer'] ?? ''))
+                        ) {
+                            return false;
+                        }
+                    }
+                }
+
+                /*
+    |--------------------------------------------------------------------------
+    | VALIDASI CODING
+    |--------------------------------------------------------------------------
+    */
+
+                if (
+                    isset($responsePayload['type']) &&
+                    $responsePayload['type'] === 'coding'
+                ) {
+
+                    if (!count($codingAnswers)) {
+                        return false;
+                    }
+
+                    foreach ($codingAnswers as $code) {
+
+                        if (empty(trim($code))) {
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+
+            case 'practice':
+
+                $items = $responsePayload['items'] ?? [];
+
+                foreach ($items as $item) {
+                    if (empty(trim($item['answer'] ?? ''))) {
+                        return false;
+                    }
+                }
+
+                return true;
+
+            case 'review':
+                return true;
+
+            case 'reflection':
+                return !empty(trim($responseText));
+
+            default:
+                return false;
+        }
     }
 }
