@@ -102,6 +102,9 @@ export default function StepForm({
                   id: item.id || `practice-${index + 1}`,
                   mode: item.assessment_mode || "quiz",
                   question: item.assessment_question || "",
+                  question_type: item.question_type || "text",
+                  question_language: item.question_language || "javascript",
+                  option_type: item.option_type || "text",
                   options: Array.isArray(item.assessment_options)
                       ? item.assessment_options
                       : typeof item.assessment_options === "string"
@@ -117,8 +120,15 @@ export default function StepForm({
                   {
                       id: "practice-1",
                       mode: "quiz",
+
+                      question_type: "text",
+                      question_language: "javascript",
+
+                      option_type: "text",
+
                       question: "",
                       options: [""],
+
                       correct_answer: 0,
                       explanation: "",
                   },
@@ -521,10 +531,21 @@ export default function StepForm({
             const cleanedPracticeItems = practiceItems
                 .map((item, index) => ({
                     id: item.id || `practice-${index + 1}`,
+
                     mode: item.mode || "quiz",
+
+                    question_type: item.question_type || "text",
+
+                    question_language: item.question_language || "javascript",
+
+                    option_type: item.option_type || "text",
+
                     question: item.question || "",
+
                     options: item.options || [],
+
                     correct_answer: item.correct_answer ?? 0,
+
                     explanation: item.explanation || "",
                 }))
                 .filter((item) => item.question.trim() !== "");
@@ -2204,6 +2225,9 @@ export default function StepForm({
                                         {
                                             id: `practice-${Date.now()}`,
                                             mode: "quiz",
+                                            question_type: "text",
+                                            question_language: "javascript",
+                                            option_type: "text",
                                             question: "",
                                             options: [""],
                                             correct_answer: 0,
@@ -2264,12 +2288,75 @@ export default function StepForm({
                                             <option value="essay">Essay</option>
                                         </select>
 
+                                        <div className="mt-3">
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Tipe Pertanyaan
+                                            </label>
+
+                                            <select
+                                                className="mt-1 w-full rounded-lg border-slate-300"
+                                                value={item.question_type}
+                                                onChange={(e) => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].question_type =
+                                                        e.target.value;
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                <option value="text">
+                                                    Teks
+                                                </option>
+                                                <option value="code">
+                                                    Code
+                                                </option>
+                                            </select>
+                                        </div>
+
                                         <label className="mt-4 block text-sm font-semibold text-slate-700">
                                             Pertanyaan
                                         </label>
+
+                                        {item.question_type === "code" && (
+                                            <select
+                                                className="mb-2 w-full rounded-lg border-slate-300"
+                                                value={
+                                                    item.question_language ||
+                                                    "javascript"
+                                                }
+                                                onChange={(e) => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[
+                                                        index
+                                                    ].question_language =
+                                                        e.target.value;
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                <option value="javascript">
+                                                    Javascript
+                                                </option>
+                                                <option value="python">
+                                                    Python
+                                                </option>
+                                                <option value="php">PHP</option>
+                                                <option value="html">
+                                                    HTML
+                                                </option>
+                                                <option value="css">CSS</option>
+                                            </select>
+                                        )}
+
                                         <textarea
-                                            className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                            value={item.question || ""}
+                                            className={`w-full rounded-lg border-slate-300 ${
+                                                item.question_type === "code"
+                                                    ? "min-h-60 font-mono"
+                                                    : "min-h-40"
+                                            }`}
+                                            value={item.question}
                                             onChange={(e) => {
                                                 const next = [...practiceItems];
                                                 next[index].question =
@@ -2277,6 +2364,24 @@ export default function StepForm({
                                                 setPracticeItems(next);
                                             }}
                                         />
+
+                                        <div className="mt-3 rounded-lg border p-4">
+                                            {item.question_type === "code" ? (
+                                                <CodePreview
+                                                    code={item.question}
+                                                    language={
+                                                        item.question_language ||
+                                                        "javascript"
+                                                    }
+                                                />
+                                            ) : (
+                                                <div
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: item.question,
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
                                     </div>
                                     {item.mode === "quiz" && (
                                         <div className="mt-4 space-y-3">
@@ -2300,6 +2405,37 @@ export default function StepForm({
                                                 >
                                                     + Tambah Pilihan
                                                 </button>
+                                            </div>
+
+                                            <div className="mb-3">
+                                                <label className="block text-sm font-semibold text-slate-700">
+                                                    Tipe Pilihan Jawaban
+                                                </label>
+
+                                                <select
+                                                    className="mt-1 w-full rounded-lg border-slate-300"
+                                                    value={
+                                                        item.option_type ||
+                                                        "text"
+                                                    }
+                                                    onChange={(e) => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].option_type =
+                                                            e.target.value;
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    <option value="text">
+                                                        Teks
+                                                    </option>
+                                                    <option value="code">
+                                                        Code
+                                                    </option>
+                                                </select>
                                             </div>
 
                                             {item.options.map(
@@ -2334,25 +2470,77 @@ export default function StepForm({
                                                             }}
                                                         />
 
-                                                        <input
-                                                            className="flex-1 rounded-lg border-slate-300"
-                                                            placeholder={`Pilihan ${optIdx + 1}`}
-                                                            value={option}
-                                                            onChange={(e) => {
-                                                                const next = [
-                                                                    ...practiceItems,
-                                                                ];
-                                                                next[
-                                                                    index
-                                                                ].options[
-                                                                    optIdx
-                                                                ] =
-                                                                    e.target.value;
-                                                                setPracticeItems(
-                                                                    next,
-                                                                );
-                                                            }}
-                                                        />
+                                                        <div className="flex-1">
+                                                            {item.option_type ===
+                                                            "code" ? (
+                                                                <>
+                                                                    <textarea
+                                                                        className="w-full rounded-lg border-slate-300 font-mono min-h-24"
+                                                                        value={
+                                                                            option
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) => {
+                                                                            const next =
+                                                                                [
+                                                                                    ...practiceItems,
+                                                                                ];
+
+                                                                            next[
+                                                                                index
+                                                                            ].options[
+                                                                                optIdx
+                                                                            ] =
+                                                                                e.target.value;
+
+                                                                            setPracticeItems(
+                                                                                next,
+                                                                            );
+                                                                        }}
+                                                                    />
+
+                                                                    {option && (
+                                                                        <CodePreview
+                                                                            code={
+                                                                                option
+                                                                            }
+                                                                            language={
+                                                                                item.question_language ||
+                                                                                "javascript"
+                                                                            }
+                                                                        />
+                                                                    )}
+                                                                </>
+                                                            ) : (
+                                                                <input
+                                                                    className="w-full rounded-lg border-slate-300"
+                                                                    placeholder={`Pilihan ${optIdx + 1}`}
+                                                                    value={
+                                                                        option
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        const next =
+                                                                            [
+                                                                                ...practiceItems,
+                                                                            ];
+
+                                                                        next[
+                                                                            index
+                                                                        ].options[
+                                                                            optIdx
+                                                                        ] =
+                                                                            e.target.value;
+
+                                                                        setPracticeItems(
+                                                                            next,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </div>
 
                                                         {item.options.length >
                                                             1 && (

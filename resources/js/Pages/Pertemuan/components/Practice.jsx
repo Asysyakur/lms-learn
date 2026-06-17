@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { usePage } from "@inertiajs/react";
+import { codeToHtml } from "shiki";
 
 export default function StepFourPractice({
     stepData,
@@ -16,6 +17,34 @@ export default function StepFourPractice({
 }) {
     const [isSaved, setIsSaved] = useState(stepData?.is_answer_locked || false);
     const { flash } = usePage().props;
+
+    function CodePreview({ code, language }) {
+        const [html, setHtml] = useState("");
+
+        useEffect(() => {
+            const run = async () => {
+                try {
+                    const result = await codeToHtml(code || "", {
+                        lang: language || "javascript",
+                        theme: "one-dark-pro",
+                    });
+
+                    setHtml(result);
+                } catch {
+                    setHtml(`<pre>${code}</pre>`);
+                }
+            };
+
+            run();
+        }, [code, language]);
+
+        return (
+            <div
+                dangerouslySetInnerHTML={{ __html: html }}
+                className="overflow-auto rounded-lg"
+            />
+        );
+    }
 
     useEffect(() => {
         setIsSaved(stepData?.is_answer_locked || false);
@@ -33,7 +62,7 @@ export default function StepFourPractice({
                       options: [],
                   },
               ];
-
+    console.log(practiceItems);
     const updateAnswer = (item, value) => {
         if (setAssessmentAnswers) {
             setAssessmentAnswers((prev) => ({
@@ -97,11 +126,21 @@ export default function StepFourPractice({
                                         : "Pilihan ganda"}
                                 </span>
                             </div>
-
-                            <p className="course-detail-text font-semibold text-slate-900">
-                                {item.question || "Tulis jawabanmu:"}
-                            </p>
-
+                            {item.question_type === "code" ? (
+                                <CodePreview
+                                    code={item.question}
+                                    language={
+                                        item.question_language || "javascript"
+                                    }
+                                />
+                            ) : (
+                                <div
+                                    className="course-detail-text font-semibold text-slate-900"
+                                    dangerouslySetInnerHTML={{
+                                        __html: item.question || "",
+                                    }}
+                                />
+                            )}
                             {item.mode === "essay" ? (
                                 <textarea
                                     disabled={isSaved}
@@ -117,9 +156,9 @@ export default function StepFourPractice({
                                     {(item.options?.length
                                         ? item.options
                                         : []
-                                    ).map((option) => (
+                                    ).map((option, optIndex) => (
                                         <label
-                                            key={option}
+                                            key={option || optIndex}
                                             className="course-option"
                                         >
                                             <input
@@ -137,7 +176,19 @@ export default function StepFourPractice({
                                                     )
                                                 }
                                             />
-                                            <span>{option}</span>
+                                            <span className="flex-1">
+                                                {item.option_type === "code" ? (
+                                                    <CodePreview
+                                                        code={option}
+                                                        language={
+                                                            item.question_language ||
+                                                            "javascript"
+                                                        }
+                                                    />
+                                                ) : (
+                                                    option
+                                                )}
+                                            </span>
                                         </label>
                                     ))}
                                 </div>

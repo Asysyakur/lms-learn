@@ -19,6 +19,9 @@ class MeetingStepPractice extends Model
         'assessment_items',
         'assessment_explanation',
         'assessment_correct_answer',
+        'question_type',
+        'question_language',
+        'option_type',
     ];
 
     protected function casts(): array

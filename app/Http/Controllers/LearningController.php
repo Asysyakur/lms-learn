@@ -743,6 +743,13 @@ class LearningController extends Controller
 
                         'mode' => $item['mode'] ?? $practice->assessment_mode ?? 'essay',
 
+                        'question_type' => $item['question_type'] ?? 'text',
+
+                        'option_type' => $item['option_type'] ?? 'text',
+
+                        'question_language' =>
+                        $item['question_language'] ?? 'javascript',
+
                         'question' => $item['question'] ?? $practice->assessment_question,
 
                         'options' => $item['options'] ?? $practice->assessment_options ?? [],
@@ -758,6 +765,12 @@ class LearningController extends Controller
                 'id' => 'practice-' . ($index + 1),
 
                 'mode' => $practice->assessment_mode ?: 'essay',
+
+                'question_type' => $practice->question_type ?? 'text',
+
+                'option_type' => $practice->option_type ?? 'text',
+
+                'question_language' => $practice->question_language ?? 'javascript',
 
                 'question' => $practice->assessment_question,
 

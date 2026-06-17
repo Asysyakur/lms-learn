@@ -263,9 +263,24 @@ class StepController extends Controller
                     $step->practices()->create([
                         'assessment_mode' => $item['mode'],
                         'assessment_question' => $item['question'],
-                        'assessment_options' => $item['options'],
-                        'assessment_explanation' => $item['explanation'],
-                        'assessment_correct_answer' => (int) ($item['correct_answer'] ?? 0),
+
+                        'question_type' =>
+                        $item['question_type'],
+
+                        'question_language' =>
+                        $item['question_language'],
+
+                        'option_type' =>
+                        $item['option_type'],
+
+                        'assessment_options' =>
+                        $item['options'],
+
+                        'assessment_explanation' =>
+                        $item['explanation'],
+
+                        'assessment_correct_answer' =>
+                        (int) ($item['correct_answer'] ?? 0),
                     ]);
                 }
 
@@ -422,10 +437,28 @@ class StepController extends Controller
                 return [
                     'id' => $item['id'] ?? ('practices-' . ($index + 1)),
                     'mode' => $mode,
+
                     'question' => trim($item['question']),
-                    'options' => $mode === 'quiz' ? $this->normalizeOptions($item['options'] ?? null) : [],
-                    'correct_answer' => (int) ($item['correct_answer'] ?? 0),
-                    'explanation' => $item['explanation'] ?? '',
+
+                    'question_type' =>
+                    $item['question_type'] ?? 'text',
+
+                    'question_language' =>
+                    $item['question_language'] ?? 'javascript',
+
+                    'option_type' =>
+                    $item['option_type'] ?? 'text',
+
+                    'options' => $mode === 'quiz'
+                        ? $this->normalizeOptions($item['options'] ?? null)
+                        : [],
+
+                    'correct_answer' =>
+                    (int) ($item['correct_answer'] ?? 0),
+
+                    'explanation' =>
+                    $item['explanation'] ?? '',
+
                     'order' => $index + 1,
                 ];
             })
