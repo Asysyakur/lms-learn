@@ -19,11 +19,10 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
 
           script: |
-            git config --global --add safe.directory /www/wwwroot/lms-iot
-
             cd /www/wwwroot/oopcode.site
 
-            git pull origin main
+            git fetch origin
+            git reset --hard origin/main
 
             composer install --no-dev --optimize-autoloader
 
