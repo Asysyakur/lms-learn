@@ -37,7 +37,7 @@ export default function AdminSidebar() {
                         className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide transition hover:opacity-80"
                     >
                         <BookOpenIcon className="h-6 w-6" />
-                        <span>OOpCode ADmin Ci/Cd</span>
+                        <span>OOPCODE ADMIN</span>
                     </Link>
 
                     <button
@@ -108,7 +108,7 @@ export default function AdminSidebar() {
                             className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide transition hover:opacity-80"
                         >
                             <BookOpenIcon className="h-6 w-6" />
-                            <span>OOpCode ADmin Ci/Cd</span>
+                            <span>OOPCODE ADMIN</span>
                         </Link>
 
                         <div className="space-y-2">
