@@ -247,7 +247,7 @@ export default function Register() {
                             </p>
                             <p className="mt-2 text-sm leading-6 text-blue-100">
                                 Platform belajar interaktif untuk membantu
-                                mahasiswa memahami konsep OOP secara bertahap.
+                                siswa memahami konsep OOP secara bertahap.
                             </p>
                         </div>
                     </section>

@@ -35,7 +35,7 @@ export default function Beranda({ title = "Pembelajaran OOP", meetings = [] }) {
                         className="flex min-h-[470px] flex-col overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))]"
                     >
                         <div className="px-4 py-3 text-center text-lg font-bold text-white bg-[rgb(var(--color-primary))]">
-                            Day {item.meeting_number || item.id}
+                            Materi {item.meeting_number || item.id}
                         </div>
 
                         <div className="flex flex-1 flex-col p-4">
