@@ -18,6 +18,10 @@ export default function StepFourPractice({
     const [isSaved, setIsSaved] = useState(stepData?.is_answer_locked || false);
     const { flash } = usePage().props;
 
+    function cleanHtml(html) {
+        return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
+    }
+
     function CodePreview({ code, language }) {
         const [html, setHtml] = useState("");
 
@@ -137,7 +141,7 @@ export default function StepFourPractice({
                                 <div
                                     className="course-detail-text font-semibold text-slate-900"
                                     dangerouslySetInnerHTML={{
-                                        __html: item.question || "",
+                                        __html: cleanHtml(item.question),
                                     }}
                                 />
                             )}

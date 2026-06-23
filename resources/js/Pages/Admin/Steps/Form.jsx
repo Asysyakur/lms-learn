@@ -2,6 +2,13 @@ import { useEffect, useState, useRef } from "react";
 import { Link, useForm } from "@inertiajs/react";
 import { codeToHtml } from "shiki";
 
+function cleanHtml(html) {
+    return html.replace(
+        /body\s*\{[\s\S]*?\}/gi,
+        ""
+    );
+}
+
 function CodePreview({ code, language }) {
     const [html, setHtml] = useState("");
 
@@ -2377,7 +2384,7 @@ export default function StepForm({
                                             ) : (
                                                 <div
                                                     dangerouslySetInnerHTML={{
-                                                        __html: item.question,
+                                                        __html: cleanHtml(item.question),
                                                     }}
                                                 />
                                             )}

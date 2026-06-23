@@ -90,6 +90,10 @@ function groupReviewItems(stepData, reviewItems) {
     }));
 }
 
+function cleanHtml(html) {
+    return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
+
 function CodePreview({ code, language }) {
     const [html, setHtml] = useState("");
 
@@ -165,7 +169,7 @@ export default function StepFiveReview({
                                 <div
                                     className="course-detail-text font-semibold text-slate-900"
                                     dangerouslySetInnerHTML={{
-                                        __html: group.question || "",
+                                        __html: cleanHtml(group.question),
                                     }}
                                 />
                             )}
@@ -200,7 +204,7 @@ export default function StepFiveReview({
                                         <div
                                             className="course-detail-text font-semibold text-slate-900"
                                             dangerouslySetInnerHTML={{
-                                                __html:
+                                                __html: cleanHtml(
                                                     Array.isArray(group.options)
                                                         ? (group.options[
                                                               practiceAnswerMap[
@@ -209,11 +213,14 @@ export default function StepFiveReview({
                                                               ]
                                                           ] ??
                                                               practiceAnswerMap[
-                                                                  group.practice_index
+                                                                  group
+                                                                      .practice_index
                                                               ])
                                                         : practiceAnswerMap[
-                                                              group.practice_index
-                                                          ] || "",
+                                                              group
+                                                                  .practice_index
+                                                          ],
+                                                ),
                                             }}
                                         />
                                     )}
@@ -238,10 +245,11 @@ export default function StepFiveReview({
                                         <div
                                             className="course-detail-text font-semibold text-slate-900"
                                             dangerouslySetInnerHTML={{
-                                                __html:
+                                                __html: cleanHtml(
                                                     group.options[
                                                         group.correct_answer
                                                     ] || "",
+                                                ),
                                             }}
                                         />
                                     )}
