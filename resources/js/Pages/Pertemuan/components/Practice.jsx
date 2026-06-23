@@ -213,7 +213,7 @@ export default function StepFourPractice({
             <div className="course-detail-card space-y-3">
                 <h3 className="course-detail-title">Jawaban Tersimpan</h3>
 
-                <div className="space-y-3">
+                <div className="space-y-3 min-h-[100px] max-h-[500px] overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
                     {practiceItems.map((item, index) => (
                         <div
                             key={item.id || index}

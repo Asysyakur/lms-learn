@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { codeToHtml } from "shiki";
 
 function getPracticeAnswerMap(practiceResponses) {
     const map = {};
@@ -75,12 +76,43 @@ function groupReviewItems(stepData, reviewItems) {
 
         options: practice.options || [],
 
+        question_type: practice.question_type || "text",
+
+        option_type: practice.option_type || "text",
+
+        question_language: practice.question_language || "javascript",
+
         correct_answer: practice.correct_answer ?? null,
 
         explanation: practice.explanation || "",
 
         items: reviewItems.filter((item) => item.practice_index === index),
     }));
+}
+
+function CodePreview({ code, language }) {
+    const [html, setHtml] = useState("");
+
+    useEffect(() => {
+        const run = async () => {
+            const result = await codeToHtml(code || "", {
+                lang: language || "javascript",
+                theme: "one-dark-pro",
+            });
+
+            setHtml(result);
+        };
+
+        run();
+    }, [code, language]);
+
+    return (
+        <div
+            dangerouslySetInnerHTML={{
+                __html: html,
+            }}
+        />
+    );
 }
 
 export default function StepFiveReview({
@@ -103,7 +135,7 @@ export default function StepFiveReview({
     );
 
     const practiceAnswerMap = getPracticeAnswerMap(practiceResponses);
-
+    console.log(groupedItems);
     return (
         <div className="space-y-6">
             <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
@@ -124,9 +156,19 @@ export default function StepFiveReview({
                                     `Latihan Soal ${group.practice_index + 1}`}
                             </h3>
 
-                            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                {group.question || ""}
-                            </p>
+                            {group.question_type === "code" ? (
+                                <CodePreview
+                                    code={group.question}
+                                    language={group.question_language}
+                                />
+                            ) : (
+                                <div
+                                    className="course-detail-text font-semibold text-slate-900"
+                                    dangerouslySetInnerHTML={{
+                                        __html: group.question || "",
+                                    }}
+                                />
+                            )}
 
                             <div className="mt-4 space-y-3">
                                 {/* JAWABAN SISWA */}
@@ -135,21 +177,46 @@ export default function StepFiveReview({
                                         Jawaban Siswa
                                     </p>
 
-                                    <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">
-                                        {Array.isArray(group.options)
-                                            ? (group.options[
-                                                  practiceAnswerMap[
-                                                      group.practice_index
-                                                  ]
-                                              ] ??
-                                              practiceAnswerMap[
-                                                  group.practice_index
-                                              ] ??
-                                              "-")
-                                            : (practiceAnswerMap[
-                                                  group.practice_index
-                                              ] ?? "-")}
-                                    </p>
+                                    {group.option_type === "code" ? (
+                                        <CodePreview
+                                            code={
+                                                Array.isArray(group.options)
+                                                    ? (group.options[
+                                                          practiceAnswerMap[
+                                                              group
+                                                                  .practice_index
+                                                          ]
+                                                      ] ??
+                                                      practiceAnswerMap[
+                                                          group.practice_index
+                                                      ])
+                                                    : practiceAnswerMap[
+                                                          group.practice_index
+                                                      ]
+                                            }
+                                            language={group.question_language}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="course-detail-text font-semibold text-slate-900"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    Array.isArray(group.options)
+                                                        ? (group.options[
+                                                              practiceAnswerMap[
+                                                                  group
+                                                                      .practice_index
+                                                              ]
+                                                          ] ??
+                                                              practiceAnswerMap[
+                                                                  group.practice_index
+                                                              ])
+                                                        : practiceAnswerMap[
+                                                              group.practice_index
+                                                          ] || "",
+                                            }}
+                                        />
+                                    )}
                                 </div>
 
                                 {/* JAWABAN BENAR */}
@@ -158,13 +225,26 @@ export default function StepFiveReview({
                                         Jawaban Benar
                                     </p>
 
-                                    <p className="mt-2 whitespace-pre-wrap text-sm text-emerald-900">
-                                        {Array.isArray(group.options)
-                                            ? group.options[
-                                                  group.correct_answer
-                                              ]
-                                            : "-"}
-                                    </p>
+                                    {group.option_type === "code" ? (
+                                        <CodePreview
+                                            code={
+                                                group.options[
+                                                    group.correct_answer
+                                                ]
+                                            }
+                                            language={group.question_language}
+                                        />
+                                    ) : (
+                                        <div
+                                            className="course-detail-text font-semibold text-slate-900"
+                                            dangerouslySetInnerHTML={{
+                                                __html:
+                                                    group.options[
+                                                        group.correct_answer
+                                                    ] || "",
+                                            }}
+                                        />
+                                    )}
                                 </div>
 
                                 {/* PEMBAHASAN */}
