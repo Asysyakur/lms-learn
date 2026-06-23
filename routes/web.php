@@ -60,6 +60,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/test-proc', function () {
+    return [
+        'sapi' => php_sapi_name(),
+        'proc_open' => function_exists('proc_open'),
+        'disable_functions' => ini_get('disable_functions'),
+        'php_ini' => php_ini_loaded_file(),
+    ];
+});
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN
