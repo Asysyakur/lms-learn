@@ -3,10 +3,7 @@ import { Link, useForm } from "@inertiajs/react";
 import { codeToHtml } from "shiki";
 
 function cleanHtml(html) {
-    return html.replace(
-        /body\s*\{[\s\S]*?\}/gi,
-        ""
-    );
+    return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
 }
 
 function CodePreview({ code, language }) {
@@ -835,205 +832,57 @@ export default function StepForm({
                 value={data.description}
                 onChange={(e) => setData("description", e.target.value)}
             />
-
-            <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-                {data.step_type === "observe" && (
-                    <div className="grid gap-4 md:grid-cols-2">
-                        <div>
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Instruksi
-                            </label>
-                            <textarea
-                                className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                value={data.instruction_text}
-                                onChange={(e) =>
-                                    setData("instruction_text", e.target.value)
-                                }
-                            />
-                        </div>
-                        <div className="space-y-4">
+            {data.step_type != "review" && (
+                <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                    {data.step_type === "observe" && (
+                        <div className="grid gap-4 md:grid-cols-2">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700">
-                                    Tipe Resource
-                                </label>
-                                <select
-                                    className="mt-1 w-full rounded-lg border-slate-300"
-                                    value={data.resource_type}
-                                    onChange={(e) =>
-                                        setData("resource_type", e.target.value)
-                                    }
-                                >
-                                    <option value="video">Video</option>
-                                    <option value="ppt">PPT</option>
-                                    <option value="both">Video dan PPT</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    URL Resource
-                                </label>
-                                <input
-                                    className="mt-1 w-full rounded-lg border-slate-300"
-                                    value={data.resource_url}
-                                    onChange={(e) =>
-                                        setData("resource_url", e.target.value)
-                                    }
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {data.step_type === "ask" && (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <label className="block text-sm font-semibold text-slate-700">
-                                Daftar Pertanyaan
-                            </label>
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    const newOrder =
-                                        Math.max(
-                                            ...questions.map(
-                                                (q) => q.order || 0,
-                                            ),
-                                            0,
-                                        ) + 1;
-                                    setQuestions([
-                                        ...questions,
-                                        {
-                                            id: null,
-                                            question_prompt: "",
-                                            order: newOrder,
-                                        },
-                                    ]);
-                                }}
-                                className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-                            >
-                                + Tambah Pertanyaan
-                            </button>
-                        </div>
-
-                        {questions.length === 0 ? (
-                            <p className="text-sm text-slate-500 italic">
-                                Belum ada pertanyaan. Klik "Tambah Pertanyaan"
-                                untuk menambah.
-                            </p>
-                        ) : (
-                            <div className="space-y-3">
-                                {questions.map((q, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="p-3 rounded-lg border border-slate-200 bg-slate-50"
-                                    >
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex-1">
-                                                <label className="block text-xs font-semibold text-slate-600 mb-1">
-                                                    Pertanyaan #
-                                                    {q.order || idx + 1}
-                                                </label>
-                                                <textarea
-                                                    className="w-full min-h-16 rounded-lg border-slate-300 text-sm"
-                                                    placeholder="Tulis pertanyaan di sini..."
-                                                    value={q.question_prompt}
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...questions,
-                                                        ];
-                                                        updated[
-                                                            idx
-                                                        ].question_prompt =
-                                                            e.target.value;
-                                                        setQuestions(updated);
-                                                    }}
-                                                />
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setQuestions(
-                                                        questions.filter(
-                                                            (_, i) => i !== idx,
-                                                        ),
-                                                    );
-                                                }}
-                                                className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded whitespace-nowrap"
-                                            >
-                                                Hapus
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {data.step_type === "exploration" && (
-                    <div className="space-y-4">
-                        <div className="flex flex-col gap-4">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    Prompt Eksplorasi
+                                    Instruksi
                                 </label>
                                 <textarea
                                     className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                    value={data.exploration_prompt}
+                                    value={data.instruction_text}
                                     onChange={(e) =>
                                         setData(
-                                            "exploration_prompt",
+                                            "instruction_text",
                                             e.target.value,
                                         )
                                     }
                                 />
                             </div>
-                            <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                            <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-semibold text-slate-700">
-                                        Judul Studi Kasus
+                                        Tipe Resource
                                     </label>
-
+                                    <select
+                                        className="mt-1 w-full rounded-lg border-slate-300"
+                                        value={data.resource_type}
+                                        onChange={(e) =>
+                                            setData(
+                                                "resource_type",
+                                                e.target.value,
+                                            )
+                                        }
+                                    >
+                                        <option value="video">Video</option>
+                                        <option value="ppt">PPT</option>
+                                        <option value="both">
+                                            Video dan PPT
+                                        </option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700">
+                                        URL Resource
+                                    </label>
                                     <input
                                         className="mt-1 w-full rounded-lg border-slate-300"
-                                        value={data.case_study_title}
+                                        value={data.resource_url}
                                         onChange={(e) =>
                                             setData(
-                                                "case_study_title",
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700">
-                                        Deskripsi Studi Kasus
-                                    </label>
-
-                                    <textarea
-                                        className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                                        value={data.case_study_description}
-                                        onChange={(e) =>
-                                            setData(
-                                                "case_study_description",
-                                                e.target.value,
-                                            )
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700">
-                                        Alert / Petunjuk
-                                    </label>
-
-                                    <textarea
-                                        className="mt-1 min-h-20 w-full rounded-lg border-slate-300"
-                                        value={data.case_study_alert}
-                                        onChange={(e) =>
-                                            setData(
-                                                "case_study_alert",
+                                                "resource_url",
                                                 e.target.value,
                                             )
                                         }
@@ -1041,647 +890,991 @@ export default function StepForm({
                                 </div>
                             </div>
                         </div>
+                    )}
 
-                        <div className="border-t border-slate-200 pt-4">
-                            <h4 className="block text-sm font-semibold text-slate-700 mb-2">
-                                Materi (Daftar)
-                            </h4>
-                            {(data.materials || []).map((m, midx) => (
-                                <div
-                                    key={midx}
-                                    className="mb-4 rounded-lg border border-slate-200 p-4 bg-slate-50"
+                    {data.step_type === "ask" && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <label className="block text-sm font-semibold text-slate-700">
+                                    Daftar Pertanyaan
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const newOrder =
+                                            Math.max(
+                                                ...questions.map(
+                                                    (q) => q.order || 0,
+                                                ),
+                                                0,
+                                            ) + 1;
+                                        setQuestions([
+                                            ...questions,
+                                            {
+                                                id: null,
+                                                question_prompt: "",
+                                                order: newOrder,
+                                            },
+                                        ]);
+                                    }}
+                                    className="text-sm bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
                                 >
-                                    <label className="block text-sm font-semibold text-slate-700">
-                                        Judul Materi
-                                    </label>
-                                    <input
-                                        className="mt-1 w-full rounded-lg border-slate-300"
-                                        value={m.title || ""}
-                                        onChange={(e) => {
-                                            const arr = [
-                                                ...(data.materials || []),
-                                            ];
-                                            arr[midx] = {
-                                                ...arr[midx],
-                                                title: e.target.value,
-                                            };
-                                            setData("materials", arr);
-                                        }}
-                                    />
+                                    + Tambah Pertanyaan
+                                </button>
+                            </div>
 
-                                    <div className="mt-3 border-t pt-3">
-                                        <p className="text-sm font-semibold text-slate-700 mb-2">
-                                            Blok Konten
-                                        </p>
-                                        {(m.blocks || []).map((block, bidx) => (
-                                            <div
-                                                key={bidx}
-                                                className={`mb-2 rounded bg-white p-3 border-2 transition-all cursor-move ${
-                                                    draggedBlock?.type ===
-                                                        "materials" &&
-                                                    draggedBlock?.parentIdx ===
-                                                        midx &&
-                                                    draggedBlock?.blockIdx ===
-                                                        bidx
-                                                        ? "border-blue-400 bg-blue-50 opacity-50"
-                                                        : dragOverBlock?.type ===
-                                                                "materials" &&
-                                                            dragOverBlock?.parentIdx ===
-                                                                midx &&
-                                                            dragOverBlock?.blockIdx ===
-                                                                bidx
-                                                          ? "border-blue-500 bg-blue-100"
-                                                          : "border-slate-200"
-                                                }`}
-                                                draggable
-                                                onDragStart={(e) =>
-                                                    handleDragStart(
-                                                        e,
-                                                        "materials",
-                                                        midx,
-                                                        bidx,
-                                                    )
-                                                }
-                                                onDragOver={handleDragOver}
-                                                onDragEnter={(e) =>
-                                                    handleDragEnter(
-                                                        e,
-                                                        "materials",
-                                                        midx,
-                                                        bidx,
-                                                    )
-                                                }
-                                                onDragLeave={handleDragLeave}
-                                                onDrop={(e) =>
-                                                    handleDrop(
-                                                        e,
-                                                        "materials",
-                                                        midx,
-                                                        bidx,
-                                                    )
-                                                }
-                                            >
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <select
-                                                        className="text-sm rounded border-slate-300"
-                                                        value={block.type}
+                            {questions.length === 0 ? (
+                                <p className="text-sm text-slate-500 italic">
+                                    Belum ada pertanyaan. Klik "Tambah
+                                    Pertanyaan" untuk menambah.
+                                </p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {questions.map((q, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="p-3 rounded-lg border border-slate-200 bg-slate-50"
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-1">
+                                                    <label className="block text-xs font-semibold text-slate-600 mb-1">
+                                                        Pertanyaan #
+                                                        {q.order || idx + 1}
+                                                    </label>
+                                                    <textarea
+                                                        className="w-full min-h-16 rounded-lg border-slate-300 text-sm"
+                                                        placeholder="Tulis pertanyaan di sini..."
+                                                        value={
+                                                            q.question_prompt
+                                                        }
                                                         onChange={(e) => {
-                                                            const arr = [
-                                                                ...(data.materials ||
-                                                                    []),
+                                                            const updated = [
+                                                                ...questions,
                                                             ];
-                                                            arr[midx].blocks[
-                                                                bidx
-                                                            ].type =
+                                                            updated[
+                                                                idx
+                                                            ].question_prompt =
                                                                 e.target.value;
-                                                            setData(
-                                                                "materials",
-                                                                arr,
+                                                            setQuestions(
+                                                                updated,
                                                             );
                                                         }}
-                                                    >
-                                                        <option value="text">
-                                                            Teks
-                                                        </option>
-                                                        <option value="image">
-                                                            Gambar
-                                                        </option>
-                                                        <option value="code">
-                                                            Kode
-                                                        </option>
-                                                    </select>
-                                                    <button
-                                                        type="button"
-                                                        className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded"
-                                                        onClick={() => {
-                                                            const arr = [
-                                                                ...(data.materials ||
-                                                                    []),
-                                                            ];
-                                                            arr[
-                                                                midx
-                                                            ].blocks.splice(
-                                                                bidx,
-                                                                1,
-                                                            );
-                                                            setData(
-                                                                "materials",
-                                                                arr,
-                                                            );
-                                                        }}
-                                                    >
-                                                        Hapus
-                                                    </button>
+                                                    />
                                                 </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setQuestions(
+                                                            questions.filter(
+                                                                (_, i) =>
+                                                                    i !== idx,
+                                                            ),
+                                                        );
+                                                    }}
+                                                    className="text-sm bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded whitespace-nowrap"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                                                {block.type === "text" && (
-                                                    <div>
-                                                        <div className="flex gap-2 mb-2 text-xs">
+                    {data.step_type === "exploration" && (
+                        <div className="space-y-4">
+                            <div className="border-t border-slate-200 pt-4">
+                                <h4 className="block text-sm font-semibold text-slate-700 mb-2">
+                                    Materi (Daftar)
+                                </h4>
+                                {(data.materials || []).map((m, midx) => (
+                                    <div
+                                        key={midx}
+                                        className="mb-4 rounded-lg border border-slate-200 p-4 bg-slate-50"
+                                    >
+                                        <label className="block text-sm font-semibold text-slate-700">
+                                            Judul Materi
+                                        </label>
+                                        <input
+                                            className="mt-1 w-full rounded-lg border-slate-300"
+                                            value={m.title || ""}
+                                            onChange={(e) => {
+                                                const arr = [
+                                                    ...(data.materials || []),
+                                                ];
+                                                arr[midx] = {
+                                                    ...arr[midx],
+                                                    title: e.target.value,
+                                                };
+                                                setData("materials", arr);
+                                            }}
+                                        />
+
+                                        <div className="mt-3 border-t pt-3">
+                                            <p className="text-sm font-semibold text-slate-700 mb-2">
+                                                Blok Konten
+                                            </p>
+                                            {(m.blocks || []).map(
+                                                (block, bidx) => (
+                                                    <div
+                                                        key={bidx}
+                                                        className={`mb-2 rounded bg-white p-3 border-2 transition-all cursor-move ${
+                                                            draggedBlock?.type ===
+                                                                "materials" &&
+                                                            draggedBlock?.parentIdx ===
+                                                                midx &&
+                                                            draggedBlock?.blockIdx ===
+                                                                bidx
+                                                                ? "border-blue-400 bg-blue-50 opacity-50"
+                                                                : dragOverBlock?.type ===
+                                                                        "materials" &&
+                                                                    dragOverBlock?.parentIdx ===
+                                                                        midx &&
+                                                                    dragOverBlock?.blockIdx ===
+                                                                        bidx
+                                                                  ? "border-blue-500 bg-blue-100"
+                                                                  : "border-slate-200"
+                                                        }`}
+                                                        draggable
+                                                        onDragStart={(e) =>
+                                                            handleDragStart(
+                                                                e,
+                                                                "materials",
+                                                                midx,
+                                                                bidx,
+                                                            )
+                                                        }
+                                                        onDragOver={
+                                                            handleDragOver
+                                                        }
+                                                        onDragEnter={(e) =>
+                                                            handleDragEnter(
+                                                                e,
+                                                                "materials",
+                                                                midx,
+                                                                bidx,
+                                                            )
+                                                        }
+                                                        onDragLeave={
+                                                            handleDragLeave
+                                                        }
+                                                        onDrop={(e) =>
+                                                            handleDrop(
+                                                                e,
+                                                                "materials",
+                                                                midx,
+                                                                bidx,
+                                                            )
+                                                        }
+                                                    >
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <select
+                                                                className="text-sm rounded border-slate-300"
+                                                                value={
+                                                                    block.type
+                                                                }
+                                                                onChange={(
+                                                                    e,
+                                                                ) => {
+                                                                    const arr =
+                                                                        [
+                                                                            ...(data.materials ||
+                                                                                []),
+                                                                        ];
+                                                                    arr[
+                                                                        midx
+                                                                    ].blocks[
+                                                                        bidx
+                                                                    ].type =
+                                                                        e.target.value;
+                                                                    setData(
+                                                                        "materials",
+                                                                        arr,
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <option value="text">
+                                                                    Teks
+                                                                </option>
+                                                                <option value="image">
+                                                                    Gambar
+                                                                </option>
+                                                                <option value="code">
+                                                                    Kode
+                                                                </option>
+                                                            </select>
                                                             <button
                                                                 type="button"
-                                                                onMouseDown={(
-                                                                    e,
-                                                                ) =>
-                                                                    e.preventDefault()
-                                                                }
-                                                                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
-                                                                onClick={() =>
-                                                                    insertFormatting(
-                                                                        block.content ||
-                                                                            "",
-                                                                        "bold",
-                                                                        "materials",
-                                                                        midx,
+                                                                className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded"
+                                                                onClick={() => {
+                                                                    const arr =
+                                                                        [
+                                                                            ...(data.materials ||
+                                                                                []),
+                                                                        ];
+                                                                    arr[
+                                                                        midx
+                                                                    ].blocks.splice(
                                                                         bidx,
-                                                                    )
-                                                                }
-                                                                title="Tambah bold"
-                                                            >
-                                                                B
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onMouseDown={(
-                                                                    e,
-                                                                ) =>
-                                                                    e.preventDefault()
-                                                                }
-                                                                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
-                                                                onClick={() =>
-                                                                    insertFormatting(
-                                                                        block.content ||
-                                                                            "",
-                                                                        "italic",
+                                                                        1,
+                                                                    );
+                                                                    setData(
                                                                         "materials",
-                                                                        midx,
-                                                                        bidx,
-                                                                    )
-                                                                }
-                                                                title="Tambah italic"
+                                                                        arr,
+                                                                    );
+                                                                }}
                                                             >
-                                                                I
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onMouseDown={(
-                                                                    e,
-                                                                ) =>
-                                                                    e.preventDefault()
-                                                                }
-                                                                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
-                                                                onClick={() =>
-                                                                    insertFormatting(
-                                                                        block.content ||
-                                                                            "",
-                                                                        "bullet",
-                                                                        "materials",
-                                                                        midx,
-                                                                        bidx,
-                                                                    )
-                                                                }
-                                                                title="Tambah bullet"
-                                                            >
-                                                                • List
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onMouseDown={(
-                                                                    e,
-                                                                ) =>
-                                                                    e.preventDefault()
-                                                                }
-                                                                className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
-                                                                onClick={() =>
-                                                                    insertFormatting(
-                                                                        block.content ||
-                                                                            "",
-                                                                        "number",
-                                                                        "materials",
-                                                                        midx,
-                                                                        bidx,
-                                                                    )
-                                                                }
-                                                                title="Tambah numbering"
-                                                            >
-                                                                1. List
+                                                                Hapus
                                                             </button>
                                                         </div>
-                                                        <textarea
-                                                            ref={(el) =>
-                                                                (materialTextRefs.current[
-                                                                    `${midx}-${bidx}`
-                                                                ] = el)
-                                                            }
-                                                            onSelect={() =>
-                                                                recordSelection(
-                                                                    `${midx}-${bidx}`,
-                                                                )
-                                                            }
-                                                            onKeyUp={() =>
-                                                                recordSelection(
-                                                                    `${midx}-${bidx}`,
-                                                                )
-                                                            }
-                                                            onMouseUp={() =>
-                                                                recordSelection(
-                                                                    `${midx}-${bidx}`,
-                                                                )
-                                                            }
-                                                            onKeyDown={(e) =>
-                                                                handleTextKeyDown(
-                                                                    e,
-                                                                    midx,
-                                                                    bidx,
-                                                                )
-                                                            }
-                                                            className="w-full text-sm rounded border-slate-300 min-h-16"
-                                                            placeholder="HTML atau plain text. Format: <b>bold</b>, <i>italic</i>, <ul><li>bullet</li></ul>, <ol><li>number</li></ol>"
-                                                            value={
-                                                                block.content ||
-                                                                ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const arr = [
-                                                                    ...(data.materials ||
-                                                                        []),
-                                                                ];
-                                                                arr[
-                                                                    midx
-                                                                ].blocks[
-                                                                    bidx
-                                                                ].content =
-                                                                    e.target.value;
-                                                                setData(
-                                                                    "materials",
-                                                                    arr,
-                                                                );
-                                                            }}
-                                                        />
-                                                    </div>
-                                                )}
-                                                {block.type === "image" && (
-                                                    <>
-                                                        <div className="mb-2 flex items-start justify-between gap-3">
-                                                            {block.url && (
-                                                                <img
-                                                                    src={
-                                                                        block.url
-                                                                    }
-                                                                    alt={
-                                                                        block.alt ||
-                                                                        "Pratinjau gambar"
-                                                                    }
-                                                                    className="max-h-48 w-full rounded border border-slate-200 object-contain bg-white"
-                                                                />
-                                                            )}
 
-                                                            {(block.url ||
-                                                                block.image_file) && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        clearMaterialImage(
+                                                        {block.type ===
+                                                            "text" && (
+                                                            <div>
+                                                                <div className="flex gap-2 mb-2 text-xs">
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(
+                                                                            e,
+                                                                        ) =>
+                                                                            e.preventDefault()
+                                                                        }
+                                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
+                                                                        onClick={() =>
+                                                                            insertFormatting(
+                                                                                block.content ||
+                                                                                    "",
+                                                                                "bold",
+                                                                                "materials",
+                                                                                midx,
+                                                                                bidx,
+                                                                            )
+                                                                        }
+                                                                        title="Tambah bold"
+                                                                    >
+                                                                        B
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(
+                                                                            e,
+                                                                        ) =>
+                                                                            e.preventDefault()
+                                                                        }
+                                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
+                                                                        onClick={() =>
+                                                                            insertFormatting(
+                                                                                block.content ||
+                                                                                    "",
+                                                                                "italic",
+                                                                                "materials",
+                                                                                midx,
+                                                                                bidx,
+                                                                            )
+                                                                        }
+                                                                        title="Tambah italic"
+                                                                    >
+                                                                        I
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(
+                                                                            e,
+                                                                        ) =>
+                                                                            e.preventDefault()
+                                                                        }
+                                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                                        onClick={() =>
+                                                                            insertFormatting(
+                                                                                block.content ||
+                                                                                    "",
+                                                                                "bullet",
+                                                                                "materials",
+                                                                                midx,
+                                                                                bidx,
+                                                                            )
+                                                                        }
+                                                                        title="Tambah bullet"
+                                                                    >
+                                                                        • List
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onMouseDown={(
+                                                                            e,
+                                                                        ) =>
+                                                                            e.preventDefault()
+                                                                        }
+                                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                                        onClick={() =>
+                                                                            insertFormatting(
+                                                                                block.content ||
+                                                                                    "",
+                                                                                "number",
+                                                                                "materials",
+                                                                                midx,
+                                                                                bidx,
+                                                                            )
+                                                                        }
+                                                                        title="Tambah numbering"
+                                                                    >
+                                                                        1. List
+                                                                    </button>
+                                                                </div>
+                                                                <textarea
+                                                                    ref={(el) =>
+                                                                        (materialTextRefs.current[
+                                                                            `${midx}-${bidx}`
+                                                                        ] = el)
+                                                                    }
+                                                                    onSelect={() =>
+                                                                        recordSelection(
+                                                                            `${midx}-${bidx}`,
+                                                                        )
+                                                                    }
+                                                                    onKeyUp={() =>
+                                                                        recordSelection(
+                                                                            `${midx}-${bidx}`,
+                                                                        )
+                                                                    }
+                                                                    onMouseUp={() =>
+                                                                        recordSelection(
+                                                                            `${midx}-${bidx}`,
+                                                                        )
+                                                                    }
+                                                                    onKeyDown={(
+                                                                        e,
+                                                                    ) =>
+                                                                        handleTextKeyDown(
+                                                                            e,
                                                                             midx,
                                                                             bidx,
                                                                         )
                                                                     }
-                                                                    className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
-                                                                >
-                                                                    Hapus gambar
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                        <input
-                                                            className="w-full text-sm rounded border-slate-300 mb-1"
-                                                            placeholder="URL gambar"
-                                                            value={
-                                                                block.url || ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                updateBlockField(
-                                                                    "materials",
-                                                                    midx,
-                                                                    bidx,
-                                                                    "url",
-                                                                    e.target
-                                                                        .value,
-                                                                );
-                                                            }}
-                                                        />
-                                                        <label className="block text-xs font-semibold text-slate-600">
-                                                            Upload gambar
-                                                        </label>
-                                                        <input
-                                                            className="w-full text-sm rounded border-slate-300 mb-1"
-                                                            type="file"
-                                                            accept="image/*"
-                                                            onChange={(e) => {
-                                                                updateBlockField(
-                                                                    "materials",
-                                                                    midx,
-                                                                    bidx,
-                                                                    "image_file",
-                                                                    e.target
-                                                                        .files?.[0] ??
-                                                                        null,
-                                                                );
-                                                            }}
-                                                        />
-                                                        <p className="text-xs text-slate-500">
-                                                            Upload akan disimpan
-                                                            ke storage dan
-                                                            dipakai sebagai URL
-                                                            gambar.
-                                                        </p>
-                                                        <input
-                                                            className="mt-2 w-full text-sm rounded border-slate-300"
-                                                            placeholder="Alt text"
-                                                            value={
-                                                                block.alt || ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                updateBlockField(
-                                                                    "materials",
-                                                                    midx,
-                                                                    bidx,
-                                                                    "alt",
-                                                                    e.target
-                                                                        .value,
-                                                                );
-                                                            }}
-                                                        />
-                                                    </>
-                                                )}
-                                                {block.type === "code" && (
-                                                    <>
-                                                        <select
-                                                            className="w-full text-sm rounded border-slate-300 mb-1"
-                                                            value={
-                                                                block.language ||
-                                                                "javascript"
-                                                            }
-                                                            onChange={(e) => {
-                                                                const arr = [
-                                                                    ...(data.materials ||
-                                                                        []),
-                                                                ];
-                                                                arr[
-                                                                    midx
-                                                                ].blocks[
-                                                                    bidx
-                                                                ].language =
-                                                                    e.target.value;
-                                                                setData(
-                                                                    "materials",
-                                                                    arr,
-                                                                );
-                                                            }}
-                                                        >
-                                                            <option value="javascript">
-                                                                JavaScript
-                                                            </option>
-                                                            <option value="python">
-                                                                Python
-                                                            </option>
-                                                            <option value="php">
-                                                                PHP
-                                                            </option>
-                                                            <option value="html">
-                                                                HTML
-                                                            </option>
-                                                            <option value="css">
-                                                                CSS
-                                                            </option>
-                                                        </select>
-                                                        <textarea
-                                                            className="w-full text-sm rounded border-slate-300 font-mono min-h-24"
-                                                            placeholder="Source code"
-                                                            value={
-                                                                block.code || ""
-                                                            }
-                                                            onChange={(e) => {
-                                                                const arr = [
-                                                                    ...(data.materials ||
-                                                                        []),
-                                                                ];
-                                                                arr[
-                                                                    midx
-                                                                ].blocks[
-                                                                    bidx
-                                                                ].code =
-                                                                    e.target.value;
-                                                                setData(
-                                                                    "materials",
-                                                                    arr,
-                                                                );
-                                                            }}
-                                                        />
-                                                        {block.code && (
-                                                            <CodePreview
-                                                                code={
-                                                                    block.code
-                                                                }
-                                                                language={
-                                                                    block.language ||
-                                                                    "javascript"
-                                                                }
-                                                            />
+                                                                    className="w-full text-sm rounded border-slate-300 min-h-16"
+                                                                    placeholder="HTML atau plain text. Format: <b>bold</b>, <i>italic</i>, <ul><li>bullet</li></ul>, <ol><li>number</li></ol>"
+                                                                    value={
+                                                                        block.content ||
+                                                                        ""
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        const arr =
+                                                                            [
+                                                                                ...(data.materials ||
+                                                                                    []),
+                                                                            ];
+                                                                        arr[
+                                                                            midx
+                                                                        ].blocks[
+                                                                            bidx
+                                                                        ].content =
+                                                                            e.target.value;
+                                                                        setData(
+                                                                            "materials",
+                                                                            arr,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </div>
                                                         )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        ))}
-                                        <button
-                                            type="button"
-                                            className="text-sm bg-slate-200 text-slate-700 px-2 py-1 rounded"
-                                            onClick={() => {
-                                                const arr = [
-                                                    ...(data.materials || []),
-                                                ];
-                                                if (!arr[midx].blocks)
-                                                    arr[midx].blocks = [];
-                                                arr[midx].blocks.push({
-                                                    type: "text",
-                                                    content: "",
-                                                });
-                                                setData("materials", arr);
-                                            }}
-                                        >
-                                            + Tambah Blok
-                                        </button>
+                                                        {block.type ===
+                                                            "image" && (
+                                                            <>
+                                                                <div className="mb-2 flex items-start justify-between gap-3">
+                                                                    {block.url && (
+                                                                        <img
+                                                                            src={
+                                                                                block.url
+                                                                            }
+                                                                            alt={
+                                                                                block.alt ||
+                                                                                "Pratinjau gambar"
+                                                                            }
+                                                                            className="max-h-48 w-full rounded border border-slate-200 object-contain bg-white"
+                                                                        />
+                                                                    )}
+
+                                                                    {(block.url ||
+                                                                        block.image_file) && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() =>
+                                                                                clearMaterialImage(
+                                                                                    midx,
+                                                                                    bidx,
+                                                                                )
+                                                                            }
+                                                                            className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                                        >
+                                                                            Hapus
+                                                                            gambar
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                                <input
+                                                                    className="w-full text-sm rounded border-slate-300 mb-1"
+                                                                    placeholder="URL gambar"
+                                                                    value={
+                                                                        block.url ||
+                                                                        ""
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        updateBlockField(
+                                                                            "materials",
+                                                                            midx,
+                                                                            bidx,
+                                                                            "url",
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <label className="block text-xs font-semibold text-slate-600">
+                                                                    Upload
+                                                                    gambar
+                                                                </label>
+                                                                <input
+                                                                    className="w-full text-sm rounded border-slate-300 mb-1"
+                                                                    type="file"
+                                                                    accept="image/*"
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        updateBlockField(
+                                                                            "materials",
+                                                                            midx,
+                                                                            bidx,
+                                                                            "image_file",
+                                                                            e
+                                                                                .target
+                                                                                .files?.[0] ??
+                                                                                null,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                <p className="text-xs text-slate-500">
+                                                                    Upload akan
+                                                                    disimpan ke
+                                                                    storage dan
+                                                                    dipakai
+                                                                    sebagai URL
+                                                                    gambar.
+                                                                </p>
+                                                                <input
+                                                                    className="mt-2 w-full text-sm rounded border-slate-300"
+                                                                    placeholder="Alt text"
+                                                                    value={
+                                                                        block.alt ||
+                                                                        ""
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        updateBlockField(
+                                                                            "materials",
+                                                                            midx,
+                                                                            bidx,
+                                                                            "alt",
+                                                                            e
+                                                                                .target
+                                                                                .value,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                            </>
+                                                        )}
+                                                        {block.type ===
+                                                            "code" && (
+                                                            <>
+                                                                <select
+                                                                    className="w-full text-sm rounded border-slate-300 mb-1"
+                                                                    value={
+                                                                        block.language ||
+                                                                        "javascript"
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        const arr =
+                                                                            [
+                                                                                ...(data.materials ||
+                                                                                    []),
+                                                                            ];
+                                                                        arr[
+                                                                            midx
+                                                                        ].blocks[
+                                                                            bidx
+                                                                        ].language =
+                                                                            e.target.value;
+                                                                        setData(
+                                                                            "materials",
+                                                                            arr,
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    <option value="javascript">
+                                                                        JavaScript
+                                                                    </option>
+                                                                    <option value="python">
+                                                                        Python
+                                                                    </option>
+                                                                    <option value="php">
+                                                                        PHP
+                                                                    </option>
+                                                                    <option value="html">
+                                                                        HTML
+                                                                    </option>
+                                                                    <option value="css">
+                                                                        CSS
+                                                                    </option>
+                                                                </select>
+                                                                <textarea
+                                                                    className="w-full text-sm rounded border-slate-300 font-mono min-h-24"
+                                                                    placeholder="Source code"
+                                                                    value={
+                                                                        block.code ||
+                                                                        ""
+                                                                    }
+                                                                    onChange={(
+                                                                        e,
+                                                                    ) => {
+                                                                        const arr =
+                                                                            [
+                                                                                ...(data.materials ||
+                                                                                    []),
+                                                                            ];
+                                                                        arr[
+                                                                            midx
+                                                                        ].blocks[
+                                                                            bidx
+                                                                        ].code =
+                                                                            e.target.value;
+                                                                        setData(
+                                                                            "materials",
+                                                                            arr,
+                                                                        );
+                                                                    }}
+                                                                />
+                                                                {block.code && (
+                                                                    <CodePreview
+                                                                        code={
+                                                                            block.code
+                                                                        }
+                                                                        language={
+                                                                            block.language ||
+                                                                            "javascript"
+                                                                        }
+                                                                    />
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                ),
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="text-sm bg-slate-200 text-slate-700 px-2 py-1 rounded"
+                                                onClick={() => {
+                                                    const arr = [
+                                                        ...(data.materials ||
+                                                            []),
+                                                    ];
+                                                    if (!arr[midx].blocks)
+                                                        arr[midx].blocks = [];
+                                                    arr[midx].blocks.push({
+                                                        type: "text",
+                                                        content: "",
+                                                    });
+                                                    setData("materials", arr);
+                                                }}
+                                            >
+                                                + Tambah Blok
+                                            </button>
+                                        </div>
+
+                                        <div className="mt-2 flex gap-2">
+                                            <button
+                                                type="button"
+                                                className="rounded-lg bg-red-100 px-3 py-1 text-sm text-red-700"
+                                                onClick={() => {
+                                                    const arr = [
+                                                        ...(data.materials ||
+                                                            []),
+                                                    ];
+                                                    arr.splice(midx, 1);
+                                                    setData("materials", arr);
+                                                }}
+                                            >
+                                                Hapus Materi
+                                            </button>
+                                        </div>
                                     </div>
-
-                                    <div className="mt-2 flex gap-2">
-                                        <button
-                                            type="button"
-                                            className="rounded-lg bg-red-100 px-3 py-1 text-sm text-red-700"
-                                            onClick={() => {
-                                                const arr = [
-                                                    ...(data.materials || []),
-                                                ];
-                                                arr.splice(midx, 1);
-                                                setData("materials", arr);
-                                            }}
-                                        >
-                                            Hapus Materi
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                className="rounded-lg bg-slate-100 px-3 py-2 text-sm"
-                                onClick={() => {
-                                    const arr = [...(data.materials || [])];
-                                    arr.push({
-                                        title: "",
-                                        blocks: [{ type: "text", content: "" }],
-                                    });
-                                    setData("materials", arr);
-                                }}
-                            >
-                                Tambah Materi
-                            </button>
-                        </div>
-
-                        {/* CASE STUDIES */}
-                        <div className="border-t border-slate-200 pt-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-semibold text-slate-700">
-                                    Studi Kasus
-                                </h4>
-
+                                ))}
                                 <button
                                     type="button"
+                                    className="rounded-lg bg-slate-100 px-3 py-2 text-sm"
                                     onClick={() => {
-                                        setData("case_studies", [
-                                            ...(data.case_studies || []),
-                                            {
-                                                type: "analysis",
-                                                title: "",
-                                                language: "javascript",
-                                                left_title: "Code A",
-                                                right_title: "Code B",
-                                                left_code: "",
-                                                right_code: "",
-                                                starter_code: "",
-                                                expected_output: "",
-                                            },
-                                        ]);
+                                        const arr = [...(data.materials || [])];
+                                        arr.push({
+                                            title: "",
+                                            blocks: [
+                                                { type: "text", content: "" },
+                                            ],
+                                        });
+                                        setData("materials", arr);
                                     }}
-                                    className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white"
                                 >
-                                    + Tambah Studi Kasus
+                                    Tambah Materi
                                 </button>
                             </div>
 
-                            {(data.case_studies || []).map((study, sidx) => (
-                                <div
-                                    key={sidx}
-                                    className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
-                                >
-                                    <div className="flex justify-between items-center">
-                                        <h5 className="font-semibold text-slate-800">
-                                            Studi Kasus #{sidx + 1}
-                                        </h5>
+                            {/* CASE STUDIES */}
+                            <div className="border-t border-slate-200 pt-4 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-semibold text-slate-700">
+                                        Studi Kasus
+                                    </h4>
 
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const updated = [
-                                                    ...data.case_studies,
-                                                ];
-                                                updated.splice(sidx, 1);
-                                                setData(
-                                                    "case_studies",
-                                                    updated,
-                                                );
-                                            }}
-                                            className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </div>
-
-                                    <input
-                                        className="w-full rounded-lg border-slate-300"
-                                        placeholder="Judul Studi Kasus"
-                                        value={study.title || ""}
-                                        onChange={(e) => {
-                                            const updated = [
-                                                ...data.case_studies,
-                                            ];
-                                            updated[sidx].title =
-                                                e.target.value;
-                                            setData("case_studies", updated);
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setData("case_studies", [
+                                                ...(data.case_studies || []),
+                                                {
+                                                    type: "analysis",
+                                                    title: "",
+                                                    language: "javascript",
+                                                    left_title: "Code A",
+                                                    right_title: "Code B",
+                                                    left_code: "",
+                                                    right_code: "",
+                                                    starter_code: "",
+                                                    expected_output: "",
+                                                },
+                                            ]);
                                         }}
-                                    />
-
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700 mb-1">
-                                            Tipe Studi Kasus
-                                        </label>
-
-                                        <select
-                                            className="w-full rounded-lg border-slate-300"
-                                            value={study.type || "analysis"}
-                                            onChange={(e) => {
-                                                const updated = [
-                                                    ...data.case_studies,
-                                                ];
-
-                                                updated[sidx].type =
-                                                    e.target.value;
-
-                                                setData(
-                                                    "case_studies",
-                                                    updated,
-                                                );
-                                            }}
-                                        >
-                                            <option value="analysis">
-                                                Analisis Code
-                                            </option>
-
-                                            <option value="coding">
-                                                Coding Mandiri
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <select
-                                        className="w-full rounded-lg border-slate-300"
-                                        value={study.language}
-                                        onChange={(e) => {
-                                            const updated = [
-                                                ...data.case_studies,
-                                            ];
-                                            updated[sidx].language =
-                                                e.target.value;
-                                            setData("case_studies", updated);
-                                        }}
+                                        className="rounded-lg bg-blue-600 px-3 py-1 text-sm text-white"
                                     >
-                                        {CODE_LANGUAGES.map((lang) => (
-                                            <option
-                                                key={lang.value}
-                                                value={lang.value}
-                                            >
-                                                {lang.label}
-                                            </option>
-                                        ))}
-                                    </select>
+                                        + Tambah Studi Kasus
+                                    </button>
+                                </div>
 
-                                    {study.type === "coding" ? (
-                                        <div className="space-y-2">
+                                <div className="flex flex-col gap-4">
+                                    {/* <div>
+                                                        <label className="block text-sm font-semibold text-slate-700">
+                                                            Prompt Eksplorasi
+                                                        </label>
+                                                        <textarea
+                                                            className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                                            value={data.exploration_prompt}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "exploration_prompt",
+                                                                    e.target.value,
+                                                                )
+                                                            }
+                                                        />
+                                                    </div> */}
+                                    <div className="mb-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Judul Studi Kasus
+                                            </label>
+
+                                            <input
+                                                className="mt-1 w-full rounded-lg border-slate-300"
+                                                value={data.case_study_title}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "case_study_title",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Deskripsi Studi Kasus
+                                            </label>
+
                                             <textarea
-                                                className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
-                                                placeholder="Code..."
-                                                value={study.left_code}
+                                                className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                                value={
+                                                    data.case_study_description
+                                                }
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "case_study_description",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Alert / Petunjuk
+                                            </label>
+
+                                            <textarea
+                                                className="mt-1 min-h-20 w-full rounded-lg border-slate-300"
+                                                value={data.case_study_alert}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "case_study_alert",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {(data.case_studies || []).map(
+                                    (study, sidx) => (
+                                        <div
+                                            key={sidx}
+                                            className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
+                                        >
+                                            <div className="flex justify-between items-center">
+                                                <h5 className="font-semibold text-slate-800">
+                                                    Studi Kasus #{sidx + 1}
+                                                </h5>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+                                                        updated.splice(sidx, 1);
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                    className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+
+                                            <input
+                                                className="w-full rounded-lg border-slate-300"
+                                                placeholder="Judul Studi Kasus"
+                                                value={study.title || ""}
                                                 onChange={(e) => {
                                                     const updated = [
                                                         ...data.case_studies,
                                                     ];
-                                                    updated[sidx].left_code =
+                                                    updated[sidx].title =
+                                                        e.target.value;
+                                                    setData(
+                                                        "case_studies",
+                                                        updated,
+                                                    );
+                                                }}
+                                            />
+
+                                            <div>
+                                                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                                                    Tipe Studi Kasus
+                                                </label>
+
+                                                <select
+                                                    className="w-full rounded-lg border-slate-300"
+                                                    value={
+                                                        study.type || "analysis"
+                                                    }
+                                                    onChange={(e) => {
+                                                        const updated = [
+                                                            ...data.case_studies,
+                                                        ];
+
+                                                        updated[sidx].type =
+                                                            e.target.value;
+
+                                                        setData(
+                                                            "case_studies",
+                                                            updated,
+                                                        );
+                                                    }}
+                                                >
+                                                    <option value="analysis">
+                                                        Analisis Code
+                                                    </option>
+
+                                                    <option value="coding">
+                                                        Coding Mandiri
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <select
+                                                className="w-full rounded-lg border-slate-300"
+                                                value={study.language}
+                                                onChange={(e) => {
+                                                    const updated = [
+                                                        ...data.case_studies,
+                                                    ];
+                                                    updated[sidx].language =
+                                                        e.target.value;
+                                                    setData(
+                                                        "case_studies",
+                                                        updated,
+                                                    );
+                                                }}
+                                            >
+                                                {CODE_LANGUAGES.map((lang) => (
+                                                    <option
+                                                        key={lang.value}
+                                                        value={lang.value}
+                                                    >
+                                                        {lang.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+
+                                            {study.type === "coding" ? (
+                                                <div className="space-y-2">
+                                                    <textarea
+                                                        className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
+                                                        placeholder="Code..."
+                                                        value={study.left_code}
+                                                        onChange={(e) => {
+                                                            const updated = [
+                                                                ...data.case_studies,
+                                                            ];
+                                                            updated[
+                                                                sidx
+                                                            ].left_code =
+                                                                e.target.value;
+                                                            setData(
+                                                                "case_studies",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="grid gap-4 md:grid-cols-2">
+                                                    <div className="space-y-2">
+                                                        <input
+                                                            className="w-full rounded-lg border-slate-300"
+                                                            placeholder="Label Kiri"
+                                                            value={
+                                                                study.left_title ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.case_studies,
+                                                                    ];
+                                                                updated[
+                                                                    sidx
+                                                                ].left_title =
+                                                                    e.target.value;
+                                                                setData(
+                                                                    "case_studies",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                        />
+
+                                                        <textarea
+                                                            className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
+                                                            placeholder="Code kiri..."
+                                                            value={
+                                                                study.left_code ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.case_studies,
+                                                                    ];
+                                                                updated[
+                                                                    sidx
+                                                                ].left_code =
+                                                                    e.target.value;
+                                                                setData(
+                                                                    "case_studies",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <input
+                                                            className="w-full rounded-lg border-slate-300"
+                                                            placeholder="Label Kanan"
+                                                            value={
+                                                                study.right_title ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.case_studies,
+                                                                    ];
+                                                                updated[
+                                                                    sidx
+                                                                ].right_title =
+                                                                    e.target.value;
+                                                                setData(
+                                                                    "case_studies",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                        />
+
+                                                        <textarea
+                                                            className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
+                                                            placeholder="Code kanan..."
+                                                            value={
+                                                                study.right_code ||
+                                                                ""
+                                                            }
+                                                            onChange={(e) => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.case_studies,
+                                                                    ];
+                                                                updated[
+                                                                    sidx
+                                                                ].right_code =
+                                                                    e.target.value;
+                                                                setData(
+                                                                    "case_studies",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                            <textarea
+                                                className="min-h-24 w-full rounded-lg border-slate-300"
+                                                placeholder="Expected Output"
+                                                value={
+                                                    study.expected_output || ""
+                                                }
+                                                onChange={(e) => {
+                                                    const updated = [
+                                                        ...data.case_studies,
+                                                    ];
+                                                    updated[
+                                                        sidx
+                                                    ].expected_output =
                                                         e.target.value;
                                                     setData(
                                                         "case_studies",
@@ -1690,436 +1883,113 @@ export default function StepForm({
                                                 }}
                                             />
                                         </div>
-                                    ) : (
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div className="space-y-2">
-                                                <input
-                                                    className="w-full rounded-lg border-slate-300"
-                                                    placeholder="Label Kiri"
-                                                    value={
-                                                        study.left_title || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.case_studies,
-                                                        ];
-                                                        updated[
-                                                            sidx
-                                                        ].left_title =
-                                                            e.target.value;
-                                                        setData(
-                                                            "case_studies",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-
-                                                <textarea
-                                                    className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
-                                                    placeholder="Code kiri..."
-                                                    value={
-                                                        study.left_code || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.case_studies,
-                                                        ];
-                                                        updated[
-                                                            sidx
-                                                        ].left_code =
-                                                            e.target.value;
-                                                        setData(
-                                                            "case_studies",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <input
-                                                    className="w-full rounded-lg border-slate-300"
-                                                    placeholder="Label Kanan"
-                                                    value={
-                                                        study.right_title || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.case_studies,
-                                                        ];
-                                                        updated[
-                                                            sidx
-                                                        ].right_title =
-                                                            e.target.value;
-                                                        setData(
-                                                            "case_studies",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-
-                                                <textarea
-                                                    className="min-h-52 w-full rounded-lg border-slate-300 font-mono"
-                                                    placeholder="Code kanan..."
-                                                    value={
-                                                        study.right_code || ""
-                                                    }
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.case_studies,
-                                                        ];
-                                                        updated[
-                                                            sidx
-                                                        ].right_code =
-                                                            e.target.value;
-                                                        setData(
-                                                            "case_studies",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-                                    <textarea
-                                        className="min-h-24 w-full rounded-lg border-slate-300"
-                                        placeholder="Expected Output"
-                                        value={study.expected_output || ""}
-                                        onChange={(e) => {
-                                            const updated = [
-                                                ...data.case_studies,
-                                            ];
-                                            updated[sidx].expected_output =
-                                                e.target.value;
-                                            setData("case_studies", updated);
-                                        }}
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                        {/* MISSIONS */}
-                        <div className="border-t border-slate-200 pt-4 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h4 className="text-sm font-semibold text-slate-700">
-                                    Missions
-                                </h4>
-
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setData("missions", [
-                                            ...(data.missions || []),
-                                            {
-                                                title: "",
-                                                description: "",
-                                                content_type: "image",
-                                                left_image: "",
-                                                right_image: "",
-                                                left_image_file: null,
-                                                right_image_file: null,
-                                                content: "",
-                                                questions: [""],
-                                            },
-                                        ]);
-                                    }}
-                                    className="rounded-lg bg-emerald-600 px-3 py-1 text-sm text-white"
-                                >
-                                    + Tambah Mission
-                                </button>
+                                    ),
+                                )}
                             </div>
+                            {/* MISSIONS */}
+                            <div className="border-t border-slate-200 pt-4 space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-sm font-semibold text-slate-700">
+                                        Missions
+                                    </h4>
 
-                            {(data.missions || []).map((mission, midx) => (
-                                <div
-                                    key={midx}
-                                    className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
-                                >
-                                    <div className="flex justify-between">
-                                        <h5 className="font-semibold">
-                                            Mission #{midx + 1}
-                                        </h5>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const updated = [
-                                                    ...data.missions,
-                                                ];
-                                                updated.splice(midx, 1);
-                                                setData("missions", updated);
-                                            }}
-                                            className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
-                                        >
-                                            Hapus
-                                        </button>
-                                    </div>
-
-                                    <input
-                                        className="w-full rounded-lg border-slate-300"
-                                        placeholder="Judul Mission"
-                                        value={mission.title || ""}
-                                        onChange={(e) => {
-                                            const updated = [...data.missions];
-                                            updated[midx].title =
-                                                e.target.value;
-                                            setData("missions", updated);
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setData("missions", [
+                                                ...(data.missions || []),
+                                                {
+                                                    title: "",
+                                                    description: "",
+                                                    content_type: "image",
+                                                    left_image: "",
+                                                    right_image: "",
+                                                    left_image_file: null,
+                                                    right_image_file: null,
+                                                    content: "",
+                                                    questions: [""],
+                                                },
+                                            ]);
                                         }}
-                                    />
+                                        className="rounded-lg bg-emerald-600 px-3 py-1 text-sm text-white"
+                                    >
+                                        + Tambah Mission
+                                    </button>
+                                </div>
 
-                                    <textarea
-                                        className="min-h-20 w-full rounded-lg border-slate-300"
-                                        placeholder="Deskripsi mission"
-                                        value={mission.description || ""}
-                                        onChange={(e) => {
-                                            const updated = [...data.missions];
-                                            updated[midx].description =
-                                                e.target.value;
-                                            setData("missions", updated);
-                                        }}
-                                    />
+                                {(data.missions || []).map((mission, midx) => (
+                                    <div
+                                        key={midx}
+                                        className="rounded-xl border border-slate-200 bg-white p-4 space-y-4"
+                                    >
+                                        <div className="flex justify-between">
+                                            <h5 className="font-semibold">
+                                                Mission #{midx + 1}
+                                            </h5>
 
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-slate-700">
-                                            Tipe Konten
-                                        </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const updated = [
+                                                        ...data.missions,
+                                                    ];
+                                                    updated.splice(midx, 1);
+                                                    setData(
+                                                        "missions",
+                                                        updated,
+                                                    );
+                                                }}
+                                                className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
+                                            >
+                                                Hapus
+                                            </button>
+                                        </div>
 
-                                        <select
+                                        <input
                                             className="w-full rounded-lg border-slate-300"
-                                            value={
-                                                mission.content_type || "image"
-                                            }
+                                            placeholder="Judul Mission"
+                                            value={mission.title || ""}
                                             onChange={(e) => {
                                                 const updated = [
                                                     ...data.missions,
                                                 ];
-
-                                                updated[midx].content_type =
+                                                updated[midx].title =
                                                     e.target.value;
-
                                                 setData("missions", updated);
                                             }}
-                                        >
-                                            <option value="image">
-                                                Compare Gambar
-                                            </option>
+                                        />
 
-                                            <option value="text">
-                                                HTML / Rich Text
-                                            </option>
-                                        </select>
-                                    </div>
+                                        <textarea
+                                            className="min-h-20 w-full rounded-lg border-slate-300"
+                                            placeholder="Deskripsi mission"
+                                            value={mission.description || ""}
+                                            onChange={(e) => {
+                                                const updated = [
+                                                    ...data.missions,
+                                                ];
+                                                updated[midx].description =
+                                                    e.target.value;
+                                                setData("missions", updated);
+                                            }}
+                                        />
 
-                                    {mission.content_type === "image" ? (
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            {/* GAMBAR KIRI */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-slate-700">
-                                                    Gambar A
-                                                </label>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-slate-700">
+                                                Tipe Konten
+                                            </label>
 
-                                                <div className="flex items-start justify-between gap-3">
-                                                    {mission.left_image && (
-                                                        <img
-                                                            src={
-                                                                mission.left_image
-                                                            }
-                                                            alt="Gambar kiri"
-                                                            className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                        />
-                                                    )}
-
-                                                    {(mission.left_image ||
-                                                        mission.left_image_file) && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                clearMissionImage(
-                                                                    midx,
-                                                                    "left",
-                                                                )
-                                                            }
-                                                            className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
-                                                        >
-                                                            Hapus gambar
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="w-full rounded-lg border-slate-300"
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[
-                                                            midx
-                                                        ].left_image_file =
-                                                            e.target
-                                                                .files?.[0] ??
-                                                            null;
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-                                            </div>
-
-                                            {/* GAMBAR KANAN */}
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-semibold text-slate-700">
-                                                    Gambar B
-                                                </label>
-
-                                                <div className="flex items-start justify-between gap-3">
-                                                    {mission.right_image && (
-                                                        <img
-                                                            src={
-                                                                mission.right_image
-                                                            }
-                                                            alt="Gambar kanan"
-                                                            className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                        />
-                                                    )}
-
-                                                    {(mission.right_image ||
-                                                        mission.right_image_file) && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                clearMissionImage(
-                                                                    midx,
-                                                                    "right",
-                                                                )
-                                                            }
-                                                            className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
-                                                        >
-                                                            Hapus gambar
-                                                        </button>
-                                                    )}
-                                                </div>
-
-                                                <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    className="w-full rounded-lg border-slate-300"
-                                                    onChange={(e) => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[
-                                                            midx
-                                                        ].right_image_file =
-                                                            e.target
-                                                                .files?.[0] ??
-                                                            null;
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-3">
-                                            {/* TOOLBAR */}
-                                            <div className="flex gap-2 mb-2 text-xs">
-                                                <button
-                                                    type="button"
-                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
-                                                    onClick={() => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[midx].content +=
-                                                            "<b>bold text</b>";
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                >
-                                                    B
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
-                                                    onClick={() => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[midx].content +=
-                                                            "<i>italic text</i>";
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                >
-                                                    I
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
-                                                    onClick={() => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[midx].content +=
-                                                            "<ul><li>List item</li></ul>";
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                >
-                                                    • List
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
-                                                    onClick={() => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-
-                                                        updated[midx].content +=
-                                                            "<ol><li>List item</li></ol>";
-
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                >
-                                                    1. List
-                                                </button>
-                                            </div>
-
-                                            <textarea
-                                                className="min-h-48 w-full rounded-lg border-slate-300"
-                                                placeholder="HTML atau plain text..."
-                                                value={mission.content || ""}
+                                            <select
+                                                className="w-full rounded-lg border-slate-300"
+                                                value={
+                                                    mission.content_type ||
+                                                    "image"
+                                                }
                                                 onChange={(e) => {
                                                     const updated = [
                                                         ...data.missions,
                                                     ];
 
-                                                    updated[midx].content =
+                                                    updated[midx].content_type =
                                                         e.target.value;
 
                                                     setData(
@@ -2127,41 +1997,242 @@ export default function StepForm({
                                                         updated,
                                                     );
                                                 }}
-                                            />
-
-                                            <div className="rounded-xl border border-slate-200 bg-white p-4">
-                                                <p className="mb-2 text-xs text-slate-500">
-                                                    Preview
-                                                </p>
-
-                                                <div
-                                                    dangerouslySetInnerHTML={{
-                                                        __html:
-                                                            mission.content ||
-                                                            "",
-                                                    }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <div className="space-y-2">
-                                        {mission.questions.map((q, qidx) => (
-                                            <div
-                                                key={qidx}
-                                                className="flex gap-2"
                                             >
-                                                <input
-                                                    className="flex-1 rounded-lg border-slate-300"
-                                                    placeholder={`Pertanyaan ${qidx + 1}`}
-                                                    value={q || ""}
+                                                <option value="image">
+                                                    Compare Gambar
+                                                </option>
+
+                                                <option value="text">
+                                                    HTML / Rich Text
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        {mission.content_type === "image" ? (
+                                            <div className="grid gap-4 md:grid-cols-2">
+                                                {/* GAMBAR KIRI */}
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-slate-700">
+                                                        Gambar A
+                                                    </label>
+
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        {mission.left_image && (
+                                                            <img
+                                                                src={
+                                                                    mission.left_image
+                                                                }
+                                                                alt="Gambar kiri"
+                                                                className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                            />
+                                                        )}
+
+                                                        {(mission.left_image ||
+                                                            mission.left_image_file) && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    clearMissionImage(
+                                                                        midx,
+                                                                        "left",
+                                                                    )
+                                                                }
+                                                                className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                            >
+                                                                Hapus gambar
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="w-full rounded-lg border-slate-300"
+                                                        onChange={(e) => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].left_image_file =
+                                                                e.target
+                                                                    .files?.[0] ??
+                                                                null;
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                {/* GAMBAR KANAN */}
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-semibold text-slate-700">
+                                                        Gambar B
+                                                    </label>
+
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        {mission.right_image && (
+                                                            <img
+                                                                src={
+                                                                    mission.right_image
+                                                                }
+                                                                alt="Gambar kanan"
+                                                                className="h-52 w-full rounded-xl border border-slate-200 object-cover"
+                                                            />
+                                                        )}
+
+                                                        {(mission.right_image ||
+                                                            mission.right_image_file) && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    clearMissionImage(
+                                                                        midx,
+                                                                        "right",
+                                                                    )
+                                                                }
+                                                                className="shrink-0 rounded bg-red-100 px-3 py-1 text-xs font-semibold text-red-700 hover:bg-red-200"
+                                                            >
+                                                                Hapus gambar
+                                                            </button>
+                                                        )}
+                                                    </div>
+
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        className="w-full rounded-lg border-slate-300"
+                                                        onChange={(e) => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].right_image_file =
+                                                                e.target
+                                                                    .files?.[0] ??
+                                                                null;
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-3">
+                                                {/* TOOLBAR */}
+                                                <div className="flex gap-2 mb-2 text-xs">
+                                                    <button
+                                                        type="button"
+                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded font-bold"
+                                                        onClick={() => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].content +=
+                                                                "<b>bold text</b>";
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    >
+                                                        B
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded italic"
+                                                        onClick={() => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].content +=
+                                                                "<i>italic text</i>";
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    >
+                                                        I
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                        onClick={() => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].content +=
+                                                                "<ul><li>List item</li></ul>";
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    >
+                                                        • List
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="bg-slate-200 hover:bg-slate-300 text-slate-700 px-2 py-1 rounded"
+                                                        onClick={() => {
+                                                            const updated = [
+                                                                ...data.missions,
+                                                            ];
+
+                                                            updated[
+                                                                midx
+                                                            ].content +=
+                                                                "<ol><li>List item</li></ol>";
+
+                                                            setData(
+                                                                "missions",
+                                                                updated,
+                                                            );
+                                                        }}
+                                                    >
+                                                        1. List
+                                                    </button>
+                                                </div>
+
+                                                <textarea
+                                                    className="min-h-48 w-full rounded-lg border-slate-300"
+                                                    placeholder="HTML atau plain text..."
+                                                    value={
+                                                        mission.content || ""
+                                                    }
                                                     onChange={(e) => {
                                                         const updated = [
                                                             ...data.missions,
                                                         ];
-                                                        updated[midx].questions[
-                                                            qidx
-                                                        ] = e.target.value;
+
+                                                        updated[midx].content =
+                                                            e.target.value;
+
                                                         setData(
                                                             "missions",
                                                             updated,
@@ -2169,269 +2240,203 @@ export default function StepForm({
                                                     }}
                                                 />
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        const updated = [
-                                                            ...data.missions,
-                                                        ];
-                                                        updated[
-                                                            midx
-                                                        ].questions.splice(
-                                                            qidx,
-                                                            1,
-                                                        );
-                                                        setData(
-                                                            "missions",
-                                                            updated,
-                                                        );
-                                                    }}
-                                                    className="rounded bg-red-100 px-2 text-xs text-red-700"
-                                                >
-                                                    X
-                                                </button>
+                                                <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                                    <p className="mb-2 text-xs text-slate-500">
+                                                        Preview
+                                                    </p>
+
+                                                    <div
+                                                        dangerouslySetInnerHTML={{
+                                                            __html:
+                                                                mission.content ||
+                                                                "",
+                                                        }}
+                                                    />
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            const updated = [...data.missions];
-                                            updated[midx].questions.push("");
-                                            setData("missions", updated);
-                                        }}
-                                        className="rounded bg-slate-200 px-3 py-1 text-xs"
-                                    >
-                                        + Tambah Pertanyaan
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {data.step_type === "practice" && (
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between gap-3">
-                            <div>
-                                <h3 className="font-semibold text-slate-900">
-                                    Daftar Latihan Soal
-                                </h3>
-                                <p className="text-sm text-slate-500">
-                                    Guru bisa mencampur pilihan ganda dan essay
-                                    dalam satu step.
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                                onClick={() =>
-                                    setPracticeItems([
-                                        ...practiceItems,
-                                        {
-                                            id: `practice-${Date.now()}`,
-                                            mode: "quiz",
-                                            question_type: "text",
-                                            question_language: "javascript",
-                                            option_type: "text",
-                                            question: "",
-                                            options: [""],
-                                            correct_answer: 0,
-                                            explanation: "",
-                                        },
-                                    ])
-                                }
-                            >
-                                + Tambah Soal
-                            </button>
-                        </div>
-
-                        {practiceItems.map((item, index) => (
-                            <div
-                                key={item.id || index}
-                                className="rounded-lg border border-slate-200 bg-white p-4"
-                            >
-                                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                                    <div className="font-semibold text-slate-900">
-                                        Soal {index + 1}
-                                    </div>
-                                    {practiceItems.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="rounded-lg border border-red-200 px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-50"
-                                            onClick={() =>
-                                                setPracticeItems(
-                                                    practiceItems.filter(
-                                                        (_, itemIndex) =>
-                                                            itemIndex !== index,
-                                                    ),
-                                                )
-                                            }
-                                        >
-                                            Hapus
-                                        </button>
-                                    )}
-                                </div>
-
-                                <div className="grid gap-4 md:grid-cols-2">
-                                    <div>
-                                        <label className="block text-sm font-semibold text-slate-700">
-                                            Tipe Soal
-                                        </label>
-                                        <select
-                                            className="mt-1 w-full rounded-lg border-slate-300"
-                                            value={item.mode}
-                                            onChange={(e) => {
-                                                const next = [...practiceItems];
-                                                next[index].mode =
-                                                    e.target.value;
-                                                setPracticeItems(next);
-                                            }}
-                                        >
-                                            <option value="quiz">
-                                                Pilihan ganda
-                                            </option>
-                                            <option value="essay">Essay</option>
-                                        </select>
-
-                                        <div className="mt-3">
-                                            <label className="block text-sm font-semibold text-slate-700">
-                                                Tipe Pertanyaan
-                                            </label>
-
-                                            <select
-                                                className="mt-1 w-full rounded-lg border-slate-300"
-                                                value={item.question_type}
-                                                onChange={(e) => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[index].question_type =
-                                                        e.target.value;
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                <option value="text">
-                                                    Teks
-                                                </option>
-                                                <option value="code">
-                                                    Code
-                                                </option>
-                                            </select>
-                                        </div>
-
-                                        <label className="mt-4 block text-sm font-semibold text-slate-700">
-                                            Pertanyaan
-                                        </label>
-
-                                        {item.question_type === "code" && (
-                                            <select
-                                                className="mb-2 w-full rounded-lg border-slate-300"
-                                                value={
-                                                    item.question_language ||
-                                                    "javascript"
-                                                }
-                                                onChange={(e) => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[
-                                                        index
-                                                    ].question_language =
-                                                        e.target.value;
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                <option value="javascript">
-                                                    Javascript
-                                                </option>
-                                                <option value="python">
-                                                    Python
-                                                </option>
-                                                <option value="php">PHP</option>
-                                                <option value="html">
-                                                    HTML
-                                                </option>
-                                                <option value="css">CSS</option>
-                                            </select>
                                         )}
 
-                                        <textarea
-                                            className={`w-full rounded-lg border-slate-300 ${
-                                                item.question_type === "code"
-                                                    ? "min-h-60 font-mono"
-                                                    : "min-h-40"
-                                            }`}
-                                            value={item.question}
-                                            onChange={(e) => {
-                                                const next = [...practiceItems];
-                                                next[index].question =
-                                                    e.target.value;
-                                                setPracticeItems(next);
-                                            }}
-                                        />
+                                        <div className="space-y-2">
+                                            {mission.questions.map(
+                                                (q, qidx) => (
+                                                    <div
+                                                        key={qidx}
+                                                        className="flex gap-2"
+                                                    >
+                                                        <input
+                                                            className="flex-1 rounded-lg border-slate-300"
+                                                            placeholder={`Pertanyaan ${qidx + 1}`}
+                                                            value={q || ""}
+                                                            onChange={(e) => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.missions,
+                                                                    ];
+                                                                updated[
+                                                                    midx
+                                                                ].questions[
+                                                                    qidx
+                                                                ] =
+                                                                    e.target.value;
+                                                                setData(
+                                                                    "missions",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                        />
 
-                                        <div className="mt-3 rounded-lg border p-4">
-                                            {item.question_type === "code" ? (
-                                                <CodePreview
-                                                    code={item.question}
-                                                    language={
-                                                        item.question_language ||
-                                                        "javascript"
-                                                    }
-                                                />
-                                            ) : (
-                                                <div
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: cleanHtml(item.question),
-                                                    }}
-                                                />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const updated =
+                                                                    [
+                                                                        ...data.missions,
+                                                                    ];
+                                                                updated[
+                                                                    midx
+                                                                ].questions.splice(
+                                                                    qidx,
+                                                                    1,
+                                                                );
+                                                                setData(
+                                                                    "missions",
+                                                                    updated,
+                                                                );
+                                                            }}
+                                                            className="rounded bg-red-100 px-2 text-xs text-red-700"
+                                                        >
+                                                            X
+                                                        </button>
+                                                    </div>
+                                                ),
                                             )}
                                         </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const updated = [
+                                                    ...data.missions,
+                                                ];
+                                                updated[midx].questions.push(
+                                                    "",
+                                                );
+                                                setData("missions", updated);
+                                            }}
+                                            className="rounded bg-slate-200 px-3 py-1 text-xs"
+                                        >
+                                            + Tambah Pertanyaan
+                                        </button>
                                     </div>
-                                    {item.mode === "quiz" && (
-                                        <div className="mt-4 space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <label className="block text-sm font-semibold text-slate-700">
-                                                    Pilihan Jawaban
-                                                </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                                                <button
-                                                    type="button"
-                                                    className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
-                                                    onClick={() => {
-                                                        const next = [
-                                                            ...practiceItems,
-                                                        ];
-                                                        next[
-                                                            index
-                                                        ].options.push("");
-                                                        setPracticeItems(next);
-                                                    }}
-                                                >
-                                                    + Tambah Pilihan
-                                                </button>
-                                            </div>
+                    {data.step_type === "practice" && (
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <h3 className="font-semibold text-slate-900">
+                                        Daftar Latihan Soal
+                                    </h3>
+                                    <p className="text-sm text-slate-500">
+                                        Guru bisa mencampur pilihan ganda dan
+                                        essay dalam satu step.
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                                    onClick={() =>
+                                        setPracticeItems([
+                                            ...practiceItems,
+                                            {
+                                                id: `practice-${Date.now()}`,
+                                                mode: "quiz",
+                                                question_type: "text",
+                                                question_language: "javascript",
+                                                option_type: "text",
+                                                question: "",
+                                                options: [""],
+                                                correct_answer: 0,
+                                                explanation: "",
+                                            },
+                                        ])
+                                    }
+                                >
+                                    + Tambah Soal
+                                </button>
+                            </div>
 
-                                            <div className="mb-3">
+                            {practiceItems.map((item, index) => (
+                                <div
+                                    key={item.id || index}
+                                    className="rounded-lg border border-slate-200 bg-white p-4"
+                                >
+                                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                                        <div className="font-semibold text-slate-900">
+                                            Soal {index + 1}
+                                        </div>
+                                        {practiceItems.length > 1 && (
+                                            <button
+                                                type="button"
+                                                className="rounded-lg border border-red-200 px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-50"
+                                                onClick={() =>
+                                                    setPracticeItems(
+                                                        practiceItems.filter(
+                                                            (_, itemIndex) =>
+                                                                itemIndex !==
+                                                                index,
+                                                        ),
+                                                    )
+                                                }
+                                            >
+                                                Hapus
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Tipe Soal
+                                            </label>
+                                            <select
+                                                className="mt-1 w-full rounded-lg border-slate-300"
+                                                value={item.mode}
+                                                onChange={(e) => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].mode =
+                                                        e.target.value;
+                                                    setPracticeItems(next);
+                                                }}
+                                            >
+                                                <option value="quiz">
+                                                    Pilihan ganda
+                                                </option>
+                                                <option value="essay">
+                                                    Essay
+                                                </option>
+                                            </select>
+
+                                            <div className="mt-3">
                                                 <label className="block text-sm font-semibold text-slate-700">
-                                                    Tipe Pilihan Jawaban
+                                                    Tipe Pertanyaan
                                                 </label>
 
                                                 <select
                                                     className="mt-1 w-full rounded-lg border-slate-300"
-                                                    value={
-                                                        item.option_type ||
-                                                        "text"
-                                                    }
+                                                    value={item.question_type}
                                                     onChange={(e) => {
                                                         const next = [
                                                             ...practiceItems,
                                                         ];
                                                         next[
                                                             index
-                                                        ].option_type =
+                                                        ].question_type =
                                                             e.target.value;
                                                         setPracticeItems(next);
                                                     }}
@@ -2445,44 +2450,223 @@ export default function StepForm({
                                                 </select>
                                             </div>
 
-                                            {item.options.map(
-                                                (option, optIdx) => (
+                                            <label className="mt-4 block text-sm font-semibold text-slate-700">
+                                                Pertanyaan
+                                            </label>
+
+                                            {item.question_type === "code" && (
+                                                <select
+                                                    className="mb-2 w-full rounded-lg border-slate-300"
+                                                    value={
+                                                        item.question_language ||
+                                                        "javascript"
+                                                    }
+                                                    onChange={(e) => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].question_language =
+                                                            e.target.value;
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    <option value="javascript">
+                                                        Javascript
+                                                    </option>
+                                                    <option value="python">
+                                                        Python
+                                                    </option>
+                                                    <option value="php">
+                                                        PHP
+                                                    </option>
+                                                    <option value="html">
+                                                        HTML
+                                                    </option>
+                                                    <option value="css">
+                                                        CSS
+                                                    </option>
+                                                </select>
+                                            )}
+
+                                            <textarea
+                                                className={`w-full rounded-lg border-slate-300 ${
+                                                    item.question_type ===
+                                                    "code"
+                                                        ? "min-h-60 font-mono"
+                                                        : "min-h-40"
+                                                }`}
+                                                value={item.question}
+                                                onChange={(e) => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].question =
+                                                        e.target.value;
+                                                    setPracticeItems(next);
+                                                }}
+                                            />
+
+                                            <div className="mt-3 rounded-lg border p-4">
+                                                {item.question_type ===
+                                                "code" ? (
+                                                    <CodePreview
+                                                        code={item.question}
+                                                        language={
+                                                            item.question_language ||
+                                                            "javascript"
+                                                        }
+                                                    />
+                                                ) : (
                                                     <div
-                                                        key={optIdx}
-                                                        className={`flex items-center gap-3 rounded-xl border p-3 ${
-                                                            item.correct_answer ===
-                                                            optIdx
-                                                                ? "border-emerald-400 bg-emerald-50"
-                                                                : "border-slate-200 bg-white"
-                                                        }`}
+                                                        dangerouslySetInnerHTML={{
+                                                            __html: cleanHtml(
+                                                                item.question,
+                                                            ),
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                        {item.mode === "quiz" && (
+                                            <div className="mt-4 space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="block text-sm font-semibold text-slate-700">
+                                                        Pilihan Jawaban
+                                                    </label>
+
+                                                    <button
+                                                        type="button"
+                                                        className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
+                                                        onClick={() => {
+                                                            const next = [
+                                                                ...practiceItems,
+                                                            ];
+                                                            next[
+                                                                index
+                                                            ].options.push("");
+                                                            setPracticeItems(
+                                                                next,
+                                                            );
+                                                        }}
                                                     >
-                                                        <input
-                                                            type="radio"
-                                                            name={`correct-${index}`}
-                                                            checked={
+                                                        + Tambah Pilihan
+                                                    </button>
+                                                </div>
+
+                                                <div className="mb-3">
+                                                    <label className="block text-sm font-semibold text-slate-700">
+                                                        Tipe Pilihan Jawaban
+                                                    </label>
+
+                                                    <select
+                                                        className="mt-1 w-full rounded-lg border-slate-300"
+                                                        value={
+                                                            item.option_type ||
+                                                            "text"
+                                                        }
+                                                        onChange={(e) => {
+                                                            const next = [
+                                                                ...practiceItems,
+                                                            ];
+                                                            next[
+                                                                index
+                                                            ].option_type =
+                                                                e.target.value;
+                                                            setPracticeItems(
+                                                                next,
+                                                            );
+                                                        }}
+                                                    >
+                                                        <option value="text">
+                                                            Teks
+                                                        </option>
+                                                        <option value="code">
+                                                            Code
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                {item.options.map(
+                                                    (option, optIdx) => (
+                                                        <div
+                                                            key={optIdx}
+                                                            className={`flex items-center gap-3 rounded-xl border p-3 ${
                                                                 item.correct_answer ===
                                                                 optIdx
-                                                            }
-                                                            onChange={() => {
-                                                                const next = [
-                                                                    ...practiceItems,
-                                                                ];
-                                                                next[
-                                                                    index
-                                                                ].correct_answer =
-                                                                    optIdx;
-                                                                setPracticeItems(
-                                                                    next,
-                                                                );
-                                                            }}
-                                                        />
+                                                                    ? "border-emerald-400 bg-emerald-50"
+                                                                    : "border-slate-200 bg-white"
+                                                            }`}
+                                                        >
+                                                            <input
+                                                                type="radio"
+                                                                name={`correct-${index}`}
+                                                                checked={
+                                                                    item.correct_answer ===
+                                                                    optIdx
+                                                                }
+                                                                onChange={() => {
+                                                                    const next =
+                                                                        [
+                                                                            ...practiceItems,
+                                                                        ];
+                                                                    next[
+                                                                        index
+                                                                    ].correct_answer =
+                                                                        optIdx;
+                                                                    setPracticeItems(
+                                                                        next,
+                                                                    );
+                                                                }}
+                                                            />
 
-                                                        <div className="flex-1">
-                                                            {item.option_type ===
-                                                            "code" ? (
-                                                                <>
-                                                                    <textarea
-                                                                        className="w-full rounded-lg border-slate-300 font-mono min-h-24"
+                                                            <div className="flex-1">
+                                                                {item.option_type ===
+                                                                "code" ? (
+                                                                    <>
+                                                                        <textarea
+                                                                            className="w-full rounded-lg border-slate-300 font-mono min-h-24"
+                                                                            value={
+                                                                                option
+                                                                            }
+                                                                            onChange={(
+                                                                                e,
+                                                                            ) => {
+                                                                                const next =
+                                                                                    [
+                                                                                        ...practiceItems,
+                                                                                    ];
+
+                                                                                next[
+                                                                                    index
+                                                                                ].options[
+                                                                                    optIdx
+                                                                                ] =
+                                                                                    e.target.value;
+
+                                                                                setPracticeItems(
+                                                                                    next,
+                                                                                );
+                                                                            }}
+                                                                        />
+
+                                                                        {option && (
+                                                                            <CodePreview
+                                                                                code={
+                                                                                    option
+                                                                                }
+                                                                                language={
+                                                                                    item.question_language ||
+                                                                                    "javascript"
+                                                                                }
+                                                                            />
+                                                                        )}
+                                                                    </>
+                                                                ) : (
+                                                                    <input
+                                                                        className="w-full rounded-lg border-slate-300"
+                                                                        placeholder={`Pilihan ${optIdx + 1}`}
                                                                         value={
                                                                             option
                                                                         }
@@ -2506,29 +2690,15 @@ export default function StepForm({
                                                                             );
                                                                         }}
                                                                     />
+                                                                )}
+                                                            </div>
 
-                                                                    {option && (
-                                                                        <CodePreview
-                                                                            code={
-                                                                                option
-                                                                            }
-                                                                            language={
-                                                                                item.question_language ||
-                                                                                "javascript"
-                                                                            }
-                                                                        />
-                                                                    )}
-                                                                </>
-                                                            ) : (
-                                                                <input
-                                                                    className="w-full rounded-lg border-slate-300"
-                                                                    placeholder={`Pilihan ${optIdx + 1}`}
-                                                                    value={
-                                                                        option
-                                                                    }
-                                                                    onChange={(
-                                                                        e,
-                                                                    ) => {
+                                                            {item.options
+                                                                .length > 1 && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
+                                                                    onClick={() => {
                                                                         const next =
                                                                             [
                                                                                 ...practiceItems,
@@ -2536,169 +2706,154 @@ export default function StepForm({
 
                                                                         next[
                                                                             index
-                                                                        ].options[
-                                                                            optIdx
-                                                                        ] =
-                                                                            e.target.value;
+                                                                        ].options.splice(
+                                                                            optIdx,
+                                                                            1,
+                                                                        );
+
+                                                                        if (
+                                                                            next[
+                                                                                index
+                                                                            ]
+                                                                                .correct_answer >=
+                                                                            next[
+                                                                                index
+                                                                            ]
+                                                                                .options
+                                                                                .length
+                                                                        ) {
+                                                                            next[
+                                                                                index
+                                                                            ].correct_answer =
+                                                                                0;
+                                                                        }
 
                                                                         setPracticeItems(
                                                                             next,
                                                                         );
                                                                     }}
-                                                                />
+                                                                >
+                                                                    Hapus
+                                                                </button>
                                                             )}
                                                         </div>
+                                                    ),
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {item.mode === "quiz" && (
+                                        <div className="mt-4">
+                                            <label className="block text-sm font-semibold text-slate-700">
+                                                Penjelasan / Pembahasan
+                                            </label>
 
-                                                        {item.options.length >
-                                                            1 && (
-                                                            <button
-                                                                type="button"
-                                                                className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
-                                                                onClick={() => {
-                                                                    const next =
-                                                                        [
-                                                                            ...practiceItems,
-                                                                        ];
+                                            {/* TOOLBAR */}
+                                            <div className="mb-2 mt-2 flex gap-2 text-xs">
+                                                <button
+                                                    type="button"
+                                                    className="rounded bg-slate-200 px-2 py-1 font-bold"
+                                                    onClick={() => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].explanation +=
+                                                            "<b>bold text</b>";
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    B
+                                                </button>
 
-                                                                    next[
-                                                                        index
-                                                                    ].options.splice(
-                                                                        optIdx,
-                                                                        1,
-                                                                    );
+                                                <button
+                                                    type="button"
+                                                    className="rounded bg-slate-200 px-2 py-1 italic"
+                                                    onClick={() => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].explanation +=
+                                                            "<i>italic text</i>";
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    I
+                                                </button>
 
-                                                                    if (
-                                                                        next[
-                                                                            index
-                                                                        ]
-                                                                            .correct_answer >=
-                                                                        next[
-                                                                            index
-                                                                        ]
-                                                                            .options
-                                                                            .length
-                                                                    ) {
-                                                                        next[
-                                                                            index
-                                                                        ].correct_answer =
-                                                                            0;
-                                                                    }
+                                                <button
+                                                    type="button"
+                                                    className="rounded bg-slate-200 px-2 py-1"
+                                                    onClick={() => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].explanation +=
+                                                            "<ul><li>Point penting</li></ul>";
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    • List
+                                                </button>
 
-                                                                    setPracticeItems(
-                                                                        next,
-                                                                    );
-                                                                }}
-                                                            >
-                                                                Hapus
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ),
-                                            )}
+                                                <button
+                                                    type="button"
+                                                    className="rounded bg-slate-200 px-2 py-1"
+                                                    onClick={() => {
+                                                        const next = [
+                                                            ...practiceItems,
+                                                        ];
+                                                        next[
+                                                            index
+                                                        ].explanation +=
+                                                            "<div class='rounded-xl bg-yellow-100 p-3 text-yellow-900'>Highlight penting</div>";
+                                                        setPracticeItems(next);
+                                                    }}
+                                                >
+                                                    Box
+                                                </button>
+                                            </div>
+                                            <textarea
+                                                className="min-h-32 w-full rounded-lg border-slate-300"
+                                                placeholder="Tulis pembahasan jawaban di sini..."
+                                                value={item.explanation || ""}
+                                                onChange={(e) => {
+                                                    const next = [
+                                                        ...practiceItems,
+                                                    ];
+                                                    next[index].explanation =
+                                                        e.target.value;
+                                                    setPracticeItems(next);
+                                                }}
+                                            />
+
+                                            {/* PREVIEW */}
+                                            <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
+                                                <p className="mb-2 text-xs text-slate-500">
+                                                    Preview
+                                                </p>
+
+                                                <div
+                                                    dangerouslySetInnerHTML={{
+                                                        __html:
+                                                            item.explanation ||
+                                                            "",
+                                                    }}
+                                                />
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                                {item.mode === "quiz" && (
-                                    <div className="mt-4">
-                                        <label className="block text-sm font-semibold text-slate-700">
-                                            Penjelasan / Pembahasan
-                                        </label>
+                            ))}
+                        </div>
+                    )}
 
-                                        {/* TOOLBAR */}
-                                        <div className="mb-2 mt-2 flex gap-2 text-xs">
-                                            <button
-                                                type="button"
-                                                className="rounded bg-slate-200 px-2 py-1 font-bold"
-                                                onClick={() => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[index].explanation +=
-                                                        "<b>bold text</b>";
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                B
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                className="rounded bg-slate-200 px-2 py-1 italic"
-                                                onClick={() => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[index].explanation +=
-                                                        "<i>italic text</i>";
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                I
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                className="rounded bg-slate-200 px-2 py-1"
-                                                onClick={() => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[index].explanation +=
-                                                        "<ul><li>Point penting</li></ul>";
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                • List
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                className="rounded bg-slate-200 px-2 py-1"
-                                                onClick={() => {
-                                                    const next = [
-                                                        ...practiceItems,
-                                                    ];
-                                                    next[index].explanation +=
-                                                        "<div class='rounded-xl bg-yellow-100 p-3 text-yellow-900'>Highlight penting</div>";
-                                                    setPracticeItems(next);
-                                                }}
-                                            >
-                                                Box
-                                            </button>
-                                        </div>
-                                        <textarea
-                                            className="min-h-32 w-full rounded-lg border-slate-300"
-                                            placeholder="Tulis pembahasan jawaban di sini..."
-                                            value={item.explanation || ""}
-                                            onChange={(e) => {
-                                                const next = [...practiceItems];
-                                                next[index].explanation =
-                                                    e.target.value;
-                                                setPracticeItems(next);
-                                            }}
-                                        />
-
-                                        {/* PREVIEW */}
-                                        <div className="mt-3 rounded-xl border border-slate-200 bg-white p-4">
-                                            <p className="mb-2 text-xs text-slate-500">
-                                                Preview
-                                            </p>
-
-                                            <div
-                                                dangerouslySetInnerHTML={{
-                                                    __html:
-                                                        item.explanation || "",
-                                                }}
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {data.step_type === "review" && (
+                    {/* {data.step_type === "review" && (
                     <div className="space-y-6">
                         <div>
                             <label className="mb-2 block text-sm font-medium">
@@ -2714,7 +2869,7 @@ export default function StepForm({
                                 className="w-full rounded-xl border border-slate-300"
                             />
                         </div>
-
+                        
                         <div className="space-y-4">
                             <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                                 Review akan mengikuti practice step sebelumnya.
@@ -2901,24 +3056,27 @@ export default function StepForm({
                             )}
                         </div>
                     </div>
-                )}
+                )} */}
 
-                {data.step_type === "reflection" && (
-                    <div>
-                        <label className="block text-sm font-semibold text-slate-700">
-                            Pertanyaan Refleksi
-                        </label>
-                        <textarea
-                            className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
-                            value={data.reflection_question || ""}
-                            onChange={(e) =>
-                                setData("reflection_question", e.target.value)
-                            }
-                        />
-                    </div>
-                )}
-            </div>
-
+                    {data.step_type === "reflection" && (
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700">
+                                Pertanyaan Refleksi
+                            </label>
+                            <textarea
+                                className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                value={data.reflection_question || ""}
+                                onChange={(e) =>
+                                    setData(
+                                        "reflection_question",
+                                        e.target.value,
+                                    )
+                                }
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
             <div className="mt-5 flex flex-wrap gap-2">
                 <button
                     disabled={processing}
