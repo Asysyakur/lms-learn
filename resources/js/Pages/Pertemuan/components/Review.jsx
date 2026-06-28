@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { codeToHtml } from "shiki";
+import CodePreview from "@/Components/CodePreview";
 
 function getPracticeAnswerMap(practiceResponses) {
     const map = {};
@@ -94,31 +94,6 @@ function cleanHtml(html) {
     return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
 }
 
-function CodePreview({ code, language }) {
-    const [html, setHtml] = useState("");
-
-    useEffect(() => {
-        const run = async () => {
-            const result = await codeToHtml(code || "", {
-                lang: language || "javascript",
-                theme: "one-dark-pro",
-            });
-
-            setHtml(result);
-        };
-
-        run();
-    }, [code, language]);
-
-    return (
-        <div
-            dangerouslySetInnerHTML={{
-                __html: html,
-            }}
-        />
-    );
-}
-
 export default function StepFiveReview({
     stepData,
     savedResponse,
@@ -139,15 +114,9 @@ export default function StepFiveReview({
     );
 
     const practiceAnswerMap = getPracticeAnswerMap(practiceResponses);
-    console.log(groupedItems);
+
     return (
         <div className="space-y-6">
-            <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                <h2 className="text-xl font-bold text-slate-900">
-                    Aktivitas 5: Pembuktian
-                </h2>
-            </div>
-
             <div className="space-y-5">
                 {groupedItems.map((group) => (
                     <div
@@ -176,55 +145,71 @@ export default function StepFiveReview({
 
                             <div className="mt-4 space-y-3">
                                 {/* JAWABAN SISWA */}
-                                <div className="rounded-lg border border-slate-200 bg-white p-3">
-                                    <p className="text-xs font-semibold text-slate-500">
-                                        Jawaban Siswa
-                                    </p>
+                                {(() => {
+                                    const studentAnswerRaw =
+                                        practiceAnswerMap[
+                                            group.practice_index
+                                        ];
+                                    const studentAnswerValue =
+                                        Array.isArray(group.options)
+                                            ? (group.options[
+                                                  studentAnswerRaw
+                                              ] ?? studentAnswerRaw)
+                                            : studentAnswerRaw;
+                                    const correctAnswerValue =
+                                        group.options?.[
+                                            group.correct_answer
+                                        ];
+                                    const hasCorrectAnswer =
+                                        group.correct_answer !== null &&
+                                        group.correct_answer !== undefined &&
+                                        correctAnswerValue !== undefined;
+                                    const isCorrect =
+                                        hasCorrectAnswer &&
+                                        studentAnswerValue ===
+                                            correctAnswerValue;
+                                    const boxClass = !hasCorrectAnswer
+                                        ? "border-slate-200 bg-white"
+                                        : isCorrect
+                                          ? "border-emerald-200 bg-emerald-50"
+                                          : "border-red-200 bg-red-50";
+                                    const labelClass = !hasCorrectAnswer
+                                        ? "text-slate-500"
+                                        : isCorrect
+                                          ? "text-emerald-700"
+                                          : "text-red-700";
 
-                                    {group.option_type === "code" ? (
-                                        <CodePreview
-                                            code={
-                                                Array.isArray(group.options)
-                                                    ? (group.options[
-                                                          practiceAnswerMap[
-                                                              group
-                                                                  .practice_index
-                                                          ]
-                                                      ] ??
-                                                      practiceAnswerMap[
-                                                          group.practice_index
-                                                      ])
-                                                    : practiceAnswerMap[
-                                                          group.practice_index
-                                                      ]
-                                            }
-                                            language={group.question_language}
-                                        />
-                                    ) : (
+                                    return (
                                         <div
-                                            className="course-detail-text font-semibold text-slate-900"
-                                            dangerouslySetInnerHTML={{
-                                                __html: cleanHtml(
-                                                    Array.isArray(group.options)
-                                                        ? (group.options[
-                                                              practiceAnswerMap[
-                                                                  group
-                                                                      .practice_index
-                                                              ]
-                                                          ] ??
-                                                              practiceAnswerMap[
-                                                                  group
-                                                                      .practice_index
-                                                              ])
-                                                        : practiceAnswerMap[
-                                                              group
-                                                                  .practice_index
-                                                          ],
-                                                ),
-                                            }}
-                                        />
-                                    )}
-                                </div>
+                                            className={`rounded-lg border p-3 ${boxClass}`}
+                                        >
+                                            <p
+                                                className={`text-xs font-semibold ${labelClass}`}
+                                            >
+                                                Jawaban Siswa
+                                            </p>
+
+                                            {group.option_type === "code" ? (
+                                                <CodePreview
+                                                    code={studentAnswerValue}
+                                                    language={
+                                                        group.question_language
+                                                    }
+                                                />
+                                            ) : (
+                                                <div
+                                                    className="course-detail-text font-semibold text-slate-900"
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: cleanHtml(
+                                                            studentAnswerValue ||
+                                                                "",
+                                                        ),
+                                                    }}
+                                                />
+                                            )}
+                                        </div>
+                                    );
+                                })()}
 
                                 {/* JAWABAN BENAR */}
                                 <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
@@ -256,8 +241,8 @@ export default function StepFiveReview({
                                 </div>
 
                                 {/* PEMBAHASAN */}
-                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                                    <p className="text-xs font-semibold text-blue-700">
+                                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3">
+                                    <p className="text-xs font-semibold text-yellow-700">
                                         Pembahasan
                                     </p>
 

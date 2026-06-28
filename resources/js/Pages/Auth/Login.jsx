@@ -4,10 +4,11 @@ import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import {
-    ArrowRightIcon,
-    BookOpenIcon,
+    ClipboardDocumentCheckIcon,
+    CodeBracketIcon,
     EnvelopeIcon,
     LockClosedIcon,
+    PlayCircleIcon,
 } from "@heroicons/react/24/outline";
 
 export default function Login({ status, canResetPassword }) {
@@ -32,61 +33,61 @@ export default function Login({ status, canResetPassword }) {
             <div className="min-h-screen bg-slate-100 px-4 py-6">
                 <div className="mx-auto flex min-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[32px] bg-white shadow-2xl shadow-slate-300/30">
                     {/* LEFT */}
-                    <section className="hidden w-[46%] flex-col justify-between bg-[rgb(var(--color-primary))] p-10 text-white lg:flex">
-                        <div>
-                            <div>
-                                <h1 className="text-3xl font-black tracking-tight">
-                                    OOP CODE
-                                </h1>
-
-                                <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.35em] text-yellow-200">
-                                    Interactive Learning
-                                </p>
-                            </div>
-
-                            <div className="mt-12">
-                                <h2 className="max-w-md text-4xl font-black leading-tight">
-                                    Media pembelajaran interaktif untuk memahami
-                                    PBO.
-                                </h2>
-
-                                <p className="mt-5 max-w-sm text-sm leading-7 text-blue-100">
-                                    Belajar PBO melalui materi, studi kasus,
-                                    latihan, kuis, dan pembuktian hasil belajar.
-                                </p>
-                            </div>
+                    <section className="hidden w-[46%] flex-col justify-center bg-[rgb(var(--color-primary))] p-10 text-white lg:flex">
+                        <div className="inline-flex w-fit items-center gap-3 font-black tracking-wide text-white">
+                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl text-[rgb(var(--color-primary))]">
+                                O
+                            </span>
+                            OOPCODE
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="mt-8">
+                            <h2 className="max-w-md text-4xl font-black leading-tight">
+                                Media pembelajaran interaktif untuk memahami
+                                PBO.
+                            </h2>
+
+                            <p className="mt-5 max-w-sm text-sm leading-7 text-blue-100">
+                                Belajar PBO melalui materi, studi kasus,
+                                latihan, kuis, dan pembuktian hasil belajar.
+                            </p>
+                        </div>
+
+                        <div className="mt-8 space-y-4">
                             {[
                                 {
-                                    title: "Materi Bertahap",
-                                    desc: "Pelajari konsep PBO per pertemuan.",
+                                    title: "Video pembelajaran",
+                                    desc: "Video stimulus sebagai pengantar pembelajaran.",
+                                    Icon: PlayCircleIcon,
                                 },
                                 {
-                                    title: "Studi Kasus",
-                                    desc: "Analisis program dan coding mandiri.",
+                                    title: "Praktik Coding",
+                                    desc: "Mengamati, memodifikasi, dan menulis sintaks kode.",
+                                    Icon: CodeBracketIcon,
                                 },
                                 {
-                                    title: "Progress Belajar",
-                                    desc: "Pantau hasil dan perkembangan siswa.",
+                                    title: "Kuis dan pembahasan",
+                                    desc: "Menguji pemahaman materi melalui kuis dan pembahasan.",
+                                    Icon: ClipboardDocumentCheckIcon,
                                 },
                             ].map((item) => (
                                 <div
                                     key={item.title}
                                     className="rounded-2xl bg-white/10 p-5 backdrop-blur-sm"
                                 >
-                                    <div className="flex items-start gap-3">
-                                        <div className="mt-2 h-2.5 w-2.5 rounded-full bg-yellow-300" />
+                                    <div className="flex items-center gap-3">
+                                        <item.Icon className="mt-0.5 h-5 w-5 flex-shrink-0 text-yellow-300" />
 
                                         <div>
                                             <h3 className="text-sm font-bold">
                                                 {item.title}
                                             </h3>
 
-                                            <p className="mt-1 text-sm text-blue-100">
-                                                {item.desc}
-                                            </p>
+                                            {item.desc && (
+                                                <p className="mt-1 text-sm text-blue-100">
+                                                    {item.desc}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -207,9 +208,7 @@ export default function Login({ status, canResetPassword }) {
                                     disabled={processing}
                                     className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[rgb(var(--color-primary))] text-sm font-bold text-white transition hover:opacity-90"
                                 >
-                                    {processing ? "Memproses..." : "Login"}
-
-                                    <ArrowRightIcon className="h-4 w-4" />
+                                    {processing ? "Memproses..." : "LOGIN"}
                                 </button>
 
                                 <div className="rounded-2xl border border-slate-200 bg-slate-50 py-4 text-center text-sm">

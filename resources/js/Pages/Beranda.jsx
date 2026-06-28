@@ -1,7 +1,7 @@
 import AppLayout from "@/Layouts/AppLayout";
 import { Link } from "@inertiajs/react";
 
-export default function Beranda({ title = "Pembelajaran OOP", meetings = [] }) {
+export default function Beranda({ title = "Materi Pelajaran PBO", meetings = [] }) {
     const learningItems =
         meetings.length > 0
             ? meetings

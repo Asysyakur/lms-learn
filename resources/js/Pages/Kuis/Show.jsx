@@ -117,18 +117,9 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
             <div className="mx-auto min-h-screen overflow-y-auto bg-white/90 p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
                 <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[rgb(var(--color-primary))] sm:tracking-[0.2em]">
-                            Quiz /{" "}
-                            {quizSet.quiz_type === "pre-test"
-                                ? "Pre-test"
-                                : "Post-test"}
-                        </p>
                         <h2 className="mt-1 text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
                             {quizSet.title}
                         </h2>
-                        <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-600">
-                            {quizSet.description}
-                        </p>
                     </div>
 
                     <div
@@ -149,31 +140,6 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
 
                 <div className="mt-4 grid min-h-0 gap-4 lg:h-[calc(100vh-9.5rem)] lg:grid-cols-[minmax(0,1.45fr)_280px]">
                     <section className="flex min-h-0 flex-col gap-3">
-                        <div className="overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white shadow-sm">
-                            <img
-                                src={quizSet.image}
-                                alt={quizSet.title}
-                                className="h-24 w-full object-cover sm:h-28"
-                            />
-                            <div className="flex flex-col gap-2 p-3 lg:flex-row lg:items-center lg:justify-between">
-                                <div>
-                                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--color-primary))]">
-                                        Deskripsi Test
-                                    </div>
-                                    <p className="mt-1 text-xs leading-5 text-slate-600">
-                                        {quizSet.description}
-                                    </p>
-                                </div>
-
-                                <div className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700">
-                                    <ClipboardDocumentCheckIcon className="h-5 w-5" />
-                                    <span>
-                                        {answeredCount}/{totalQuestions} dijawab
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
                         {currentQuestion ? (
                             <div className="flex min-h-0 flex-1 flex-col rounded-[1.4rem] border border-slate-200 bg-white p-3 shadow-sm">
                                 <div className="flex flex-col gap-2 border-b border-slate-200 pb-2 md:flex-row md:items-start md:justify-between">

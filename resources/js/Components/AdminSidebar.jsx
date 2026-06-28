@@ -4,9 +4,10 @@ import {
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     BookOpenIcon,
+    ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
-    ChartBarIcon,
     HomeIcon,
+    QuestionMarkCircleIcon,
     UsersIcon,
     UserCircleIcon,
     XMarkIcon,
@@ -24,7 +25,11 @@ export default function AdminSidebar() {
             href: "/admin/quiz-sets",
             icon: ClipboardDocumentListIcon,
         },
-        { name: "Hasil Kuis", href: "/admin/quiz-results", icon: ChartBarIcon },
+        {
+            name: "Hasil Kuis",
+            href: "/admin/quiz-results",
+            icon: ClipboardDocumentCheckIcon,
+        },
         { name: "Pengguna", href: "/admin/users", icon: UsersIcon },
     ];
 

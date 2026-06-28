@@ -122,7 +122,7 @@ function CaseStudyCard({
                     <div className="flex h-full min-w-full font-mono text-sm">
                         <div
                             ref={lineRef}
-                            className="shrink-0 select-none bg-[#071623] px-3 py-3 text-slate-500 sm:px-4"
+                            className="shrink-0 select-none bg-[#071623] px-3 py-4 text-slate-500 sm:px-4"
                         >
                             {codeLines.map((_, i) => (
                                 <div
@@ -147,6 +147,11 @@ function CaseStudyCard({
                                         [getStudyKey(study)]: e.target.value,
                                     }))
                                 }
+                                onScroll={(e) => {
+                                    if (lineRef.current)
+                                        lineRef.current.scrollTop =
+                                            e.target.scrollTop;
+                                }}
                                 spellCheck={false}
                                 autoComplete="off"
                                 autoCorrect="off"
@@ -156,10 +161,12 @@ function CaseStudyCard({
                                     color: "white",
                                     lineHeight: "22px",
                                     tabSize: 4,
+                                    height: Math.max(
+                                        codeLines.length * lineHeight + 32,
+                                        512,
+                                    ),
                                 }}
                                 className="
-            h-full
-            min-h-[32rem]
             w-full
             min-w-[700px]
 
@@ -180,7 +187,7 @@ function CaseStudyCard({
             focus:outline-none
             focus:ring-0
 
-            overflow-auto
+            overflow-hidden
             whitespace-pre
 
             relative
@@ -223,7 +230,7 @@ function CaseStudyCard({
                         disabled={loading}
                         className="course-step-primary-button"
                     >
-                        {loading ? "Running..." : "▶ Run"}
+                        {loading ? "Running..." : "Run"}
                     </button>
 
                     <button
@@ -282,11 +289,11 @@ function CaseStudyCard({
                                 }
                             }}
                             disabled={savingMission}
-                            className="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                            className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
                             {savingMission
                                 ? "Menyimpan..."
-                                : "💾 Simpan Coding"}
+                                : "Simpan Coding"}
                         </button>
                     )}
                 </div>
@@ -432,6 +439,43 @@ export default function StepThreeExploration({
         });
     };
 
+    const allMissionsAnswered = () => {
+        return (stepData.missions || []).every((mission, missionIndex) =>
+            mission.questions.every((_, qidx) =>
+                missionAnswers[`${missionIndex}-${qidx}`]?.trim(),
+            ),
+        );
+    };
+
+    const allCodingAnswered = () => {
+        const codingStudies =
+            stepData.case_studies?.items?.filter(
+                (item) => item.type === "coding",
+            ) || [];
+
+        return codingStudies.every((study, index) =>
+            codingAnswers[getStudyKey(study, index)]?.trim(),
+        );
+    };
+
+    const finishExploration = () => {
+        if (!allMissionsAnswered()) {
+            setToastMessage("Semua mission harus diisi terlebih dahulu.");
+            setToastIsError(true);
+            setTimeout(() => setToastMessage(null), 3000);
+            return;
+        }
+
+        if (!allCodingAnswered()) {
+            setToastMessage("Semua coding harus diisi terlebih dahulu.");
+            setToastIsError(true);
+            setTimeout(() => setToastMessage(null), 3000);
+            return;
+        }
+
+        onNext();
+    };
+
     useEffect(() => {
         const updateActiveMaterial = () => {
             const sections = materialRefs.current.filter(Boolean);
@@ -539,10 +583,6 @@ export default function StepThreeExploration({
             }
         >
             <div className="course-detail-card space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <BeakerIcon className="h-5 w-5 text-[rgb(var(--color-primary))]" />
-                    Eksplorasi per pertemuan
-                </div>
                 <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
                     {[
                         {
@@ -727,11 +767,11 @@ export default function StepThreeExploration({
                             </div>
                         </div>
 
-                        {stepData.case_studies?.meta?.alert && (
+                        {/* {stepData.case_studies?.meta?.alert && (
                             <div className="rounded-2xl border border-blue-100 bg-blue-50 px-5 py-4 text-sm text-blue-700">
                                 {stepData.case_studies?.meta?.alert}
                             </div>
-                        )}
+                        )} */}
 
                         <div className="space-y-8">
                             {stepData.case_studies?.items
@@ -867,21 +907,13 @@ export default function StepThreeExploration({
                                 ) : (
                                     <button
                                         className="course-step-primary-button w-full sm:w-auto"
-                                        onClick={() =>
-                                            setActiveTab("materials")
-                                        }
+                                        onClick={finishExploration}
                                     >
-                                        Lanjut ke Materi
+                                        {nextLabel}
                                     </button>
                                 )}
                             </div>
                         </div>
-                        <button
-                            className="course-step-primary-button"
-                            onClick={() => setActiveTab("materials")}
-                        >
-                            Lanjut ke Materi
-                        </button>
                     </div>
                 )}
                 {activeTab === "missions" && (
@@ -940,7 +972,7 @@ export default function StepThreeExploration({
                                                             {/* GAMBAR B */}
                                                             <div className="min-w-0 rounded-3xl border border-slate-200 bg-slate-50 p-3 shadow-sm sm:p-4">
                                                                 <div className="mb-3 flex items-center gap-2">
-                                                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600">
+                                                                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-600">
                                                                         B
                                                                     </div>
 
@@ -1121,13 +1153,19 @@ export default function StepThreeExploration({
                                         ) : (
                                             <button
                                                 onClick={() => {
-                                                    setActiveTab(
-                                                        "case-studies",
-                                                    );
+                                                    if (allCodingAnswered()) {
+                                                        finishExploration();
+                                                    } else {
+                                                        setActiveTab(
+                                                            "case-studies",
+                                                        );
+                                                    }
                                                 }}
                                                 className="course-step-primary-button w-full sm:w-auto"
                                             >
-                                                {nextLabel}
+                                                {allCodingAnswered()
+                                                    ? nextLabel
+                                                    : "Lanjut ke Codelab"}
                                             </button>
                                         )}
                                     </div>
@@ -1164,84 +1202,10 @@ export default function StepThreeExploration({
                     )}
                     <div className="flex justify-end pt-6">
                         <button
-                            onClick={() => {
-                                /*
-        |--------------------------------------------------------------------------
-        | VALIDASI SEMUA MISSION
-        |--------------------------------------------------------------------------
-        */
-
-                                const allMissionAnswered =
-                                    stepData.missions?.every(
-                                        (mission, missionIndex) => {
-                                            return mission.questions.every(
-                                                (_, qidx) => {
-                                                    return missionAnswers[
-                                                        `${missionIndex}-${qidx}`
-                                                    ]?.trim();
-                                                },
-                                            );
-                                        },
-                                    );
-
-                                /*
-        |--------------------------------------------------------------------------
-        | VALIDASI CODING
-        |--------------------------------------------------------------------------
-        */
-
-                                const codingStudies =
-                                    stepData.case_studies?.items?.filter(
-                                        (item) => item.type === "coding",
-                                    ) || [];
-
-                                const allCodingAnswered = codingStudies.every(
-                                    (study, index) => {
-                                        return codingAnswers[
-                                            getStudyKey(study, index)
-                                        ]?.trim();
-                                    },
-                                );
-
-                                /*
-        |--------------------------------------------------------------------------
-        | BLOCK NEXT STEP
-        |--------------------------------------------------------------------------
-        */
-
-                                if (!allMissionAnswered) {
-                                    setToastMessage(
-                                        "Semua mission harus diisi terlebih dahulu.",
-                                    );
-
-                                    setToastIsError(true);
-
-                                    setTimeout(() => {
-                                        setToastMessage(null);
-                                    }, 3000);
-
-                                    return;
-                                }
-
-                                if (!allCodingAnswered) {
-                                    setToastMessage(
-                                        "Semua coding harus diisi terlebih dahulu.",
-                                    );
-
-                                    setToastIsError(true);
-
-                                    setTimeout(() => {
-                                        setToastMessage(null);
-                                    }, 3000);
-
-                                    return;
-                                }
-
-                                onNext();
-                            }}
+                            onClick={finishExploration}
                             className="course-step-primary-button"
                         >
-                            Selesai Explorasi
+                            {nextLabel ? nextLabel : "Selesai"}
                         </button>
                     </div>
                 </div>

@@ -7,10 +7,11 @@ import {
     CheckCircleIcon,
     ChatBubbleLeftRightIcon,
     ClipboardDocumentCheckIcon,
+    ClipboardDocumentListIcon,
     HomeIcon,
+    InformationCircleIcon,
     PlayCircleIcon,
     QuestionMarkCircleIcon,
-    Squares2X2Icon,
     ArrowRightOnRectangleIcon,
     Bars3Icon,
     UserCircleIcon,
@@ -38,8 +39,8 @@ export default function Sidebar({
 
     const menu = [
         { name: "Beranda", href: "/beranda", icon: HomeIcon },
-        { name: "Kuis", href: "/kuis", icon: QuestionMarkCircleIcon },
-        { name: "Tentang", href: "/about", icon: Squares2X2Icon },
+        { name: "Kuis", href: "/kuis", icon: ClipboardDocumentListIcon },
+        { name: "Tentang", href: "/about", icon: InformationCircleIcon },
     ];
 
     const isCourseSidebar = variant === "progress";
@@ -100,7 +101,13 @@ export default function Sidebar({
                 <nav className="mobile-navbar md:hidden">
                     <div className="mobile-navbar-row">
                         <div className="mobile-navbar-brand">
-                            <BookOpenIcon className="h-5 w-5 shrink-0" />
+                            {isCourseSidebar ? (
+                                <BookOpenIcon className="h-5 w-5 shrink-0" />
+                            ) : (
+                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-xs text-[rgb(var(--color-primary))]">
+                                    O
+                                </span>
+                            )}
                             <span className="min-w-0 truncate">
                                 {mobileTitle}
                             </span>
@@ -134,7 +141,6 @@ export default function Sidebar({
                                         onClick={() => setMobileMenuOpen(false)}
                                         className="mobile-nav-link"
                                     >
-                                        <ArrowLeftIcon className="mobile-nav-icon" />
                                         <span>Kembali ke overview</span>
                                     </Link>
 
@@ -243,7 +249,6 @@ export default function Sidebar({
                                     href={route("pertemuan", { id: courseId })}
                                     className="sidebar-back-link text-center"
                                 >
-                                    <ArrowLeftIcon className="h-5 w-5" />
                                     Kembali ke overview
                                 </Link>
 
@@ -327,9 +332,11 @@ export default function Sidebar({
                             <div>
                                 <Link
                                     href="/beranda"
-                                    className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide transition hover:opacity-80"
+                                    className="mb-8 flex items-center gap-3 text-xl font-black tracking-wide transition hover:opacity-80"
                                 >
-                                    <BookOpenIcon className="h-6 w-6" />
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-base text-[rgb(var(--color-primary))]">
+                                        O
+                                    </span>
                                     <span>OOPCODE</span>
                                 </Link>
 

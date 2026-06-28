@@ -3,12 +3,19 @@ import InputLabel from "@/Components/InputLabel";
 import TextInput from "@/Components/TextInput";
 import { Head, Link, useForm } from "@inertiajs/react";
 import {
-    ArrowRightIcon,
+    BookOpenIcon,
+    ClipboardDocumentCheckIcon,
     EnvelopeIcon,
     LockClosedIcon,
-    SparklesIcon,
+    PencilSquareIcon,
     UserIcon,
 } from "@heroicons/react/24/outline";
+
+const journeyItems = [
+    { label: "Materi", Icon: BookOpenIcon },
+    { label: "Latihan", Icon: PencilSquareIcon },
+    { label: "Kuis", Icon: ClipboardDocumentCheckIcon },
+];
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -188,7 +195,6 @@ export default function Register() {
                                     className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[rgb(var(--color-primary))] px-5 py-3 text-sm font-black uppercase tracking-wide text-white shadow-lg shadow-blue-500/25 transition hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-70"
                                 >
                                     {processing ? "Memproses..." : "Daftar"}
-                                    <ArrowRightIcon className="h-4 w-4" />
                                 </button>
 
                                 <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center text-sm font-semibold text-slate-600">
@@ -204,20 +210,17 @@ export default function Register() {
                         </div>
                     </div>
 
-                    <section className="relative hidden bg-[rgb(var(--color-primary))] p-10 text-white lg:flex lg:flex-col lg:justify-between">
-                        <div className="inline-flex w-fit items-center gap-3 rounded-2xl bg-white/10 px-4 py-3 font-black tracking-wide text-white ring-1 ring-white/15">
-                            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl text-[rgb(var(--color-primary))]">
+                    <section className="relative hidden bg-[rgb(var(--color-primary))] p-10 text-white lg:flex lg:flex-col lg:justify-center">
+                        <div className="inline-flex w-fit items-center gap-3 font-black tracking-wide text-white">
+                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl text-[rgb(var(--color-primary))]">
                                 O
                             </span>
                             OOPCODE
                         </div>
 
-                        <div className="space-y-8">
+                        <div className="mt-8 space-y-8">
                             <div>
-                                <p className="text-sm font-bold uppercase tracking-[0.24em] text-yellow-200">
-                                    Learning Journey
-                                </p>
-                                <h2 className="mt-4 max-w-md text-5xl font-black leading-tight">
+                                <h2 className="max-w-md text-5xl font-black leading-tight">
                                     Siapkan akun, mulai eksplorasi OOP.
                                 </h2>
                                 <p className="mt-5 max-w-sm text-base leading-7 text-blue-100">
@@ -227,28 +230,18 @@ export default function Register() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-3">
-                                {["Materi", "Latihan", "Kuis"].map((item) => (
+                                {journeyItems.map(({ label, Icon }) => (
                                     <div
-                                        key={item}
+                                        key={label}
                                         className="rounded-2xl bg-white/10 px-4 py-5 text-center ring-1 ring-white/10"
                                     >
-                                        <SparklesIcon className="mx-auto h-6 w-6 text-[rgb(var(--color-accent))]" />
+                                        <Icon className="mx-auto h-6 w-6 text-[rgb(var(--color-accent))]" />
                                         <p className="mt-3 text-sm font-black">
-                                            {item}
+                                            {label}
                                         </p>
                                     </div>
                                 ))}
                             </div>
-                        </div>
-
-                        <div className="rounded-3xl bg-white/10 p-5 ring-1 ring-white/15">
-                            <p className="text-sm font-bold text-yellow-200">
-                                OOPCODE
-                            </p>
-                            <p className="mt-2 text-sm leading-6 text-blue-100">
-                                Platform belajar interaktif untuk membantu
-                                siswa memahami konsep OOP secara bertahap.
-                            </p>
                         </div>
                     </section>
                 </div>

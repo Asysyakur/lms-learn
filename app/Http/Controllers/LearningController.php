@@ -46,7 +46,7 @@ class LearningController extends Controller
             });
 
         return Inertia::render('Beranda', [
-            'title' => 'Pembelajaran OOP',
+            'title' => 'Materi Pelajaran PBO',
             'meetings' => $meetings,
         ]);
     }
@@ -835,6 +835,12 @@ class LearningController extends Controller
 
                                     'options' => $item['options'] ?? [],
 
+                                    'question_type' => $item['question_type'] ?? 'text',
+
+                                    'option_type' => $item['option_type'] ?? 'text',
+
+                                    'question_language' => $item['question_language'] ?? 'javascript',
+
                                     'correct_answer' => $item['correct_answer'] ?? null,
 
                                     'explanation' => $item['explanation'] ?? '',
@@ -855,6 +861,12 @@ class LearningController extends Controller
                             'question' => $practice->assessment_question,
 
                             'options' => $practice->assessment_options ?? [],
+
+                            'question_type' => $practice->question_type ?? 'text',
+
+                            'option_type' => $practice->option_type ?? 'text',
+
+                            'question_language' => $practice->question_language ?? 'javascript',
 
                             'correct_answer' => $practice->assessment_correct_answer,
 

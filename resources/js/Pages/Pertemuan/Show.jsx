@@ -571,9 +571,6 @@ export default function StepPage({
             <div className="course-shell pb-6 sm:pb-8">
                 <div className="course-hero">
                     <div>
-                        <div className="course-breadcrumb">
-                            {meeting?.title || `Pertemuan ${id}`} / Step {step}
-                        </div>
                         <h2 className="course-title">{currentStep.title}</h2>
                         <p className="course-description">{currentStep.desc}</p>
                     </div>

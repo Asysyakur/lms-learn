@@ -1,7 +1,11 @@
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { usePage } from "@inertiajs/react";
-import { codeToHtml } from "shiki";
+import CodePreview from "@/Components/CodePreview";
+
+function cleanHtml(html) {
+    return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
 
 export default function StepFourPractice({
     stepData,
@@ -17,38 +21,6 @@ export default function StepFourPractice({
 }) {
     const [isSaved, setIsSaved] = useState(stepData?.is_answer_locked || false);
     const { flash } = usePage().props;
-
-    function cleanHtml(html) {
-        return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
-    }
-
-    function CodePreview({ code, language }) {
-        const [html, setHtml] = useState("");
-
-        useEffect(() => {
-            const run = async () => {
-                try {
-                    const result = await codeToHtml(code || "", {
-                        lang: language || "javascript",
-                        theme: "one-dark-pro",
-                    });
-
-                    setHtml(result);
-                } catch {
-                    setHtml(`<pre>${code}</pre>`);
-                }
-            };
-
-            run();
-        }, [code, language]);
-
-        return (
-            <div
-                dangerouslySetInnerHTML={{ __html: html }}
-                className="overflow-auto rounded-lg"
-            />
-        );
-    }
 
     useEffect(() => {
         setIsSaved(stepData?.is_answer_locked || false);

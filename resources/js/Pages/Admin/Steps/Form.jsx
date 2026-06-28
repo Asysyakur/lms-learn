@@ -1,55 +1,22 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useForm } from "@inertiajs/react";
-import { codeToHtml } from "shiki";
+import CodePreview from "@/Components/CodePreview";
 
 function cleanHtml(html) {
     return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
 }
 
-function CodePreview({ code, language }) {
-    const [html, setHtml] = useState("");
-
-    useEffect(() => {
-        const highlight = async () => {
-            try {
-                const langMap = {
-                    js: "javascript",
-                    py: "python",
-                    html: "html",
-                    css: "css",
-                };
-                const lang =
-                    langMap[language?.toLowerCase()] ||
-                    language ||
-                    "javascript";
-                const result = await codeToHtml(code, {
-                    lang,
-                    theme: "one-dark-pro",
-                });
-                setHtml(result);
-            } catch (e) {
-                setHtml(`<pre><code>${code}</code></pre>`);
-            }
-        };
-        highlight();
-    }, [code, language]);
-
+function CodeQuestionPreview({ code, language }) {
     return (
         <div
             className="mt-2 p-3 rounded overflow-auto"
             style={{ background: "#282C34" }}
         >
             <p className="text-slate-400 text-xs mb-2">Preview:</p>
-            <div
-                dangerouslySetInnerHTML={{ __html: html }}
-                style={{
-                    background: "#282C34",
-                    padding: "0.5rem",
-                    borderRadius: "0.375rem",
-                    fontSize: "14px",
-                    lineHeight: "1.5",
-                    fontFamily: "monospace",
-                }}
+            <CodePreview
+                code={code}
+                language={language}
+                className="[&_pre]:!p-0"
             />
         </div>
     );
@@ -1463,7 +1430,7 @@ export default function StepForm({
                                                                     }}
                                                                 />
                                                                 {block.code && (
-                                                                    <CodePreview
+                                                                    <CodeQuestionPreview
                                                                         code={
                                                                             block.code
                                                                         }
@@ -2511,7 +2478,7 @@ export default function StepForm({
                                             <div className="mt-3 rounded-lg border p-4">
                                                 {item.question_type ===
                                                 "code" ? (
-                                                    <CodePreview
+                                                    <CodeQuestionPreview
                                                         code={item.question}
                                                         language={
                                                             item.question_language ||
@@ -2652,7 +2619,7 @@ export default function StepForm({
                                                                         />
 
                                                                         {option && (
-                                                                            <CodePreview
+                                                                            <CodeQuestionPreview
                                                                                 code={
                                                                                     option
                                                                                 }
