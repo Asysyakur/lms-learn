@@ -211,12 +211,6 @@ export default function Register() {
                     </div>
 
                     <section className="relative hidden bg-[rgb(var(--color-primary))] p-10 text-white lg:flex lg:flex-col lg:justify-center">
-                        <div className="inline-flex w-fit items-center gap-3 font-black tracking-wide text-white">
-                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-xl text-[rgb(var(--color-primary))]">
-                                O
-                            </span>
-                            OOPCODE
-                        </div>
 
                         <div className="mt-8 space-y-8">
                             <div>

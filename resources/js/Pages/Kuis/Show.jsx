@@ -89,9 +89,13 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
 
         let cleaned = html;
 
-        // kalau string json
+        // kalau string json (hanya pakai hasilnya kalau memang string,
+        // soalnya JSON.parse("123") balikin number 123, bukan string)
         try {
-            cleaned = JSON.parse(cleaned);
+            const parsed = JSON.parse(cleaned);
+            if (typeof parsed === "string") {
+                cleaned = parsed;
+            }
         } catch (e) {}
 
         // hapus quote pembungkus
@@ -104,7 +108,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
         }
 
         // unescape
-        cleaned = cleaned
+        cleaned = String(cleaned)
             .replace(/\\"/g, '"')
             .replace(/\\n/g, "\n")
             .replace(/\\\\/g, "\\");
@@ -114,7 +118,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
 
     return (
         <AppLayout title={quizSet.title} showTitleBar={false}>
-            <div className="mx-auto min-h-screen overflow-y-auto bg-white/90 p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
+            <div className="mx-auto bg-white/90 p-3 sm:p-5 ">
                 <div className="flex flex-col gap-3 border-b border-slate-200 pb-4 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
                         <h2 className="mt-1 text-xl font-black tracking-tight text-slate-900 sm:text-2xl">
@@ -138,7 +142,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                     </div>
                 </div>
 
-                <div className="mt-4 grid min-h-0 gap-4 lg:h-[calc(100vh-9.5rem)] lg:grid-cols-[minmax(0,1.45fr)_280px]">
+                <div className="mt-4 grid min-h-0 gap-4 lg:grid-cols-[minmax(0,1.45fr)_280px]">
                     <section className="flex min-h-0 flex-col gap-3">
                         {currentQuestion ? (
                             <div className="flex min-h-0 flex-1 flex-col rounded-[1.4rem] border border-slate-200 bg-white p-3 shadow-sm">
