@@ -22,13 +22,13 @@ function CodeQuestionPreview({ code, language }) {
     );
 }
 
-const STEP_TYPES = [
-    { value: "observe", label: "Observe" },
-    { value: "ask", label: "Ask" },
-    { value: "exploration", label: "Exploration" },
-    { value: "practice", label: "Practice" },
+export const STEP_TYPES = [
+    { value: "observe", label: "Mengamati" },
+    { value: "ask", label: "Bertanya" },
+    { value: "exploration", label: "Eksplorasi" },
+    { value: "practice", label: "Latihan Soal" },
     { value: "review", label: "Review" },
-    { value: "reflection", label: "Reflection" },
+    { value: "reflection", label: "Kesimpulan" },
 ];
 
 const CODE_LANGUAGES = [
@@ -2314,7 +2314,7 @@ export default function StepForm({
                                 </div>
                                 <button
                                     type="button"
-                                    className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
                                     onClick={() =>
                                         setPracticeItems([
                                             ...practiceItems,
@@ -2348,7 +2348,7 @@ export default function StepForm({
                                         {practiceItems.length > 1 && (
                                             <button
                                                 type="button"
-                                                className="rounded-lg border border-red-200 px-3 py-1 text-sm font-semibold text-red-600 hover:bg-red-50"
+                                                className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50"
                                                 onClick={() =>
                                                     setPracticeItems(
                                                         practiceItems.filter(
@@ -2505,7 +2505,7 @@ export default function StepForm({
 
                                                     <button
                                                         type="button"
-                                                        className="rounded bg-blue-600 px-3 py-1 text-xs text-white"
+                                                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
                                                         onClick={() => {
                                                             const next = [
                                                                 ...practiceItems,
@@ -2664,7 +2664,7 @@ export default function StepForm({
                                                                 .length > 1 && (
                                                                 <button
                                                                     type="button"
-                                                                    className="rounded bg-red-100 px-2 py-1 text-xs text-red-700"
+                                                                    className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50"
                                                                     onClick={() => {
                                                                         const next =
                                                                             [

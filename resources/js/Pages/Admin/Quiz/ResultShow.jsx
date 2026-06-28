@@ -14,12 +14,21 @@ export default function ResultShow({ quizSet, attempts = [] }) {
           </p>
         </div>
 
-        <Link
-          href="/admin/quiz-results"
-          className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-        >
-          Kembali
-        </Link>
+        <div className="flex gap-2">
+          <a
+            href={route("admin.quiz-results.export", quizSet.id)}
+            className="inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          >
+            Export ke Excel
+          </a>
+
+          <Link
+            href="/admin/quiz-results"
+            className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Kembali
+          </Link>
+        </div>
       </div>
 
       <section className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">

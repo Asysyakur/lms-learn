@@ -14,8 +14,14 @@ export default function Index({ users }) {
 
   return (
     <AdminLayout title="Pengguna">
-      <div className="mb-4">
+      <div className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm text-slate-500">Daftar akun, role akses, dan nilai kuis siswa.</p>
+        <Link
+          className="shrink-0 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500"
+          href="/admin/users/create"
+        >
+          + Tambah Siswa
+        </Link>
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">

@@ -1,5 +1,47 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
+import CodePreview from "@/Components/CodePreview";
+
+function isFullHtmlDocument(value) {
+    return (
+        typeof value === "string" && /<!DOCTYPE html>|<html[\s>]/i.test(value)
+    );
+}
+
+function CodeBlock({ code, language }) {
+    return (
+        <div
+            className="rounded-lg p-3"
+            style={{ background: "#282C34" }}
+        >
+            <p className="mb-2 text-xs text-slate-400">Preview:</p>
+            <CodePreview code={code} language={language || "javascript"} />
+        </div>
+    );
+}
+
+function QuestionContent({ value, type, language }) {
+    if (!value) {
+        return "-";
+    }
+
+    if (isFullHtmlDocument(value)) {
+        return (
+            <iframe
+                srcDoc={value}
+                sandbox=""
+                title="Pertanyaan"
+                className="h-64 w-full rounded-lg border border-slate-200 bg-white"
+            />
+        );
+    }
+
+    if (type === "code") {
+        return <CodeBlock code={value} language={language} />;
+    }
+
+    return value;
+}
 
 export default function Show({ meeting, student, responses = [] }) {
     return (
@@ -59,6 +101,10 @@ export default function Show({ meeting, student, responses = [] }) {
 
                 <div className="space-y-4">
                     {responses.map((response, index) => {
+                        if (response.type === "Review") {
+                            return null;
+                        }
+
                         return (
                             <div
                                 key={index}
@@ -68,10 +114,6 @@ export default function Show({ meeting, student, responses = [] }) {
                                     <h2 className="text-lg font-semibold text-slate-900">
                                         {response.step_title || "Step"}
                                     </h2>
-
-                                    <p className="text-sm text-slate-500">
-                                        {response.type}
-                                    </p>
                                 </div>
 
                                 {response.type === "Exploration" &&
@@ -126,9 +168,11 @@ export default function Show({ meeting, student, responses = [] }) {
                                                                     </div>
 
                                                                     <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
-                                                                        {
-                                                                            item.question
-                                                                        }
+                                                                        <QuestionContent
+                                                                            value={
+                                                                                item.question
+                                                                            }
+                                                                        />
                                                                     </div>
 
                                                                     <div className="rounded-lg bg-slate-50 p-3">
@@ -150,111 +194,51 @@ export default function Show({ meeting, student, responses = [] }) {
                                             ),
                                         )}
                                     </div>
-                                ) : response.type === "Review" &&
-                                  Array.isArray(response.items) ? (
-                                    <div className="space-y-6">
-                                        {response.items.map(
-                                            (group, groupIndex) => (
-                                                <div
-                                                    key={
-                                                        group.practice_index ??
-                                                        groupIndex
-                                                    }
-                                                    className="rounded-2xl border border-slate-200 bg-slate-50 p-5"
-                                                >
-                                                    <div className="mb-4 rounded-xl border border-blue-100 bg-white p-4">
-                                                        <div className="text-sm font-semibold text-blue-700">
-                                                            {group.practice_title ||
-                                                                `Latihan Soal ${groupIndex + 1}`}
-                                                        </div>
-
-                                                        <div className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
-                                                            {group.practice_question ||
-                                                                "-"}
-                                                        </div>
-
-                                                        <div className="mt-4 rounded-lg bg-slate-50 p-3">
-                                                            <div className="mb-1 text-xs font-semibold text-slate-500">
-                                                                Jawaban Awal
-                                                                Siswa
-                                                            </div>
-
-                                                            <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                                {group.practice_answer ||
-                                                                    "-"}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="space-y-4">
-                                                        {group.items?.map(
-                                                            (
-                                                                item,
-                                                                itemIndex,
-                                                            ) => (
-                                                                <div
-                                                                    key={
-                                                                        itemIndex
-                                                                    }
-                                                                    className="rounded-xl border border-slate-200 bg-white p-4"
-                                                                >
-                                                                    <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
-                                                                        {
-                                                                            item.question
-                                                                        }
-                                                                    </div>
-
-                                                                    <div className="mb-4 rounded-xl bg-slate-50 p-4">
-                                                                        <div className="mb-2 text-xs font-semibold text-slate-500">
-                                                                            Pembuktian
-                                                                            &
-                                                                            Argumen
-                                                                        </div>
-
-                                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                                            {item.review_answer ||
-                                                                                "-"}
-                                                                        </div>
-                                                                    </div>
-
-                                                                    {item.evidence &&
-                                                                        (/\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(
-                                                                            item.evidence,
-                                                                        ) ? (
-                                                                            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                                                                                <img
-                                                                                    src={
-                                                                                        item.evidence
-                                                                                    }
-                                                                                    alt="Bukti"
-                                                                                    className="max-h-[400px] w-full object-contain"
-                                                                                />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <a
-                                                                                href={
-                                                                                    item.evidence
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noreferrer"
-                                                                                className="inline-flex rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                                                                            >
-                                                                                Lihat
-                                                                                bukti
-                                                                            </a>
-                                                                        ))}
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            ),
-                                        )}
-                                    </div>
                                 ) : response.type === "Practice" &&
                                   response.items ? (
                                     <div className="space-y-4">
-                                        <div className="flex justify-end">
+                                        <div className="flex items-center justify-between gap-3">
+                                            {(() => {
+                                                const gradedItems =
+                                                    response.items.filter(
+                                                        (item) =>
+                                                            item.mode !==
+                                                                "essay" &&
+                                                            item.correct_answer !==
+                                                                null &&
+                                                            item.correct_answer !==
+                                                                undefined,
+                                                    );
+                                                const correctCount =
+                                                    gradedItems.filter(
+                                                        (item) =>
+                                                            item.answer ===
+                                                            item.options?.[
+                                                                item
+                                                                    .correct_answer
+                                                            ],
+                                                    ).length;
+
+                                                if (gradedItems.length === 0) {
+                                                    return <div />;
+                                                }
+
+                                                const score = Math.round(
+                                                    (correctCount /
+                                                        gradedItems.length) *
+                                                        100,
+                                                );
+
+                                                return (
+                                                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-700">
+                                                        Benar {correctCount}{" "}
+                                                        dari{" "}
+                                                        {gradedItems.length}{" "}
+                                                        soal • Nilai {score}
+                                                    </div>
+                                                );
+                                            })()}
+
                                             <button
                                                 onClick={() =>
                                                     router.post(
@@ -274,31 +258,88 @@ export default function Show({ meeting, student, responses = [] }) {
                                         </div>
 
                                         {response.items.map(
-                                            (item, itemIndex) => (
-                                                <div
-                                                    key={itemIndex}
-                                                    className="rounded-xl border border-slate-200 bg-slate-50 p-4"
-                                                >
-                                                    <div className="mb-2 text-sm font-semibold text-blue-700">
-                                                        Pertanyaan{" "}
-                                                        {itemIndex + 1}
-                                                    </div>
+                                            (item, itemIndex) => {
+                                                const hasCorrectAnswer =
+                                                    item.mode !== "essay" &&
+                                                    item.correct_answer !==
+                                                        null &&
+                                                    item.correct_answer !==
+                                                        undefined &&
+                                                    item.options?.[
+                                                        item.correct_answer
+                                                    ] !== undefined;
+                                                const isCorrect =
+                                                    hasCorrectAnswer &&
+                                                    item.answer ===
+                                                        item.options[
+                                                            item.correct_answer
+                                                        ];
+                                                const boxClass =
+                                                    !hasCorrectAnswer
+                                                        ? "bg-white"
+                                                        : isCorrect
+                                                          ? "border border-emerald-200 bg-emerald-50"
+                                                          : "border border-red-200 bg-red-50";
+                                                const labelClass =
+                                                    !hasCorrectAnswer
+                                                        ? "text-slate-500"
+                                                        : isCorrect
+                                                          ? "text-emerald-700"
+                                                          : "text-red-700";
 
-                                                    <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
-                                                        {item.question}
-                                                    </div>
-
-                                                    <div className="rounded-lg bg-white p-3">
-                                                        <div className="mb-1 text-xs font-semibold text-slate-500">
-                                                            Jawaban Siswa
+                                                return (
+                                                    <div
+                                                        key={itemIndex}
+                                                        className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                                                    >
+                                                        <div className="mb-2 text-sm font-semibold text-blue-700">
+                                                            Pertanyaan{" "}
+                                                            {itemIndex + 1}
                                                         </div>
 
-                                                        <div className="whitespace-pre-wrap text-sm text-slate-700">
-                                                            {item.answer || "-"}
+                                                        <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
+                                                            <QuestionContent
+                                                                value={
+                                                                    item.question
+                                                                }
+                                                                type={
+                                                                    item.question_type
+                                                                }
+                                                                language={
+                                                                    item.question_language
+                                                                }
+                                                            />
+                                                        </div>
+
+                                                        <div
+                                                            className={`rounded-lg p-3 ${boxClass}`}
+                                                        >
+                                                            <div
+                                                                className={`mb-1 text-xs font-semibold ${labelClass}`}
+                                                            >
+                                                                Jawaban Siswa
+                                                            </div>
+
+                                                            {item.option_type ===
+                                                            "code" ? (
+                                                                <CodeBlock
+                                                                    code={
+                                                                        item.answer
+                                                                    }
+                                                                    language={
+                                                                        item.question_language
+                                                                    }
+                                                                />
+                                                            ) : (
+                                                                <div className="whitespace-pre-wrap text-sm text-slate-700">
+                                                                    {item.answer ||
+                                                                        "-"}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                </div>
-                                            ),
+                                                );
+                                            },
                                         )}
                                     </div>
                                 ) : response.items ? (
@@ -318,7 +359,11 @@ export default function Show({ meeting, student, responses = [] }) {
                                                     </div>{" "}
                                                     <div className="mb-4 whitespace-pre-wrap text-sm text-slate-700">
                                                         {" "}
-                                                        {item.question}{" "}
+                                                        <QuestionContent
+                                                            value={
+                                                                item.question
+                                                            }
+                                                        />{" "}
                                                     </div>{" "}
                                                     {item.mode === "quiz" &&
                                                         item.options && (
@@ -371,7 +416,9 @@ export default function Show({ meeting, student, responses = [] }) {
                                             </div>{" "}
                                             <div className="whitespace-pre-wrap text-sm text-slate-700">
                                                 {" "}
-                                                {response.question || "-"}{" "}
+                                                <QuestionContent
+                                                    value={response.question}
+                                                />{" "}
                                             </div>{" "}
                                         </div>{" "}
                                         <div className="rounded-xl bg-slate-50 p-4">

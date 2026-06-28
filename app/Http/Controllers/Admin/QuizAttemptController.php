@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\QuizSet;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class QuizAttemptController extends Controller
@@ -52,6 +53,40 @@ class QuizAttemptController extends Controller
                     'submitted_at' => optional($attempt->submitted_at)->format('d M Y H:i'),
                 ];
             })->values(),
+        ]);
+    }
+
+    public function export(QuizSet $quizSet)
+    {
+        $quizSet->load(['attempts' => function ($query) {
+            $query->with('user')->latest('submitted_at');
+        }]);
+
+        $filename = Str::slug($quizSet->title).'-hasil.csv';
+
+        return response()->streamDownload(function () use ($quizSet) {
+            $handle = fopen('php://output', 'w');
+
+            fwrite($handle, "\xEF\xBB\xBF");
+            fwrite($handle, "sep=,\n");
+
+            fputcsv($handle, ['No', 'Nama Siswa', 'Email', 'Skor', 'Total Soal', 'Nilai (%)', 'Waktu Submit']);
+
+            foreach ($quizSet->attempts as $index => $attempt) {
+                fputcsv($handle, [
+                    $index + 1,
+                    $attempt->user?->name ?? 'User dihapus',
+                    $attempt->user?->email,
+                    $attempt->score,
+                    $attempt->total_questions,
+                    $attempt->percentage,
+                    optional($attempt->submitted_at)->format('d M Y H:i'),
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
         ]);
     }
 }

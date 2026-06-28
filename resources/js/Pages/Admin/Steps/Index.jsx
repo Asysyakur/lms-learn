@@ -1,7 +1,11 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
 import { useState } from "react";
-import StepForm from "./Form";
+import StepForm, { STEP_TYPES } from "./Form";
+
+function stepTypeLabel(stepType) {
+  return STEP_TYPES.find((type) => type.value === stepType)?.label ?? stepType;
+}
 
 export default function Index({ steps, meetingId }) {
   const [showForm, setShowForm] = useState(false);
@@ -53,7 +57,7 @@ export default function Index({ steps, meetingId }) {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
-                    Step {step.step_number} / {step.step_type}
+                    Step {step.step_number} / {stepTypeLabel(step.step_type)}
                   </p>
                   <h3 className="mt-1 font-semibold text-slate-900">{step.title}</h3>
                   <p className="mt-1 text-sm text-slate-500">{step.description}</p>

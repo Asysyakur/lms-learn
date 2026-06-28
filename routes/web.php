@@ -81,7 +81,8 @@ Route::middleware(['auth', 'admin'])
         Route::resource('quiz-questions', QuizQuestionController::class)->except(['show']);
         Route::get('quiz-results', [QuizAttemptController::class, 'index'])->name('quiz-results.index');
         Route::get('quiz-results/{quizSet}', [QuizAttemptController::class, 'show'])->name('quiz-results.show');
-        Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+        Route::get('quiz-results/{quizSet}/export', [QuizAttemptController::class, 'export'])->name('quiz-results.export');
+        Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
         Route::get('meetings/{meeting}/steps', [StepController::class, 'index'])
             ->name('meetings.steps');

@@ -662,6 +662,18 @@ class StepController extends Controller
                                 'options' => optional($matchedQuestion)->assessment_options
                                     ?? $payloadItem['options']
                                     ?? [],
+                                'question_type' => optional($matchedQuestion)->question_type
+                                    ?? $payloadItem['question_type']
+                                    ?? 'text',
+                                'option_type' => optional($matchedQuestion)->option_type
+                                    ?? $payloadItem['option_type']
+                                    ?? 'text',
+                                'question_language' => optional($matchedQuestion)->question_language
+                                    ?? $payloadItem['question_language']
+                                    ?? 'javascript',
+                                'correct_answer' => optional($matchedQuestion)->assessment_correct_answer
+                                    ?? $payloadItem['correct_answer']
+                                    ?? null,
                                 'answer' => $payloadItem['answer'] ?? '-',
                             ];
                         })
@@ -670,6 +682,10 @@ class StepController extends Controller
                                 'question' => $practice->assessment_question,
                                 'mode' => $practice->assessment_mode,
                                 'options' => $practice->assessment_options,
+                                'question_type' => $practice->question_type ?? 'text',
+                                'option_type' => $practice->option_type ?? 'text',
+                                'question_language' => $practice->question_language ?? 'javascript',
+                                'correct_answer' => $practice->assessment_correct_answer,
                                 'answer' => '-',
                             ];
                         });

@@ -46,6 +46,25 @@ class UserController extends Controller
         ]);
     }
 
+    public function create()
+    {
+        return Inertia::render('Admin/Users/Create');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'role' => ['required', Rule::in(['admin', 'student'])],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        User::create(Arr::except($validated, ['password_confirmation']));
+
+        return redirect()->route('admin.users.index')->with('success', 'User berhasil ditambahkan.');
+    }
+
     public function edit(User $user)
     {
         return Inertia::render('Admin/Users/Edit', [

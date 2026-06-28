@@ -1,6 +1,10 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
 
+function cleanHtml(html) {
+  return (html || "").replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
+
 export default function Questions({ questions, selected_set }) {
   function destroy(question) {
     if (confirm("Hapus pertanyaan ini?")) {
@@ -16,9 +20,6 @@ export default function Questions({ questions, selected_set }) {
           <p className="text-sm text-slate-500">Pertanyaan untuk quiz set.</p>
         </div>
         <div className="flex gap-2">
-          <Link className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/admin/quiz-sets">
-            Kumpulan Kuis
-          </Link>
           <Link className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500" href={`/admin/quiz-questions/create${selected_set ? `?set_id=${selected_set.id}` : ''}`}>
             Tambah
           </Link>
@@ -38,7 +39,12 @@ export default function Questions({ questions, selected_set }) {
                   <p className="text-xs font-bold uppercase tracking-wide text-blue-700">
                     {question.quiz_set?.title ?? question.quizSet?.title ?? "Quiz"}
                   </p>
-                  <h3 className="mt-1 font-semibold text-slate-900">{question.question_text}</h3>
+                  <h3
+                    className="mt-1 font-semibold text-slate-900 line-clamp-2"
+                    dangerouslySetInnerHTML={{
+                      __html: cleanHtml(question.question_text),
+                    }}
+                  />
                   <p className="mt-1 text-sm text-slate-500">Jawaban: {question.correct_option}</p>
                 </div>
 

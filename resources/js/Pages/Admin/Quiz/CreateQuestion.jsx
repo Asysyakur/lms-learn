@@ -1,11 +1,14 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, useForm } from "@inertiajs/react";
+import QuizQuestionPreview from "@/Components/QuizQuestionPreview";
+
+const OPTION_LABELS = ["A", "B", "C", "D", "E", "F"];
 
 export default function CreateQuestion({ sets, selected_set_id }) {
     const { data, setData, post, processing, errors } = useForm({
         quiz_set_id: selected_set_id ?? sets[0]?.id ?? "",
         question_text: "",
-        options: "",
+        options: ["", "", "", ""],
         correct_option: "A",
     });
 
@@ -16,15 +19,23 @@ export default function CreateQuestion({ sets, selected_set_id }) {
 
     return (
         <AdminLayout title="Tambah Soal">
-            <QuestionForm
-                data={data}
-                setData={setData}
-                sets={sets}
-                errors={errors}
-                processing={processing}
-                submit={submit}
-                submitLabel="Simpan"
-            />
+            <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+                <QuestionForm
+                    data={data}
+                    setData={setData}
+                    sets={sets}
+                    errors={errors}
+                    processing={processing}
+                    submit={submit}
+                    submitLabel="Simpan"
+                />
+
+                <QuizQuestionPreview
+                    questionText={data.question_text}
+                    options={data.options}
+                    correctOption={data.correct_option}
+                />
+            </div>
         </AdminLayout>
     );
 }
@@ -38,10 +49,30 @@ function QuestionForm({
     submit,
     submitLabel,
 }) {
+    function updateOption(index, value) {
+        const next = [...data.options];
+        next[index] = value;
+        setData("options", next);
+    }
+
+    function addOption() {
+        setData("options", [...data.options, ""]);
+    }
+
+    function removeOption(index) {
+        const removedLabel = OPTION_LABELS[index];
+        const next = data.options.filter((_, i) => i !== index);
+        setData("options", next);
+
+        if (data.correct_option === removedLabel) {
+            setData("correct_option", OPTION_LABELS[0]);
+        }
+    }
+
     return (
         <form
             onSubmit={submit}
-            className="max-w-2xl rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200"
+            className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200"
         >
             <label className="block text-sm font-semibold text-slate-700">
                 Quiz Set
@@ -77,37 +108,70 @@ function QuestionForm({
                 </p>
             )}
 
-            <label className="mt-4 block text-sm font-semibold text-slate-700">
-                Opsi Jawaban
-            </label>
-            <textarea
-                className="mt-1 min-h-32 w-full rounded-lg border-slate-300"
-                placeholder={`[
-                  "<pre><code>s1.salam()</code></pre>",
-                  "<pre><code>s1->salam()</code></pre>",
-                  "<pre><code>s1.salam</code></pre>",
-                  "<pre><code>def salam()</code></pre>"
-                ]`}
-                value={data.options}
-                onChange={(e) => setData("options", e.target.value)}
-            />
+            <div className="mt-4 flex items-center justify-between">
+                <label className="block text-sm font-semibold text-slate-700">
+                    Opsi Jawaban
+                </label>
+                <button
+                    type="button"
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    onClick={addOption}
+                >
+                    + Tambah Opsi
+                </button>
+            </div>
+
+            <div className="mt-2 space-y-2">
+                {data.options.map((option, index) => {
+                    const label = OPTION_LABELS[index] || `${index + 1}`;
+
+                    return (
+                        <div
+                            key={index}
+                            className="flex items-start gap-2 rounded-lg border border-slate-200 p-2"
+                        >
+                            <label className="mt-2 flex items-center gap-1.5">
+                                <input
+                                    type="radio"
+                                    name="correct_option"
+                                    checked={data.correct_option === label}
+                                    onChange={() =>
+                                        setData("correct_option", label)
+                                    }
+                                />
+                                <span className="text-sm font-semibold text-slate-700">
+                                    {label}
+                                </span>
+                            </label>
+
+                            <textarea
+                                className="min-h-12 flex-1 rounded-lg border-slate-300 text-sm"
+                                value={option}
+                                onChange={(e) =>
+                                    updateOption(index, e.target.value)
+                                }
+                            />
+
+                            {data.options.length > 2 && (
+                                <button
+                                    type="button"
+                                    className="mt-1 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-semibold text-red-600 hover:bg-red-50"
+                                    onClick={() => removeOption(index)}
+                                >
+                                    Hapus
+                                </button>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
             {errors.options && (
                 <p className="mt-1 text-sm text-red-600">{errors.options}</p>
             )}
 
-            <label className="mt-4 block text-sm font-semibold text-slate-700">
-                Jawaban Benar
-            </label>
-            <input
-                className="mt-1 w-full rounded-lg border-slate-300"
-                value={data.correct_option}
-                onChange={(e) => setData("correct_option", e.target.value)}
-            />
-            {errors.correct_option && (
-                <p className="mt-1 text-sm text-red-600">
-                    {errors.correct_option}
-                </p>
-            )}
+            <p className="mt-2 text-xs text-slate-500">
+                Pilih radio di samping opsi untuk menandai jawaban benar.
+            </p>
 
             <div className="mt-5 flex gap-2">
                 <button
