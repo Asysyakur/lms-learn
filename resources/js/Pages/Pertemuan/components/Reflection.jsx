@@ -5,6 +5,7 @@ export default function StepSixReflection({
   reflectionDraft,
   setReflectionDraft,
   reflectionSaved,
+  reflectionFeedback,
   onSave,
 }) {
   return (
@@ -36,6 +37,17 @@ export default function StepSixReflection({
         <p className="course-detail-text">
           {reflectionSaved || "Belum ada jawaban refleksi yang disimpan."}
         </p>
+
+        {reflectionFeedback && (
+          <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <h4 className="text-sm font-semibold text-blue-700">
+              Feedback dari Guru
+            </h4>
+            <p className="course-detail-text mt-1 whitespace-pre-wrap">
+              {reflectionFeedback}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

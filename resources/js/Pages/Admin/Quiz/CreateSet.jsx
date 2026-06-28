@@ -1,7 +1,9 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, useForm } from "@inertiajs/react";
+import { useState } from "react";
 
 export default function CreateSet() {
+  const [previewUrl, setPreviewUrl] = useState(null);
   const { data, setData, post, processing, errors } = useForm({
     title: "",
     quiz_type: "pre-test",
@@ -9,6 +11,11 @@ export default function CreateSet() {
     cover_image: "",
     cover_image_file: null,
   });
+
+  function handleFileChange(file) {
+    setData("cover_image_file", file ?? null);
+    setPreviewUrl(file ? URL.createObjectURL(file) : null);
+  }
 
   function submit(e) {
     e.preventDefault();
@@ -45,13 +52,18 @@ export default function CreateSet() {
         />
 
         <label className="mt-4 block text-sm font-semibold text-slate-700">Thumbnail</label>
+        {previewUrl && (
+          <div className="mt-2 flex h-28 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-50 ring-1 ring-slate-200">
+            <img src={previewUrl} alt="Pratinjau thumbnail" className="h-full w-full object-contain" />
+          </div>
+        )}
         <input
           className="mt-1 w-full rounded-lg border-slate-300"
           type="file"
           accept="image/*"
-          onChange={(e) => setData("cover_image_file", e.target.files?.[0] ?? null)}
+          onChange={(e) => handleFileChange(e.target.files?.[0])}
         />
-        <p className="mt-1 text-xs text-slate-500">Upload dari komputer untuk thumbnail quiz set. Maksimal 2 MB.</p>
+        <p className="mt-1 text-xs text-slate-500">Upload dari komputer untuk thumbnail quiz set. Maksimal 2 MB. Rasio disarankan 4:3 (misal 800x600px) agar tampil pas tanpa terpotong.</p>
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">

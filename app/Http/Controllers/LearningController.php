@@ -671,6 +671,7 @@ class LearningController extends Controller
             $responses[$stepNumber] = [
                 'response_text' => $response->reflection_text,
                 'response_payload' => $response->reflection_payload,
+                'feedback' => $response->feedback,
             ];
         }
 

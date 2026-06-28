@@ -41,7 +41,9 @@ export default function AdminSidebar() {
                         href="/admin"
                         className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide transition hover:opacity-80"
                     >
-                        <BookOpenIcon className="h-6 w-6" />
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white text-xs text-[rgb(var(--color-primary))]">
+                            O
+                        </span>
                         <span>OOPCODE GURU</span>
                     </Link>
 
@@ -112,7 +114,9 @@ export default function AdminSidebar() {
                             href="/admin"
                             className="mb-8 flex items-center gap-2 text-xl font-black tracking-wide transition hover:opacity-80"
                         >
-                            <BookOpenIcon className="h-6 w-6" />
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-base text-[rgb(var(--color-primary))]">
+                                O
+                            </span>
                             <span>OOPCODE GURU</span>
                         </Link>
 

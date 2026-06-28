@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 use App\Models\MeetingStepPracticeResponse;
+use App\Models\MeetingStepReflectionResponse;
 
 class StepController extends Controller
 {
@@ -714,11 +715,13 @@ class StepController extends Controller
                     }
 
                     return [
+                        'response_id' => $item->id,
                         'type' => 'Reflection',
                         'step_title' => $item->step ? $item->step->title : null,
                         'step_type' => $item->step ? $item->step->step_type : null,
                         'question' => $question,
                         'answer' => $item->reflection_text,
+                        'feedback' => $item->feedback,
                         'step_order' => $item->step ? $item->step->step_number : null,
                     ];
                 })
@@ -942,5 +945,20 @@ class StepController extends Controller
             'success',
             'Jawaban berhasil dibuka.'
         );
+    }
+
+    public function saveReflectionFeedback(Request $request, $responseId)
+    {
+        $request->validate([
+            'feedback' => ['nullable', 'string'],
+        ]);
+
+        $response = MeetingStepReflectionResponse::findOrFail($responseId);
+
+        $response->update([
+            'feedback' => $request->feedback,
+        ]);
+
+        return back()->with('success', 'Feedback berhasil disimpan.');
     }
 }

@@ -1985,13 +1985,15 @@ export default function StepForm({
 
                                                     <div className="flex items-start justify-between gap-3">
                                                         {mission.left_image && (
-                                                            <img
-                                                                src={
-                                                                    mission.left_image
-                                                                }
-                                                                alt="Gambar kiri"
-                                                                className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                            />
+                                                            <div className="flex h-52 w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                                                                <img
+                                                                    src={
+                                                                        mission.left_image
+                                                                    }
+                                                                    alt="Gambar kiri"
+                                                                    className="h-full w-full object-contain"
+                                                                />
+                                                            </div>
                                                         )}
 
                                                         {(mission.left_image ||
@@ -2043,13 +2045,15 @@ export default function StepForm({
 
                                                     <div className="flex items-start justify-between gap-3">
                                                         {mission.right_image && (
-                                                            <img
-                                                                src={
-                                                                    mission.right_image
-                                                                }
-                                                                alt="Gambar kanan"
-                                                                className="h-52 w-full rounded-xl border border-slate-200 object-cover"
-                                                            />
+                                                            <div className="flex h-52 w-full items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                                                                <img
+                                                                    src={
+                                                                        mission.right_image
+                                                                    }
+                                                                    alt="Gambar kanan"
+                                                                    className="h-full w-full object-contain"
+                                                                />
+                                                            </div>
                                                         )}
 
                                                         {(mission.right_image ||

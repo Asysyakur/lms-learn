@@ -65,7 +65,9 @@ export default function Edit({ meeting, defaultCourseId }) {
 
         <label className="mt-4 block text-sm font-semibold text-slate-700">Thumbnail</label>
         {data.cover_image ? (
-          <img src={data.cover_image} alt={meeting.title} className="mt-2 h-28 w-full rounded-lg object-cover ring-1 ring-slate-200" />
+          <div className="mt-2 flex h-28 w-full items-center justify-center overflow-hidden rounded-lg bg-slate-50 ring-1 ring-slate-200">
+            <img src={data.cover_image} alt={meeting.title} className="h-full w-full object-contain" />
+          </div>
         ) : null}
 
         <label className="mt-4 block text-sm font-semibold text-slate-700">Upload Thumbnail Baru</label>
@@ -75,7 +77,7 @@ export default function Edit({ meeting, defaultCourseId }) {
           accept="image/*"
           onChange={(e) => setData("cover_image_file", e.target.files?.[0] ?? null)}
         />
-        <p className="mt-1 text-xs text-slate-500">Upload baru akan mengganti thumbnail lama. Maksimal 2 MB.</p>
+        <p className="mt-1 text-xs text-slate-500">Upload baru akan mengganti thumbnail lama. Maksimal 2 MB. Rasio disarankan 4:3 (misal 800x600px) agar tampil pas tanpa terpotong.</p>
 
         <div className="mt-5 flex gap-2">
           <button disabled={processing} className="rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500 disabled:opacity-60" type="submit">

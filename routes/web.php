@@ -107,6 +107,11 @@ Route::middleware(['auth', 'admin'])
             [StepController::class, 'unlockPractice']
         )->name('practice.unlock');
 
+        Route::post(
+            'reflection/{response}/feedback',
+            [StepController::class, 'saveReflectionFeedback']
+        )->name('reflection.feedback');
+
         Route::delete('steps/{step}', [StepController::class, 'destroy'])
             ->name('steps.destroy');
     });

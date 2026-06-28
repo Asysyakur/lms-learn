@@ -17,6 +17,7 @@ class MeetingStepReflectionResponse extends Model
         'reflection_text',
         'reflection_payload',
         'reflected_at',
+        'feedback',
     ];
 
     protected function casts(): array

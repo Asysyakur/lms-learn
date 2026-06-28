@@ -31,11 +31,13 @@ export default function Sets({ sets }) {
           sets.map((set) => (
             <div key={set.id} className="flex flex-col gap-3 border-b border-slate-100 p-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <img
-                  src={set.cover_image || (set.quiz_type === "pre-test" ? "/images/pretest-card.svg" : "/images/posttest-card.svg")}
-                  alt={set.title}
-                  className="h-16 w-24 rounded-lg object-cover ring-1 ring-slate-200"
-                />
+                <div className="flex h-16 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-50 ring-1 ring-slate-200">
+                  <img
+                    src={set.cover_image || (set.quiz_type === "pre-test" ? "/images/pretest-card.svg" : "/images/posttest-card.svg")}
+                    alt={set.title}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{set.quiz_type}</p>
                   <h3 className="mt-1 font-semibold text-slate-900">{set.title}</h3>

@@ -113,6 +113,10 @@ export default function StepPage({
         currentStep?.step_type === "reflection"
             ? savedCurrentResponse?.response_text || ""
             : responseByType("reflection")?.response_text || "";
+    const savedReflectionFeedback =
+        currentStep?.step_type === "reflection"
+            ? savedCurrentResponse?.feedback || ""
+            : responseByType("reflection")?.feedback || "";
     const savedPracticeMode =
         savedPracticeResponse?.response_payload?.mode ||
         currentStep?.assessment_mode ||
@@ -524,6 +528,7 @@ export default function StepPage({
                         reflectionDraft={reflectionDraft}
                         setReflectionDraft={setReflectionDraft}
                         reflectionSaved={reflectionSaved}
+                        reflectionFeedback={savedReflectionFeedback}
                         onSave={() => saveReflection(goToOverview)}
                     />
                 );

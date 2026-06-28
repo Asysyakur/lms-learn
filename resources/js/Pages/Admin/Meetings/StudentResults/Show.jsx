@@ -1,5 +1,6 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, router } from "@inertiajs/react";
+import { useState } from "react";
 import CodePreview from "@/Components/CodePreview";
 
 function isFullHtmlDocument(value) {
@@ -41,6 +42,48 @@ function QuestionContent({ value, type, language }) {
     }
 
     return value;
+}
+
+function ReflectionFeedback({ responseId, initialFeedback }) {
+    const [feedback, setFeedback] = useState(initialFeedback || "");
+    const [saving, setSaving] = useState(false);
+
+    function save() {
+        setSaving(true);
+
+        router.post(
+            route("admin.reflection.feedback", { response: responseId }),
+            { feedback },
+            {
+                preserveScroll: true,
+                onFinish: () => setSaving(false),
+            },
+        );
+    }
+
+    return (
+        <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 p-4">
+            <label className="mb-2 block text-sm font-semibold text-blue-700">
+                Feedback untuk Siswa (opsional)
+            </label>
+
+            <textarea
+                className="min-h-20 w-full rounded-lg border-slate-300 text-sm"
+                placeholder="Tulis feedback untuk keseluruhan materi pertemuan ini..."
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+            />
+
+            <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                className="mt-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
+            >
+                {saving ? "Menyimpan..." : "Simpan Feedback"}
+            </button>
+        </div>
+    );
 }
 
 export default function Show({ meeting, student, responses = [] }) {
@@ -432,6 +475,17 @@ export default function Show({ meeting, student, responses = [] }) {
                                                 {response.answer || "-"}{" "}
                                             </pre>{" "}
                                         </div>{" "}
+
+                                        {response.type === "Reflection" && (
+                                            <ReflectionFeedback
+                                                responseId={
+                                                    response.response_id
+                                                }
+                                                initialFeedback={
+                                                    response.feedback
+                                                }
+                                            />
+                                        )}
                                     </div>
                                 )}
                             </div>

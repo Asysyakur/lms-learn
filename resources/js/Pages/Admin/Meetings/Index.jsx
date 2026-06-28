@@ -39,14 +39,16 @@ export default function Index({ meetings }) {
                             <div className="flex items-center justify-between gap-6">
                                 {/* LEFT */}
                                 <div className="flex min-w-0 items-center gap-4">
-                                    <img
-                                        src={
-                                            meeting.cover_image ||
-                                            "/images/learning-card.svg"
-                                        }
-                                        alt={meeting.title}
-                                        className="h-24 w-32 flex-shrink-0 rounded-xl object-cover ring-1 ring-slate-200"
-                                    />
+                                    <div className="flex h-24 w-32 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-200">
+                                        <img
+                                            src={
+                                                meeting.cover_image ||
+                                                "/images/learning-card.svg"
+                                            }
+                                            alt={meeting.title}
+                                            className="h-full w-full object-contain"
+                                        />
+                                    </div>
 
                                     <div className="min-w-0">
                                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
