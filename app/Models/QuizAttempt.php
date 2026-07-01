@@ -14,6 +14,7 @@ class QuizAttempt extends Model
         'quiz_set_id',
         'user_id',
         'answers',
+        'question_ids',
         'score',
         'total_questions',
         'percentage',
@@ -24,6 +25,7 @@ class QuizAttempt extends Model
     {
         return [
             'answers' => 'array',
+            'question_ids' => 'array',
             'percentage' => 'decimal:2',
             'submitted_at' => 'datetime',
         ];

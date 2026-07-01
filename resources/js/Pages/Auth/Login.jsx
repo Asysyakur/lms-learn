@@ -49,7 +49,7 @@ export default function Login({ status, canResetPassword }) {
 
                             <p className="mt-5 max-w-sm text-sm leading-7 text-blue-100">
                                 Belajar PBO melalui materi, studi kasus,
-                                latihan, kuis, dan pembuktian hasil belajar.
+                                latihan, tes, dan pembuktian hasil belajar.
                             </p>
                         </div>
 
@@ -66,8 +66,8 @@ export default function Login({ status, canResetPassword }) {
                                     Icon: CodeBracketIcon,
                                 },
                                 {
-                                    title: "Kuis dan pembahasan",
-                                    desc: "Menguji pemahaman materi melalui kuis dan pembahasan.",
+                                    title: "Tes dan pembahasan",
+                                    desc: "Menguji pemahaman materi melalui tes dan pembahasan.",
                                     Icon: ClipboardDocumentCheckIcon,
                                 },
                             ].map((item) => (

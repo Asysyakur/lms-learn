@@ -21,12 +21,12 @@ export default function AdminSidebar() {
     const menu = [
         { name: "Pertemuan", href: "/admin/meetings", icon: BookOpenIcon },
         {
-            name: "Kuis",
+            name: "Tes",
             href: "/admin/quiz-sets",
             icon: ClipboardDocumentListIcon,
         },
         {
-            name: "Hasil Kuis",
+            name: "Hasil Tes",
             href: "/admin/quiz-results",
             icon: ClipboardDocumentCheckIcon,
         },

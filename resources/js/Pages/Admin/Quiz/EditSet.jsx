@@ -17,7 +17,7 @@ export default function EditSet({ set }) {
   }
 
   return (
-    <AdminLayout title="Ubah Kuis">
+    <AdminLayout title="Ubah Tes">
       <form onSubmit={submit} className="max-w-2xl rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
         <label className="block text-sm font-semibold text-slate-700">Judul</label>
         <input

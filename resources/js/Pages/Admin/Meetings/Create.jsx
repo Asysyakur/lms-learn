@@ -1,4 +1,5 @@
 import AdminLayout from "@/Layouts/AdminLayout";
+import HtmlEditorField from "@/Components/HtmlEditorField";
 import { Link, useForm } from "@inertiajs/react";
 import { useState } from "react";
 
@@ -77,12 +78,15 @@ function MeetingForm({ data, setData, errors, processing, submit, submitLabel })
       />
       {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
 
-      <label className="mt-4 block text-sm font-semibold text-slate-700">Deskripsi</label>
-      <textarea
-        className="mt-1 min-h-28 w-full rounded-lg border-slate-300"
-        value={data.description}
-        onChange={(e) => setData("description", e.target.value)}
-      />
+      <div className="mt-4">
+        <HtmlEditorField
+          label="Deskripsi"
+          value={data.description}
+          onChange={(value) => setData("description", value)}
+          error={errors.description}
+          placeholder="Bisa tempel CP/ATP di sini, gunakan tombol List untuk poin-poin."
+        />
+      </div>
 
       <label className="mt-4 block text-sm font-semibold text-slate-700">Thumbnail</label>
       {previewUrl && (

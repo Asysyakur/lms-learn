@@ -153,14 +153,15 @@ class LearningController extends Controller
             'quiz_set_id' => $quizSet->id,
             'user_id' => Auth::id(),
             'answers' => $answers,
+            'question_ids' => $quizSet->questions->pluck('id')->values()->all(),
             'score' => $score,
             'total_questions' => $totalQuestions,
             'percentage' => $percentage,
             'submitted_at' => now(),
         ]);
 
-        return redirect()->route('kuis')
-            ->with('success', 'Jawaban kuis berhasil disimpan.');
+        return redirect()->route('tes')
+            ->with('success', 'Jawaban tes berhasil disimpan.');
     }
 
     public function meetingShow(string $id)

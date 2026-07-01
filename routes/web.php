@@ -33,9 +33,9 @@ Route::get('/', function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/beranda', [LearningController::class, 'index'])->name('beranda');
 
-    Route::get('/kuis', [LearningController::class, 'quizIndex'])->name('kuis');
-    Route::get('/kuis/{slug}', [LearningController::class, 'quizShow'])->name('kuis.show');
-    Route::post('/kuis/{slug}', [LearningController::class, 'submitQuiz'])->name('kuis.submit');
+    Route::get('/tes', [LearningController::class, 'quizIndex'])->name('tes');
+    Route::get('/tes/{slug}', [LearningController::class, 'quizShow'])->name('tes.show');
+    Route::post('/tes/{slug}', [LearningController::class, 'submitQuiz'])->name('tes.submit');
 
     Route::get('/pertemuan/{id}', [LearningController::class, 'meetingShow'])->name('pertemuan');
 
@@ -82,6 +82,7 @@ Route::middleware(['auth', 'admin'])
         Route::get('quiz-results', [QuizAttemptController::class, 'index'])->name('quiz-results.index');
         Route::get('quiz-results/{quizSet}', [QuizAttemptController::class, 'show'])->name('quiz-results.show');
         Route::get('quiz-results/{quizSet}/export', [QuizAttemptController::class, 'export'])->name('quiz-results.export');
+        Route::get('quiz-results/{quizSet}/attempts/{attempt}', [QuizAttemptController::class, 'showAttempt'])->name('quiz-results.attempt');
         Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
         Route::get('meetings/{meeting}/steps', [StepController::class, 'index'])

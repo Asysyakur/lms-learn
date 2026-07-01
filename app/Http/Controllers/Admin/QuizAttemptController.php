@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\QuizAttempt;
 use App\Models\QuizSet;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -51,6 +52,50 @@ class QuizAttemptController extends Controller
                     'total_questions' => $attempt->total_questions,
                     'percentage' => (float) $attempt->percentage,
                     'submitted_at' => optional($attempt->submitted_at)->format('d M Y H:i'),
+                ];
+            })->values(),
+        ]);
+    }
+
+    public function showAttempt(QuizSet $quizSet, QuizAttempt $attempt)
+    {
+        abort_unless($attempt->quiz_set_id === $quizSet->id, 404);
+
+        $attempt->load('user');
+
+        $questionIds = $attempt->question_ids ?? array_keys($attempt->answers);
+
+        $questions = $quizSet->questions()
+            ->whereIn('id', $questionIds)
+            ->orderBy('sort_order')
+            ->get();
+
+        return Inertia::render('Admin/Quiz/AttemptShow', [
+            'quizSet' => [
+                'id' => $quizSet->id,
+                'title' => $quizSet->title,
+                'quiz_type' => $quizSet->quiz_type,
+            ],
+            'attempt' => [
+                'id' => $attempt->id,
+                'student_name' => $attempt->user?->name ?? 'User dihapus',
+                'student_email' => $attempt->user?->email,
+                'score' => $attempt->score,
+                'total_questions' => $attempt->total_questions,
+                'percentage' => (float) $attempt->percentage,
+                'submitted_at' => optional($attempt->submitted_at)->format('d M Y H:i'),
+            ],
+            'questions' => $questions->map(function ($question) use ($attempt) {
+                $selectedOption = $attempt->answers[$question->id] ?? null;
+
+                return [
+                    'id' => $question->id,
+                    'question_text' => $question->question_text,
+                    'options' => $question->options,
+                    'correct_option' => $question->correct_option,
+                    'selected_option' => $selectedOption,
+                    'is_correct' => $selectedOption !== null && $selectedOption === $question->correct_option,
+                    'explanation' => $question->explanation,
                 ];
             })->values(),
         ]);

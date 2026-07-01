@@ -15,7 +15,7 @@ export default function Index({ users }) {
   return (
     <AdminLayout title="Pengguna">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-sm text-slate-500">Daftar akun, role akses, dan nilai kuis siswa.</p>
+        <p className="text-sm text-slate-500">Daftar akun, role akses, dan nilai tes siswa.</p>
         <Link
           className="shrink-0 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-yellow-500"
           href="/admin/users/create"
@@ -29,7 +29,7 @@ export default function Index({ users }) {
           <div>Nama</div>
           <div>Email</div>
           <div>Role</div>
-          <div>Nilai Kuis</div>
+          <div>Nilai Tes</div>
           <div className="text-right">Aksi</div>
         </div>
 
@@ -70,7 +70,7 @@ export default function Index({ users }) {
 
               <div className="space-y-1.5">
                 <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
-                  Nilai Kuis
+                  Nilai Tes
                 </p>
                 {user.quiz_attempts?.length > 0 ? (
                   user.quiz_attempts.map((attempt) => (
@@ -84,7 +84,7 @@ export default function Index({ users }) {
                     </div>
                   ))
                 ) : (
-                  <span className="text-sm text-slate-400">Belum mengerjakan kuis</span>
+                  <span className="text-sm text-slate-400">Belum mengerjakan tes</span>
                 )}
               </div>
 

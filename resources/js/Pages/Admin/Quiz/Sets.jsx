@@ -9,7 +9,7 @@ export default function Sets({ sets }) {
   }
 
   return (
-    <AdminLayout title="Kumpulan Kuis">
+    <AdminLayout title="Kumpulan Tes">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="text-sm text-slate-500">Pre-test dan post-test untuk siswa.</p>

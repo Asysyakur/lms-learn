@@ -3,7 +3,7 @@ import { Link } from "@inertiajs/react";
 
 export default function Results({ quizSets = [] }) {
   return (
-    <AdminLayout title="Hasil Kuis">
+    <AdminLayout title="Hasil Tes">
       <div className="mb-4">
         <p className="text-sm text-slate-500">
           Pilih salah satu tes untuk membuka tabel hasil siswa.
@@ -12,7 +12,7 @@ export default function Results({ quizSets = [] }) {
 
       {quizSets.length === 0 ? (
         <div className="rounded-lg bg-white p-6 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200">
-          Belum ada kuis.
+          Belum ada tes.
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

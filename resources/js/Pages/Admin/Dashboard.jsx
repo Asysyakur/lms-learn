@@ -15,7 +15,7 @@ export default function Dashboard() {
       color: "bg-emerald-600",
     },
     {
-      title: "Kuis",
+      title: "Tes",
       href: "/admin/quiz-sets",
       description: "Kelola pre-test dan post-test.",
       icon: ClipboardDocumentListIcon,

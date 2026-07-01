@@ -9,6 +9,10 @@ import StepFiveReview from "@/Pages/Student/Steps/StepFiveReview";
 import StepSixReflection from "@/Pages/Pertemuan/components/Reflection";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
 
+function cleanHtml(html) {
+    return (html || "").replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
+
 function extractPracticeAnswer(response) {
     const payload = response?.response_payload;
 
@@ -577,7 +581,12 @@ export default function StepPage({
                 <div className="course-hero">
                     <div>
                         <h2 className="course-title">{currentStep.title}</h2>
-                        <p className="course-description">{currentStep.desc}</p>
+                        <div
+                            className="course-description prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{
+                                __html: cleanHtml(currentStep.desc),
+                            }}
+                        />
                     </div>
                 </div>
 

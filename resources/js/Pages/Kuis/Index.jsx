@@ -20,12 +20,12 @@ export default function Kuis({ quizSets = [] }) {
   ];
 
   return (
-    <AppLayout title="Kuis">
+    <AppLayout title="Tes">
       <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
         {quizzes.map((quiz) => (
           <Link
             key={quiz.label || quiz.slug}
-            href={route("kuis.show", { slug: quiz.slug })}
+            href={route("tes.show", { slug: quiz.slug })}
             className="group min-w-0 overflow-hidden rounded-xl bg-[rgb(var(--color-surface))] shadow-lg ring-1 ring-[rgb(var(--color-border))] transition hover:-translate-y-0.5 hover:shadow-xl"
           >
             <div className="px-4 py-3 text-center text-lg font-bold text-white bg-[rgb(var(--color-primary-hover))]">

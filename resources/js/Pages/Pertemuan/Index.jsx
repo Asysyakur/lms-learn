@@ -3,6 +3,10 @@ import { Link } from "@inertiajs/react";
 import { BookOpenIcon } from "@heroicons/react/24/solid";
 import { decorateMeetingSteps } from "@/data/meetingSteps";
 
+function cleanHtml(html) {
+    return (html || "").replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
+
 export default function Pertemuan({
     id,
     meeting,
@@ -30,10 +34,14 @@ export default function Pertemuan({
                             {meeting?.title || `Pertemuan ${id}`}
                         </h2>
 
-                        <p className="course-description">
-                            {meeting?.description ||
-                                "Mari belajar konsep dasar pada pertemuan ini dengan langkah yang terarah, ringkas, dan mudah diikuti."}
-                        </p>
+                        <div
+                            className="course-description prose prose-sm max-w-none"
+                            dangerouslySetInnerHTML={{
+                                __html: meeting?.description
+                                    ? cleanHtml(meeting.description)
+                                    : "Mari belajar konsep dasar pada pertemuan ini dengan langkah yang terarah, ringkas, dan mudah diikuti.",
+                            }}
+                        />
 
                         <div className="course-progress-label">
                             {completedSteps}/{meetingSteps.length} Selesai

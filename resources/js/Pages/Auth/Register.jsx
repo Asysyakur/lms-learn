@@ -14,7 +14,7 @@ import {
 const journeyItems = [
     { label: "Materi", Icon: BookOpenIcon },
     { label: "Latihan", Icon: PencilSquareIcon },
-    { label: "Kuis", Icon: ClipboardDocumentCheckIcon },
+    { label: "Tes", Icon: ClipboardDocumentCheckIcon },
 ];
 
 export default function Register() {

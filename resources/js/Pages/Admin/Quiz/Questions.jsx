@@ -13,7 +13,7 @@ export default function Questions({ questions, selected_set }) {
   }
 
   return (
-    <AdminLayout title="Soal Kuis">
+    <AdminLayout title="Soal Tes">
         <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-900">Soal {selected_set ? `- ${selected_set.title}` : ''}</h2>

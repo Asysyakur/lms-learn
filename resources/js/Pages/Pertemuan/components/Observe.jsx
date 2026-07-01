@@ -1,5 +1,9 @@
 import { CloudArrowUpIcon, PlayCircleIcon } from "@heroicons/react/24/solid";
 
+function cleanHtml(html) {
+  return (html || "").replace(/body\s*\{[\s\S]*?\}/gi, "");
+}
+
 export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" }) {
   const resourceUrl = stepData?.resource_url || "";
   const instructionText =
@@ -25,9 +29,10 @@ export default function StepOneObserve({ stepData, onNext, nextLabel = "Lanjut" 
 
       <div className="course-detail-card space-y-3">
         <h3 className="course-detail-title">Instruksi</h3>
-        <p className="course-detail-text">
-          {instructionText}
-        </p>
+        <div
+          className="course-detail-text prose prose-sm max-w-none"
+          dangerouslySetInnerHTML={{ __html: cleanHtml(instructionText) }}
+        />
         <button className="course-step-primary-button w-full" onClick={onNext}>
           {nextLabel}
         </button>

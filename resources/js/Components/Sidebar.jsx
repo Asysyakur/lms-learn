@@ -39,7 +39,7 @@ export default function Sidebar({
 
     const menu = [
         { name: "Beranda", href: "/beranda", icon: HomeIcon },
-        { name: "Kuis", href: "/kuis", icon: ClipboardDocumentListIcon },
+        { name: "Tes", href: "/tes", icon: ClipboardDocumentListIcon },
         { name: "Tentang", href: "/about", icon: InformationCircleIcon },
     ];
 

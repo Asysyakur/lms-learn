@@ -37,14 +37,14 @@ class QuizAttemptTest extends TestCase
             'sort_order' => 2,
         ]);
 
-        $response = $this->actingAs($user)->post(route('kuis.submit', ['slug' => $quizSet->slug]), [
+        $response = $this->actingAs($user)->post(route('tes.submit', ['slug' => $quizSet->slug]), [
             'answers' => [
                 $firstQuestion->id => 'A',
                 $secondQuestion->id => 'A',
             ],
         ]);
 
-        $response->assertRedirect(route('kuis.show', ['slug' => $quizSet->slug]));
+        $response->assertRedirect(route('tes.show', ['slug' => $quizSet->slug]));
         $this->assertDatabaseHas('quiz_attempts', [
             'quiz_set_id' => $quizSet->id,
             'user_id' => $user->id,
@@ -71,11 +71,11 @@ class QuizAttemptTest extends TestCase
             'sort_order' => 1,
         ]);
 
-        $this->actingAs($user)->post(route('kuis.submit', ['slug' => $quizSet->slug]), [
+        $this->actingAs($user)->post(route('tes.submit', ['slug' => $quizSet->slug]), [
             'answers' => [$question->id => 'A'],
         ]);
 
-        $response = $this->actingAs($user)->post(route('kuis.submit', ['slug' => $quizSet->slug]), [
+        $response = $this->actingAs($user)->post(route('tes.submit', ['slug' => $quizSet->slug]), [
             'answers' => [$question->id => 'B'],
         ]);
 

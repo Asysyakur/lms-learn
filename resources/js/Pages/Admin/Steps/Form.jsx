@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, useForm } from "@inertiajs/react";
 import CodePreview from "@/Components/CodePreview";
+import HtmlEditorField from "@/Components/HtmlEditorField";
 
 function cleanHtml(html) {
     return html.replace(/body\s*\{[\s\S]*?\}/gi, "");
@@ -791,31 +792,26 @@ export default function StepForm({
                 </div>
             </div>
 
-            <label className="mt-4 block text-sm font-semibold text-slate-700">
-                Deskripsi
-            </label>
-            <textarea
-                className="mt-1 min-h-20 w-full rounded-lg border-slate-300"
-                value={data.description}
-                onChange={(e) => setData("description", e.target.value)}
-            />
+            <div className="mt-4">
+                <HtmlEditorField
+                    label="Deskripsi"
+                    value={data.description}
+                    onChange={(value) => setData("description", value)}
+                    minHeightClass="min-h-20"
+                />
+            </div>
             {data.step_type != "review" && (
                 <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
                     {data.step_type === "observe" && (
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700">
-                                    Instruksi
-                                </label>
-                                <textarea
-                                    className="mt-1 min-h-24 w-full rounded-lg border-slate-300"
+                                <HtmlEditorField
+                                    label="Instruksi"
                                     value={data.instruction_text}
-                                    onChange={(e) =>
-                                        setData(
-                                            "instruction_text",
-                                            e.target.value,
-                                        )
+                                    onChange={(value) =>
+                                        setData("instruction_text", value)
                                     }
+                                    minHeightClass="min-h-24"
                                 />
                             </div>
                             <div className="space-y-4">

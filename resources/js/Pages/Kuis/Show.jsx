@@ -63,7 +63,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
         }
 
         router.post(
-            route("kuis.submit", { slug: quizSet.slug }),
+            route("tes.submit", { slug: quizSet.slug }),
             { answers },
             {
                 preserveScroll: true,
@@ -136,7 +136,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
                         )}
                         <span className="truncate">
                             {submitted
-                                ? "Kuis sudah dikerjakan"
+                                ? "Tes sudah dikerjakan"
                                 : `Waktu tersisa: ${formatTime(remainingSeconds)}`}
                         </span>
                     </div>
@@ -337,7 +337,7 @@ max-w-none
                             <div className="rounded-[1.2rem] border border-slate-200 bg-slate-50 p-3 shadow-sm">
                                 <div>
                                     <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[rgb(var(--color-primary))]">
-                                        Hasil kuis
+                                        Hasil tes
                                     </div>
                                     <p className="mt-1 text-base font-black text-slate-900">
                                         Nilai kamu: {attempt.percentage}
@@ -348,14 +348,14 @@ max-w-none
                                     </p>
                                 </div>
                                 <p className="mt-2 text-xs leading-5 text-slate-600">
-                                    Kuis ini hanya bisa dikerjakan satu kali.
+                                    Tes ini hanya bisa dikerjakan satu kali.
                                 </p>
                             </div>
                         ) : null}
 
                         <div className="mt-auto grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2 lg:flex">
                             <Link
-                                href={route("kuis")}
+                                href={route("tes")}
                                 className="course-secondary-button flex-1 text-center"
                             >
                                 Kembali

@@ -86,6 +86,13 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                     </p>
                   </div>
                 </div>
+
+                <Link
+                  href={route("admin.quiz-results.attempt", [quizSet.id, attempt.id])}
+                  className="inline-flex w-full items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Lihat Detail Jawaban
+                </Link>
               </div>
             ))
           )}
@@ -113,13 +120,16 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   Waktu Submit
                 </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Aksi
+                </th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-slate-100 bg-white">
               {attempts.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-4 py-5 text-center text-slate-500">
+                  <td colSpan="7" className="px-4 py-5 text-center text-slate-500">
                     Belum ada siswa yang mengerjakan tes ini.
                   </td>
                 </tr>
@@ -145,6 +155,14 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-500">
                       {attempt.submitted_at || "-"}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3">
+                      <Link
+                        href={route("admin.quiz-results.attempt", [quizSet.id, attempt.id])}
+                        className="inline-flex items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Detail
+                      </Link>
                     </td>
                   </tr>
                 ))
