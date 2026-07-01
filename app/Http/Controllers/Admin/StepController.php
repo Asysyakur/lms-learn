@@ -764,7 +764,11 @@ class StepController extends Controller
                                 ->map(fn($item) => $item->exploration_payload['coding_answers'] ?? null)
                                 ->filter()
                                 ->first() ?? [],
+                            // Baris "coding" disimpan dengan mission_index -1; itu bukan
+                            // mission dan ditampilkan lewat coding_answers di atas.
                             'items' => $group
+                                ->filter(fn($item) => (int) $item->mission_index >= 0)
+                                ->sortBy(fn($item) => (int) $item->mission_index)
                                 ->map(fn($item) => $item->exploration_payload)
                                 ->values()
                                 ->toArray(),

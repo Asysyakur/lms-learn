@@ -389,27 +389,38 @@ class LearningController extends Controller
             }
         } elseif ($stepType === 'exploration') {
 
-            MeetingStepExplorationResponse::query()->updateOrCreate(
-                [
-                    'meeting_step_id' => $meetingStep->id,
-                    'user_id' => $userId,
+            // Hanya simpan sebagai response mission/coding kalau payload memang
+            // berisi data itu. Klik "Lanjut Eksplorasi" mengirim payload generik
+            // ke endpoint yang sama hanya untuk menandai step selesai (lihat
+            // isStepCompleted di bawah) — kalau tetap di-upsert, mission_index
+            // akan default ke 0 dan menimpa jawaban Mission 1 yang asli.
+            $isExplorationMissionPayload =
+                isset($responsePayload['mission_title'])
+                || ($responsePayload['type'] ?? null) === 'coding';
 
-                    'mission_index' => ($responsePayload['type'] ?? null) === 'coding'
-                        ? -1
-                        : ($responsePayload['mission_index'] ?? 0),
-                ],
-                [
-                    'meeting_id' => $meeting->id,
+            if ($isExplorationMissionPayload) {
+                MeetingStepExplorationResponse::query()->updateOrCreate(
+                    [
+                        'meeting_step_id' => $meetingStep->id,
+                        'user_id' => $userId,
 
-                    'exploration_text' =>
-                    json_encode($responsePayload),
+                        'mission_index' => ($responsePayload['type'] ?? null) === 'coding'
+                            ? -1
+                            : ($responsePayload['mission_index'] ?? 0),
+                    ],
+                    [
+                        'meeting_id' => $meeting->id,
 
-                    'exploration_payload' =>
-                    $responsePayload,
+                        'exploration_text' =>
+                        json_encode($responsePayload),
 
-                    'explored_at' => now(),
-                ]
-            );
+                        'exploration_payload' =>
+                        $responsePayload,
+
+                        'explored_at' => now(),
+                    ]
+                );
+            }
         } elseif ($stepType === 'practice') {
 
             $payload = $responsePayload ?? [];

@@ -188,7 +188,7 @@ export default function Show({ meeting, student, responses = [] }) {
                                                     <div className="mb-4 rounded-xl border border-orange-200 bg-orange-50 p-4">
                                                         <div className="text-sm font-semibold text-orange-700">
                                                             {mission.mission_title ||
-                                                                `Mission ${missionIndex + 1}`}
+                                                                `Mission ${(mission.mission_index ?? missionIndex) + 1}`}
                                                         </div>
                                                     </div>
 
