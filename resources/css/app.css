@@ -323,6 +323,10 @@
         @apply bg-white text-[rgb(var(--color-primary))];
     }
 
+    .sidebar-toggle-button {
+        @apply fixed top-12 z-50 h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-[rgb(var(--color-primary))] text-white shadow-lg transition-all duration-300 hover:bg-[rgb(var(--color-primary-hover))];
+    }
+
     .toast-enter {
         animation: toast-enter 180ms ease-out;
     }

@@ -1,11 +1,13 @@
 import { Link, usePage } from "@inertiajs/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ArrowLeftIcon,
     ArrowPathIcon,
     BookOpenIcon,
     CheckCircleIcon,
     ChatBubbleLeftRightIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
     ClipboardDocumentCheckIcon,
     ClipboardDocumentListIcon,
     HomeIcon,
@@ -17,6 +19,8 @@ import {
     UserCircleIcon,
     XMarkIcon,
 } from "@heroicons/react/24/solid";
+
+const DESKTOP_SIDEBAR_STORAGE_KEY = "sidebar-desktop-open";
 
 export default function Sidebar({
     showMobileNav = true,
@@ -36,6 +40,22 @@ export default function Sidebar({
     const { url, props } = usePage();
     const user = props.auth?.user;
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [desktopOpen, setDesktopOpen] = useState(() => {
+        if (typeof window === "undefined") {
+            return true;
+        }
+        const saved = window.localStorage.getItem(
+            DESKTOP_SIDEBAR_STORAGE_KEY,
+        );
+        return saved === null ? true : saved === "true";
+    });
+
+    useEffect(() => {
+        window.localStorage.setItem(
+            DESKTOP_SIDEBAR_STORAGE_KEY,
+            String(desktopOpen),
+        );
+    }, [desktopOpen]);
 
     const menu = [
         { name: "Beranda", href: "/beranda", icon: HomeIcon },
@@ -240,7 +260,29 @@ export default function Sidebar({
                 </nav>
             )}
 
-            <div className="sidebar-column">
+            <button
+                type="button"
+                onClick={() => setDesktopOpen((open) => !open)}
+                className={`sidebar-toggle-button hidden md:flex ${
+                    desktopOpen
+                        ? "left-[15.5rem]"
+                        : "left-2"
+                }`}
+                aria-label={desktopOpen ? "Tutup sidebar" : "Buka sidebar"}
+                aria-expanded={desktopOpen}
+            >
+                {desktopOpen ? (
+                    <ChevronLeftIcon className="h-4 w-4" />
+                ) : (
+                    <ChevronRightIcon className="h-4 w-4" />
+                )}
+            </button>
+
+            <div
+                className={`sidebar-column overflow-hidden transition-all duration-300 ${
+                    desktopOpen ? "md:w-64" : "md:w-0"
+                }`}
+            >
                 <aside className="sidebar-shell flex">
                     {isCourseSidebar ? (
                         <div className="flex h-full flex-col">
