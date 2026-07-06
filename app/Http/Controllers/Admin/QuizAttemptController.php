@@ -107,26 +107,67 @@ class QuizAttemptController extends Controller
             $query->with('user')->latest('submitted_at');
         }]);
 
+        $questionsById = $quizSet->questions()->get()->keyBy('id');
+
+        $rows = $quizSet->attempts->map(function ($attempt) use ($questionsById) {
+            $questionIds = $attempt->question_ids ?? array_keys($attempt->answers);
+
+            $perQuestion = collect($questionIds)
+                ->map(fn ($id) => $questionsById->get($id))
+                ->filter()
+                ->sortBy('sort_order')
+                ->map(function ($question) use ($attempt) {
+                    $selectedOption = $attempt->answers[$question->id] ?? null;
+
+                    return $selectedOption !== null && $selectedOption === $question->correct_option ? 1 : 0;
+                })
+                ->values()
+                ->all();
+
+            return [
+                'attempt' => $attempt,
+                'per_question' => $perQuestion,
+            ];
+        });
+
+        $maxQuestions = (int) $rows->max(fn ($row) => count($row['per_question']));
+
         $filename = Str::slug($quizSet->title).'-hasil.csv';
 
-        return response()->streamDownload(function () use ($quizSet) {
+        return response()->streamDownload(function () use ($rows, $maxQuestions) {
             $handle = fopen('php://output', 'w');
 
             fwrite($handle, "\xEF\xBB\xBF");
             fwrite($handle, "sep=,\n");
 
-            fputcsv($handle, ['No', 'Nama Siswa', 'Email', 'Skor', 'Total Soal', 'Nilai (%)', 'Waktu Submit']);
+            $questionHeaders = collect(range(1, $maxQuestions))
+                ->map(fn ($number) => 'Soal '.$number)
+                ->all();
 
-            foreach ($quizSet->attempts as $index => $attempt) {
-                fputcsv($handle, [
-                    $index + 1,
-                    $attempt->user?->name ?? 'User dihapus',
-                    $attempt->user?->email,
-                    $attempt->score,
-                    $attempt->total_questions,
-                    $attempt->percentage,
-                    optional($attempt->submitted_at)->format('d M Y H:i'),
-                ]);
+            fputcsv($handle, array_merge(
+                ['No', 'Nama Siswa', 'Email'],
+                $questionHeaders,
+                ['Skor', 'Total Soal', 'Nilai (%)', 'Waktu Submit']
+            ));
+
+            foreach ($rows as $index => $row) {
+                $attempt = $row['attempt'];
+                $perQuestion = array_pad($row['per_question'], $maxQuestions, '');
+
+                fputcsv($handle, array_merge(
+                    [
+                        $index + 1,
+                        $attempt->user?->name ?? 'User dihapus',
+                        $attempt->user?->email,
+                    ],
+                    $perQuestion,
+                    [
+                        $attempt->score,
+                        $attempt->total_questions,
+                        $attempt->percentage,
+                        optional($attempt->submitted_at)->format('d M Y H:i'),
+                    ]
+                ));
             }
 
             fclose($handle);

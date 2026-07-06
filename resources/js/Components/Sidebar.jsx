@@ -279,7 +279,7 @@ export default function Sidebar({
             </button>
 
             <div
-                className={`sidebar-column overflow-hidden transition-all duration-300 ${
+                className={`sidebar-column sticky top-0 h-dvh overflow-hidden transition-all duration-300 ${
                     desktopOpen ? "md:w-64" : "md:w-0"
                 }`}
             >
