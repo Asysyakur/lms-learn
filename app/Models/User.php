@@ -20,7 +20,7 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    public const KELAS_OPTIONS = ['XI RPL 3', 'XII RPL 2'];
+    public const KELAS_OPTIONS = ['XI RPL 3', 'XII RPL 1', 'XII RPL 2'];
 
     /**
      * The attributes that are mass assignable.
