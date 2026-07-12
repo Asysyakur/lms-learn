@@ -25,10 +25,11 @@ export default function Index({ users }) {
       </div>
 
       <div className="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
-        <div className="hidden grid-cols-[1.1fr_1.2fr_100px_1.4fr_150px] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
+        <div className="hidden grid-cols-[1.1fr_1.2fr_100px_120px_1.4fr_150px] gap-4 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500 md:grid">
           <div>Nama</div>
           <div>Email</div>
           <div>Role</div>
+          <div>Kelas</div>
           <div>Nilai Tes</div>
           <div className="text-right">Aksi</div>
         </div>
@@ -37,7 +38,7 @@ export default function Index({ users }) {
           <div className="p-6 text-sm text-slate-500">Belum ada user.</div>
         ) : (
           users.map((user) => (
-            <div key={user.id} className="grid gap-3 border-b border-slate-100 p-4 last:border-b-0 md:grid-cols-[1.1fr_1.2fr_100px_1.4fr_150px] md:items-center">
+            <div key={user.id} className="grid gap-3 border-b border-slate-100 p-4 last:border-b-0 md:grid-cols-[1.1fr_1.2fr_100px_120px_1.4fr_150px] md:items-center">
               <div>
                 <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
                   Nama
@@ -66,6 +67,13 @@ export default function Index({ users }) {
                 }`}>
                   {user.role}
                 </span>
+              </div>
+
+              <div>
+                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 md:hidden">
+                  Kelas
+                </p>
+                <span className="text-sm text-slate-600">{user.kelas || "-"}</span>
               </div>
 
               <div className="space-y-1.5">

@@ -564,6 +564,7 @@ class StepController extends Controller
                     'id' => $student->id,
                     'name' => $student->name,
                     'email' => $student->email,
+                    'kelas' => $student->kelas,
                     'completed_steps' => $completedSteps,
                     'total_steps' => $totalSteps,
                     'progress' => $progress,
@@ -575,6 +576,7 @@ class StepController extends Controller
             [
                 'meeting' => $meeting,
                 'students' => $students,
+                'kelasOptions' => User::KELAS_OPTIONS,
             ]
         );
     }

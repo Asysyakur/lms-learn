@@ -1,11 +1,12 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link, useForm } from "@inertiajs/react";
 
-export default function Edit({ user }) {
+export default function Edit({ user, kelasOptions = [] }) {
   const { data, setData, put, processing, errors } = useForm({
     name: user.name ?? "",
     email: user.email ?? "",
     role: user.role ?? "student",
+    kelas: user.kelas ?? "",
     password: "",
     password_confirmation: "",
   });
@@ -45,6 +46,25 @@ export default function Edit({ user }) {
           <option value="admin">Admin</option>
         </select>
         {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role}</p>}
+
+        {data.role === "student" && (
+          <>
+            <label className="mt-4 block text-sm font-semibold text-slate-700">Kelas</label>
+            <select
+              className="mt-1 w-full rounded-lg border-slate-300"
+              value={data.kelas}
+              onChange={(e) => setData("kelas", e.target.value)}
+            >
+              <option value="">-- Pilih Kelas --</option>
+              {kelasOptions.map((kelas) => (
+                <option key={kelas} value={kelas}>
+                  {kelas}
+                </option>
+              ))}
+            </select>
+            {errors.kelas && <p className="mt-1 text-sm text-red-600">{errors.kelas}</p>}
+          </>
+        )}
 
         <div className="mt-4 rounded-lg bg-slate-50 p-4 ring-1 ring-slate-200">
           <h3 className="text-sm font-bold text-slate-800">Ubah Password</h3>

@@ -1,7 +1,18 @@
 import AdminLayout from "@/Layouts/AdminLayout";
 import { Link } from "@inertiajs/react";
+import { useMemo, useState } from "react";
 
-export default function Index({ meeting, students }) {
+export default function Index({ meeting, students, kelasOptions = [] }) {
+    const [kelasFilter, setKelasFilter] = useState("");
+
+    const filteredStudents = useMemo(
+        () =>
+            kelasFilter
+                ? students.filter((student) => student.kelas === kelasFilter)
+                : students,
+        [students, kelasFilter]
+    );
+
     return (
         <AdminLayout title="Hasil Siswa">
             <div className="space-y-6">
@@ -21,7 +32,7 @@ export default function Index({ meeting, students }) {
                                 Total Siswa
                             </p>
                             <h2 className="mt-1 text-3xl font-bold text-slate-900">
-                                {students.length}
+                                {filteredStudents.length}
                             </h2>
                         </div>
 
@@ -37,14 +48,27 @@ export default function Index({ meeting, students }) {
                 </div>
 
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-200 px-6 py-4">
+                    <div className="flex flex-col gap-3 border-b border-slate-200 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <h2 className="text-lg font-semibold text-slate-900">
                             Daftar Siswa
                         </h2>
+
+                        <select
+                            value={kelasFilter}
+                            onChange={(e) => setKelasFilter(e.target.value)}
+                            className="rounded-lg border-slate-300 text-sm font-medium text-slate-700 focus:border-blue-500 focus:ring-blue-500"
+                        >
+                            <option value="">Semua Kelas</option>
+                            {kelasOptions.map((kelas) => (
+                                <option key={kelas} value={kelas}>
+                                    {kelas}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="divide-y divide-slate-100">
-                        {students.map((student) => (
+                        {filteredStudents.map((student) => (
                             <div
                                 key={student.id}
                                 className="flex items-center justify-between px-6 py-5"
@@ -57,6 +81,12 @@ export default function Index({ meeting, students }) {
                                     <p className="text-sm text-slate-500">
                                         {student.email}
                                     </p>
+
+                                    {student.kelas && (
+                                        <span className="mt-1 inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
+                                            {student.kelas}
+                                        </span>
+                                    )}
 
                                     <div className="mt-3">
                                         <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
@@ -97,9 +127,11 @@ export default function Index({ meeting, students }) {
                             </div>
                         ))}
 
-                        {students.length === 0 && (
+                        {filteredStudents.length === 0 && (
                             <div className="px-6 py-10 text-center text-sm text-slate-500">
-                                Belum ada data siswa.
+                                {kelasFilter
+                                    ? "Tidak ada siswa untuk kelas ini."
+                                    : "Belum ada data siswa."}
                             </div>
                         )}
                     </div>

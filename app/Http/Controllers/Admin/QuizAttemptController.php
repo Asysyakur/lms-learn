@@ -48,6 +48,7 @@ class QuizAttemptController extends Controller
                     'id' => $attempt->id,
                     'student_name' => $attempt->user?->name ?? 'User dihapus',
                     'student_email' => $attempt->user?->email,
+                    'student_kelas' => $attempt->user?->kelas,
                     'score' => $attempt->score,
                     'total_questions' => $attempt->total_questions,
                     'percentage' => (float) $attempt->percentage,
@@ -145,7 +146,7 @@ class QuizAttemptController extends Controller
                 ->all();
 
             fputcsv($handle, array_merge(
-                ['No', 'Nama Siswa', 'Email'],
+                ['No', 'Nama Siswa', 'Email', 'Kelas'],
                 $questionHeaders,
                 ['Skor', 'Total Soal', 'Nilai (%)', 'Waktu Submit']
             ));
@@ -159,6 +160,7 @@ class QuizAttemptController extends Controller
                         $index + 1,
                         $attempt->user?->name ?? 'User dihapus',
                         $attempt->user?->email,
+                        $attempt->user?->kelas,
                     ],
                     $perQuestion,
                     [

@@ -61,6 +61,9 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                     <p className="mt-1 break-all text-sm text-slate-600">
                       {attempt.student_email || "-"}
                     </p>
+                    <p className="mt-1 text-sm text-slate-600">
+                      {attempt.student_kelas || "-"}
+                    </p>
                   </div>
 
                   <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
@@ -112,6 +115,9 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                   Email
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Kelas
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   Skor
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
@@ -129,7 +135,7 @@ export default function ResultShow({ quizSet, attempts = [] }) {
             <tbody className="divide-y divide-slate-100 bg-white">
               {attempts.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-4 py-5 text-center text-slate-500">
+                  <td colSpan="8" className="px-4 py-5 text-center text-slate-500">
                     Belum ada siswa yang mengerjakan tes ini.
                   </td>
                 </tr>
@@ -144,6 +150,9 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-600">
                       {attempt.student_email || "-"}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-slate-600">
+                      {attempt.student_kelas || "-"}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-slate-700">
                       {attempt.score}/{attempt.total_questions}

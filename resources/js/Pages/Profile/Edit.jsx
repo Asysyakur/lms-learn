@@ -7,10 +7,11 @@ import AppLayout from '@/Layouts/AppLayout';
 import { EnvelopeIcon, KeyIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { Head, useForm } from '@inertiajs/react';
 
-export default function Edit({ user, status }) {
+export default function Edit({ user, status, kelasOptions = [] }) {
     const { data, setData, put, processing, errors, recentlySuccessful, reset } = useForm({
         name: user.name || '',
         email: user.email || '',
+        kelas: user.kelas || '',
         password: '',
         password_confirmation: '',
     });
@@ -89,6 +90,26 @@ export default function Edit({ user, status }) {
                             />
                             <InputError message={errors.email} className="mt-2" />
                         </div>
+
+                        {user.role === 'student' && (
+                            <div>
+                                <InputLabel htmlFor="kelas" value="Kelas" />
+                                <select
+                                    id="kelas"
+                                    value={data.kelas}
+                                    onChange={(e) => setData('kelas', e.target.value)}
+                                    className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">-- Pilih Kelas --</option>
+                                    {kelasOptions.map((kelas) => (
+                                        <option key={kelas} value={kelas}>
+                                            {kelas}
+                                        </option>
+                                    ))}
+                                </select>
+                                <InputError message={errors.kelas} className="mt-2" />
+                            </div>
+                        )}
 
                         <div>
                             <InputLabel htmlFor="password" value="New Password" />

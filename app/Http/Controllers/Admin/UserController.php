@@ -16,13 +16,14 @@ class UserController extends Controller
         $users = User::query()
             ->with(['quizAttempts.quizSet'])
             ->latest()
-            ->get(['id', 'name', 'email', 'role', 'created_at'])
+            ->get(['id', 'name', 'email', 'role', 'kelas', 'created_at'])
             ->map(function (User $user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
                     'role' => $user->role,
+                    'kelas' => $user->kelas,
                     'created_at' => $user->created_at,
                     'quiz_attempts' => $user->quizAttempts
                         ->sortBy(fn ($attempt) => $attempt->quizSet?->sort_order ?? 0)
@@ -68,7 +69,8 @@ class UserController extends Controller
     public function edit(User $user)
     {
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user->only(['id', 'name', 'email', 'role']),
+            'user' => $user->only(['id', 'name', 'email', 'role', 'kelas']),
+            'kelasOptions' => User::KELAS_OPTIONS,
         ]);
     }
 
@@ -85,10 +87,15 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
             'role' => ['required', Rule::in(['admin', 'student'])],
+            'kelas' => ['nullable', Rule::in(User::KELAS_OPTIONS)],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
         $payload = Arr::except($validated, ['password']);
+
+        if ($validated['role'] !== 'student') {
+            $payload['kelas'] = null;
+        }
 
         if ($request->filled('password')) {
             $payload['password'] = $validated['password'];
