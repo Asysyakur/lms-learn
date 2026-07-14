@@ -19,6 +19,7 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
     const [processing, setProcessing] = useState(false);
     const [remainingSeconds, setRemainingSeconds] =
         useState(DEFAULT_TIME_SECONDS);
+    const [incompleteWarning, setIncompleteWarning] = useState(false);
 
     const totalQuestions = questions.length;
     const currentQuestion = questions[currentQuestionIndex];
@@ -42,9 +43,22 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
 
     useEffect(() => {
         if (remainingSeconds === 0 && !submitted) {
-            submitQuiz();
+            submitQuiz({ force: true });
         }
     }, [remainingSeconds, submitted]);
+
+    useEffect(() => {
+        if (!incompleteWarning) {
+            return undefined;
+        }
+
+        const timer = window.setTimeout(
+            () => setIncompleteWarning(false),
+            3000,
+        );
+
+        return () => window.clearTimeout(timer);
+    }, [incompleteWarning]);
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60)
@@ -57,8 +71,21 @@ export default function QuizShow({ quizSet, questions = [], attempt = null }) {
         return `${minutes}:${secs}`;
     };
 
-    const submitQuiz = () => {
+    const submitQuiz = ({ force = false } = {}) => {
         if (submitted || processing) {
+            return;
+        }
+
+        if (!force && answeredCount < totalQuestions) {
+            const firstUnansweredIndex = questions.findIndex(
+                (question) => !answers[question.id],
+            );
+
+            if (firstUnansweredIndex !== -1) {
+                setCurrentQuestionIndex(firstUnansweredIndex);
+            }
+
+            setIncompleteWarning(true);
             return;
         }
 
@@ -353,6 +380,14 @@ max-w-none
                             </div>
                         ) : null}
 
+                        {incompleteWarning ? (
+                            <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
+                                Masih ada {totalQuestions - answeredCount}{" "}
+                                soal yang belum dijawab. Lengkapi semua
+                                jawaban sebelum submit.
+                            </p>
+                        ) : null}
+
                         <div className="mt-auto grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2 lg:flex">
                             <Link
                                 href={route("tes")}
@@ -364,7 +399,7 @@ max-w-none
                             <button
                                 type="button"
                                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-[rgb(var(--color-primary))] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[rgb(var(--color-primary-hover))] disabled:cursor-not-allowed disabled:opacity-40"
-                                onClick={submitQuiz}
+                                onClick={() => submitQuiz()}
                                 disabled={
                                     submitted ||
                                     processing ||
