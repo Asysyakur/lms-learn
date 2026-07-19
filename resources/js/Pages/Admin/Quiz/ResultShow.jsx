@@ -71,21 +71,13 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="grid grid-cols-1 gap-2 text-sm">
                   <div className="rounded-lg bg-slate-50 p-3">
                     <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
                       Skor
                     </p>
                     <p className="mt-1 font-semibold text-slate-800">
                       {attempt.score}/{attempt.total_questions}
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-slate-50 p-3">
-                    <p className="text-xs font-bold uppercase tracking-wide text-slate-400">
-                      Submit
-                    </p>
-                    <p className="mt-1 font-semibold text-slate-800">
-                      {attempt.submitted_at || "-"}
                     </p>
                   </div>
                 </div>
@@ -124,9 +116,6 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                   Nilai
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
-                  Waktu Submit
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                   Aksi
                 </th>
               </tr>
@@ -135,7 +124,7 @@ export default function ResultShow({ quizSet, attempts = [] }) {
             <tbody className="divide-y divide-slate-100 bg-white">
               {attempts.length === 0 ? (
                 <tr>
-                  <td colSpan="8" className="px-4 py-5 text-center text-slate-500">
+                  <td colSpan="7" className="px-4 py-5 text-center text-slate-500">
                     Belum ada siswa yang mengerjakan tes ini.
                   </td>
                 </tr>
@@ -161,9 +150,6 @@ export default function ResultShow({ quizSet, attempts = [] }) {
                       <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
                         {attempt.percentage}
                       </span>
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3 text-slate-500">
-                      {attempt.submitted_at || "-"}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3">
                       <Link
