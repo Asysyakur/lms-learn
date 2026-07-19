@@ -39,7 +39,7 @@ export default function Sets({ sets }) {
                   />
                 </div>
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{set.quiz_type}</p>
+                  <p className="text-xs font-bold uppercase tracking-wide text-blue-700">{set.quiz_type} &middot; {set.duration_minutes} menit</p>
                   <h3 className="mt-1 font-semibold text-slate-900">{set.title}</h3>
                   <p className="mt-1 text-sm text-slate-500">{set.description || set.slug}</p>
                 </div>

@@ -14,6 +14,7 @@ class QuizSet extends Model
         'title',
         'slug',
         'quiz_type',
+        'duration_minutes',
         'description',
         'cover_image',
         'sort_order',
@@ -24,6 +25,7 @@ class QuizSet extends Model
     {
         return [
             'is_active' => 'boolean',
+            'duration_minutes' => 'integer',
         ];
     }
 

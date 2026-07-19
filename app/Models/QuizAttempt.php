@@ -13,6 +13,7 @@ class QuizAttempt extends Model
     protected $fillable = [
         'quiz_set_id',
         'user_id',
+        'started_at',
         'answers',
         'question_ids',
         'score',
@@ -27,6 +28,7 @@ class QuizAttempt extends Model
             'answers' => 'array',
             'question_ids' => 'array',
             'percentage' => 'decimal:2',
+            'started_at' => 'datetime',
             'submitted_at' => 'datetime',
         ];
     }

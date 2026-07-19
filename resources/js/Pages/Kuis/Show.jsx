@@ -10,15 +10,24 @@ import {
 } from "@heroicons/react/24/solid";
 
 const optionLabels = ["A", "B", "C", "D"];
-const DEFAULT_TIME_SECONDS = 45 * 60;
+const FALLBACK_DURATION_MINUTES = 45;
 
-export default function QuizShow({ quizSet, questions = [], attempt = null }) {
+export default function QuizShow({
+    quizSet,
+    questions = [],
+    attempt = null,
+    remainingSeconds: initialRemainingSeconds = null,
+}) {
+    const fallbackDurationSeconds =
+        (quizSet.duration_minutes || FALLBACK_DURATION_MINUTES) * 60;
+
     const [answers, setAnswers] = useState(attempt?.answers ?? {});
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [submitted, setSubmitted] = useState(Boolean(attempt));
     const [processing, setProcessing] = useState(false);
-    const [remainingSeconds, setRemainingSeconds] =
-        useState(DEFAULT_TIME_SECONDS);
+    const [remainingSeconds, setRemainingSeconds] = useState(
+        initialRemainingSeconds ?? fallbackDurationSeconds,
+    );
     const [incompleteWarning, setIncompleteWarning] = useState(false);
 
     const totalQuestions = questions.length;

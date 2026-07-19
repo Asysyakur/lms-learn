@@ -58,12 +58,18 @@ class LearningController extends Controller
             ->get()
             ->keyBy('quiz_set_id');
 
+        $activeAttempt = $attempts->first(
+            fn (QuizAttempt $attempt) => $attempt->started_at && ! $attempt->submitted_at
+        );
+
         $quizSets = QuizSet::query()
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get()
-            ->map(function (QuizSet $quizSet) use ($attempts) {
+            ->map(function (QuizSet $quizSet) use ($attempts, $activeAttempt) {
                 $attempt = $attempts->get($quizSet->id);
+                $isCompleted = $attempt && $attempt->submitted_at;
+                $isRunning = $activeAttempt && $activeAttempt->quiz_set_id === $quizSet->id;
 
                 return [
                     'id' => $quizSet->id,
@@ -71,14 +77,20 @@ class LearningController extends Controller
                     'label' => $quizSet->quiz_type === 'pre-test' ? 'Pre-test' : 'Post-test',
                     'slug' => $quizSet->slug,
                     'quiz_type' => $quizSet->quiz_type,
+                    'duration_minutes' => $quizSet->duration_minutes,
                     'description' => $quizSet->description,
                     'image' => $quizSet->cover_image ?: ($quizSet->quiz_type === 'pre-test' ? '/images/pretest-card.svg' : '/images/posttest-card.svg'),
-                    'attempt' => $attempt ? $this->formatQuizAttempt($attempt) : null,
+                    'attempt' => $isCompleted ? $this->formatQuizAttempt($attempt) : null,
+                    'is_running' => $isRunning,
+                    'locked' => $activeAttempt && ! $isRunning && ! $isCompleted,
                 ];
             });
 
         return Inertia::render('Kuis/Index', [
             'quizSets' => $quizSets,
+            'activeQuizTitle' => $activeAttempt
+                ? $quizSets->firstWhere('id', $activeAttempt->quiz_set_id)['title'] ?? null
+                : null,
         ]);
     }
 
@@ -91,10 +103,42 @@ class LearningController extends Controller
             }])
             ->firstOrFail();
 
+        $otherActiveAttempt = QuizAttempt::query()
+            ->where('user_id', Auth::id())
+            ->where('quiz_set_id', '!=', $quizSet->id)
+            ->whereNotNull('started_at')
+            ->whereNull('submitted_at')
+            ->with('quizSet')
+            ->first();
+
+        if ($otherActiveAttempt) {
+            $runningTitle = $otherActiveAttempt->quizSet->title ?? 'tes lain';
+
+            return redirect()->route('tes')
+                ->with('error', "Selesaikan dulu \"{$runningTitle}\" yang sedang berjalan sebelum membuka tes lain.");
+        }
+
         $attempt = QuizAttempt::query()
             ->where('quiz_set_id', $quizSet->id)
             ->where('user_id', Auth::id())
             ->first();
+
+        if (! $attempt && $quizSet->is_active) {
+            $attempt = QuizAttempt::create([
+                'quiz_set_id' => $quizSet->id,
+                'user_id' => Auth::id(),
+                'started_at' => now(),
+                'answers' => [],
+                'question_ids' => $quizSet->questions->pluck('id')->values()->all(),
+            ]);
+        }
+
+        $remainingSeconds = null;
+
+        if ($attempt && ! $attempt->submitted_at && $attempt->started_at) {
+            $deadline = $attempt->started_at->copy()->addMinutes($quizSet->duration_minutes);
+            $remainingSeconds = max(0, $deadline->timestamp - now()->timestamp);
+        }
 
         return Inertia::render('Kuis/Show', [
             'quizSet' => [
@@ -102,6 +146,7 @@ class LearningController extends Controller
                 'title' => $quizSet->title,
                 'slug' => $quizSet->slug,
                 'quiz_type' => $quizSet->quiz_type,
+                'duration_minutes' => $quizSet->duration_minutes,
                 'description' => $quizSet->description,
                 'image' => $quizSet->cover_image ?: ($quizSet->quiz_type === 'pre-test' ? '/images/pretest-card.svg' : '/images/posttest-card.svg'),
             ],
@@ -112,7 +157,8 @@ class LearningController extends Controller
                     'options' => $question->options,
                 ];
             })->values(),
-            'attempt' => $attempt ? $this->formatQuizAttempt($attempt) : null,
+            'attempt' => $attempt && $attempt->submitted_at ? $this->formatQuizAttempt($attempt) : null,
+            'remainingSeconds' => $remainingSeconds,
         ]);
     }
 
@@ -126,12 +172,16 @@ class LearningController extends Controller
             }])
             ->firstOrFail();
 
-        $existingAttempt = QuizAttempt::query()
+        $attempt = QuizAttempt::query()
             ->where('quiz_set_id', $quizSet->id)
             ->where('user_id', Auth::id())
             ->first();
 
-        if ($existingAttempt) {
+        if (! $attempt || ! $attempt->started_at) {
+            return back()->with('error', 'Tes belum dimulai. Silakan buka halaman tes terlebih dahulu.');
+        }
+
+        if ($attempt->submitted_at) {
             return back()->with('error', 'Kuis ini sudah pernah dikerjakan. Setiap user hanya bisa mengerjakan satu kali.');
         }
 
@@ -149,9 +199,7 @@ class LearningController extends Controller
         $totalQuestions = $quizSet->questions->count();
         $percentage = $totalQuestions > 0 ? round(($score / $totalQuestions) * 100, 2) : 0;
 
-        QuizAttempt::create([
-            'quiz_set_id' => $quizSet->id,
-            'user_id' => Auth::id(),
+        $attempt->update([
             'answers' => $answers,
             'question_ids' => $quizSet->questions->pluck('id')->values()->all(),
             'score' => $score,

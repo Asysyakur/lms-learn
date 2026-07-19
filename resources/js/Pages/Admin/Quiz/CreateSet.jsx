@@ -7,6 +7,7 @@ export default function CreateSet() {
   const { data, setData, post, processing, errors } = useForm({
     title: "",
     quiz_type: "pre-test",
+    duration_minutes: 45,
     description: "",
     cover_image: "",
     cover_image_file: null,
@@ -43,6 +44,17 @@ export default function CreateSet() {
           <option value="post-test">Post-test</option>
         </select>
         {errors.quiz_type && <p className="mt-1 text-sm text-red-600">{errors.quiz_type}</p>}
+
+        <label className="mt-4 block text-sm font-semibold text-slate-700">Durasi Pengerjaan (menit)</label>
+        <input
+          className="mt-1 w-full rounded-lg border-slate-300"
+          type="number"
+          min={1}
+          max={600}
+          value={data.duration_minutes}
+          onChange={(e) => setData("duration_minutes", e.target.value)}
+        />
+        {errors.duration_minutes && <p className="mt-1 text-sm text-red-600">{errors.duration_minutes}</p>}
 
         <label className="mt-4 block text-sm font-semibold text-slate-700">Deskripsi</label>
         <textarea

@@ -37,6 +37,8 @@ class QuizAttemptTest extends TestCase
             'sort_order' => 2,
         ]);
 
+        $this->actingAs($user)->get(route('tes.show', ['slug' => $quizSet->slug]));
+
         $response = $this->actingAs($user)->post(route('tes.submit', ['slug' => $quizSet->slug]), [
             'answers' => [
                 $firstQuestion->id => 'A',
@@ -44,7 +46,7 @@ class QuizAttemptTest extends TestCase
             ],
         ]);
 
-        $response->assertRedirect(route('tes.show', ['slug' => $quizSet->slug]));
+        $response->assertRedirect(route('tes'));
         $this->assertDatabaseHas('quiz_attempts', [
             'quiz_set_id' => $quizSet->id,
             'user_id' => $user->id,
@@ -71,6 +73,8 @@ class QuizAttemptTest extends TestCase
             'sort_order' => 1,
         ]);
 
+        $this->actingAs($user)->get(route('tes.show', ['slug' => $quizSet->slug]));
+
         $this->actingAs($user)->post(route('tes.submit', ['slug' => $quizSet->slug]), [
             'answers' => [$question->id => 'A'],
         ]);
@@ -85,6 +89,60 @@ class QuizAttemptTest extends TestCase
             'quiz_set_id' => $quizSet->id,
             'user_id' => $user->id,
             'score' => 1,
+        ]);
+    }
+
+    public function test_starting_a_quiz_records_started_at_and_keeps_it_on_revisit(): void
+    {
+        $user = User::factory()->create();
+        $quizSet = QuizSet::create([
+            'title' => 'Pre-test',
+            'slug' => 'pre-test',
+            'quiz_type' => 'pre-test',
+            'duration_minutes' => 30,
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)->get(route('tes.show', ['slug' => $quizSet->slug]));
+
+        $attempt = $quizSet->attempts()->where('user_id', $user->id)->first();
+        $this->assertNotNull($attempt->started_at);
+
+        $firstStartedAt = $attempt->started_at;
+
+        $this->travel(5)->minutes();
+        $response = $this->actingAs($user)->get(route('tes.show', ['slug' => $quizSet->slug]));
+
+        $attempt->refresh();
+        $this->assertTrue($attempt->started_at->equalTo($firstStartedAt));
+        $response->assertInertia(fn ($page) => $page->where('remainingSeconds', 25 * 60));
+    }
+
+    public function test_user_cannot_open_another_quiz_while_one_is_running(): void
+    {
+        $user = User::factory()->create();
+        $firstSet = QuizSet::create([
+            'title' => 'Pre-test',
+            'slug' => 'pre-test',
+            'quiz_type' => 'pre-test',
+            'is_active' => true,
+        ]);
+        $secondSet = QuizSet::create([
+            'title' => 'Post-test',
+            'slug' => 'post-test',
+            'quiz_type' => 'post-test',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)->get(route('tes.show', ['slug' => $firstSet->slug]));
+
+        $response = $this->actingAs($user)->get(route('tes.show', ['slug' => $secondSet->slug]));
+
+        $response->assertRedirect(route('tes'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseMissing('quiz_attempts', [
+            'quiz_set_id' => $secondSet->id,
+            'user_id' => $user->id,
         ]);
     }
 }

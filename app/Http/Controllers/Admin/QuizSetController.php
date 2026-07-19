@@ -28,6 +28,7 @@ class QuizSetController extends Controller
         $request->validate([
             'title' => 'required',
             'quiz_type' => 'required',
+            'duration_minutes' => 'required|integer|min:1|max:600',
             'cover_image' => 'nullable|string|max:255',
             'cover_image_file' => 'nullable|image|max:2048',
         ]);
@@ -38,6 +39,7 @@ class QuizSetController extends Controller
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'quiz_type' => $request->quiz_type,
+            'duration_minutes' => $request->duration_minutes,
             'description' => $request->description,
             'cover_image' => $coverImage,
         ]);
@@ -57,6 +59,7 @@ class QuizSetController extends Controller
         $request->validate([
             'title' => 'required',
             'quiz_type' => 'required',
+            'duration_minutes' => 'required|integer|min:1|max:600',
             'cover_image' => 'nullable|string|max:255',
             'cover_image_file' => 'nullable|image|max:2048',
         ]);
@@ -67,6 +70,7 @@ class QuizSetController extends Controller
             'title' => $request->title,
             'slug' => Str::slug($request->title),
             'quiz_type' => $request->quiz_type,
+            'duration_minutes' => $request->duration_minutes,
             'description' => $request->description,
             'cover_image' => $coverImage,
         ]);
